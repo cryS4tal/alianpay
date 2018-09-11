@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="ExampleRuleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>
+        This ruleset should turn off UselessParentheses
+    </description>
+
+    <rule ref="rulesets/java/basic.xml">
+    </rule>
+    <rule ref="rulesets/java/braces.xml">
+    </rule>
+    <rule ref="rulesets/java/codesize.xml">
+        <exclude name="CyclomaticComplexity"/>
+        <exclude name="TooManyMethods"/>
+        <exclude name="TooManyFields"/>
+    </rule>
+    <rule ref="rulesets/java/clone.xml">
+    </rule>
+    <rule ref="rulesets/java/controversial.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="DefaultPackage"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="UseConcurrentHashMap"/>
+        <exclude name="AvoidPrefixingMethodParameters"/>
+        <exclude name="UseObjectForClearerAPI"/>
+        <exclude name="NullAssignment"/>
+    </rule>
+    <rule ref="rulesets/java/coupling.xml">
+        <exclude name="LawOfDemeter"/>
+        <exclude name="ExcessiveImports"/>
+    </rule>
+    <rule ref="rulesets/java/imports.xml">
+    </rule>
+</ruleset>
