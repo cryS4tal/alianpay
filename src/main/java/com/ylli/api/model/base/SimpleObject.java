@@ -1,7 +1,7 @@
 package com.ylli.api.model.base;
 
 /**
- * Created by RexQian on 2017/3/22.
+ * Created by ylli on 2017/3/22.
  */
 public class SimpleObject {
     public Long id;

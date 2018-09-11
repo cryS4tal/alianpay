@@ -3,7 +3,7 @@ package com.ylli.api.base.exception;
 /**
  * 自定义异常基础类
  * 从RuntimeException继承以直接支持Transactional
- * Created by RexQian on 2017/2/9.
+ * Created by ylli on 2017/2/9.
  */
 public class AwesomeException extends RuntimeException {
 

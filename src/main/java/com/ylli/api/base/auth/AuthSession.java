@@ -13,7 +13,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 /**
  * Session认证帮助类.
  * 仅支持单点登录。其它session登录会引起登录失效。
- * Created by RexQian on 2017/2/12.
+ * Created by ylli on 2017/2/12.
  */
 @Component
 public class AuthSession {

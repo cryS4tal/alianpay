@@ -7,7 +7,7 @@ import java.io.StringWriter;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
- * Created by RexQian on 2017/2/12.
+ * Created by ylli on 2017/2/12.
  */
 public class ExceptionHelper {
 

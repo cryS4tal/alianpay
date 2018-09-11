@@ -4,7 +4,7 @@ import com.ylli.api.base.exception.ErrorCode;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Created by RexQian on 2017/5/10.
+ * Created by ylli on 2017/5/10.
  */
 public class Config {
     /**

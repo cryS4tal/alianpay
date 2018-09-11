@@ -10,7 +10,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Created by RexQian on 2017/2/14.
+ * Created by ylli on 2017/2/14.
  */
 public class MatchPathVariableMethodArgumentResolver implements HandlerMethodArgumentResolver {
 

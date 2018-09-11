@@ -18,7 +18,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Created by RexQian on 2017/2/10.
+ * Created by ylli on 2017/2/10.
  */
 @Aspect
 @Component

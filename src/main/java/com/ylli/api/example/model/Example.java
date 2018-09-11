@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Created by RexQian on 2017/5/10.
+ * Created by ylli on 2017/5/10.
  */
 @Table(name = "t_example")
 public class Example {

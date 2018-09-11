@@ -21,7 +21,7 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
 
 /**
- * Created by RexQian on 2017/4/19.
+ * Created by ylli on 2017/4/19.
  */
 @MappedTypes(value = {List.class})
 public class ListTypeHandler extends BaseTypeHandler<List> {

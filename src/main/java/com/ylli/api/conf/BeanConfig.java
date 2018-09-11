@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Created by RexQian on 2017/3/9.
+ * Created by ylli on 2017/3/9.
  */
 @Configuration
 public class BeanConfig {

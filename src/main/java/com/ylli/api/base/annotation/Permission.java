@@ -1,7 +1,7 @@
 package com.ylli.api.base.annotation;
 
 /**
- * Created by RexQian on 2017/2/10.
+ * Created by ylli on 2017/2/10.
  */
 public @interface Permission {
     /**

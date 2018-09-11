@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * Created by RexQian on 2017/2/16.
+ * Created by ylli on 2017/2/16.
  */
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurerAdapter {

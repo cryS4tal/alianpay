@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * 标注于RestController的类或方法上
  * 如果方法有标记以方法为准，忽略类标记
  *
- * Created by RexQian on 2017/2/10.
+ * Created by ylli on 2017/2/10.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})

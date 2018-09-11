@@ -7,7 +7,7 @@ import org.springframework.session.web.http.CookieHttpSessionStrategy;
 import org.springframework.session.web.http.HttpSessionStrategy;
 
 /**
- * Created by RexQian on 2017/2/12.
+ * Created by ylli on 2017/2/12.
  */
 @Configuration
 @EnableRedisHttpSession

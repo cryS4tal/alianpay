@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
- * Created by RexQian on 2017/3/14.
+ * Created by ylli on 2017/3/14.
  */
 @RestController
 @RequestMapping("/base/doc")

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * 全局默认异常捕获
  * 捕获优先级最低
  *
- * Created by RexQian on 2017/2/9.
+ * Created by ylli on 2017/2/9.
  */
 @ControllerAdvice
 @Order(Ordered.LOWEST_PRECEDENCE)

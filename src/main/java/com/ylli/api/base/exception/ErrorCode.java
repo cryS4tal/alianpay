@@ -2,7 +2,7 @@ package com.ylli.api.base.exception;
 
 /**
  * 错误码
- * Created by RexQian on 2017/2/16.
+ * Created by ylli on 2017/2/16.
  */
 public class ErrorCode {
     private int httpStatus;

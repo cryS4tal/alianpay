@@ -4,7 +4,7 @@ import com.github.pagehelper.Page;
 import java.util.List;
 
 /**
- * Created by RexQian on 2017/4/18.
+ * Created by ylli on 2017/4/18.
  */
 public class DataList<T> {
     public Integer offset;

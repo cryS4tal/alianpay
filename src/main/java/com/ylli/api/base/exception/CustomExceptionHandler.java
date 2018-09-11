@@ -22,7 +22,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
  * @see AwesomeException
  * @see GlobalExceptionHandler
  *
- * Created by RexQian on 2017/2/9.
+ * Created by ylli on 2017/2/9.
  */
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)

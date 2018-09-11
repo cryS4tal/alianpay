@@ -12,7 +12,7 @@ import org.springframework.security.web.csrf.InvalidCsrfTokenException;
 import org.springframework.security.web.csrf.MissingCsrfTokenException;
 
 /**
- * Created by RexQian on 2017/2/14.
+ * Created by ylli on 2017/2/14.
  */
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
