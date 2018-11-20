@@ -43,7 +43,7 @@ public class MyBatisMapperScannerConfig {
     public MapperScannerConfigurer mapperScannerConfigurer() {
         MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
         mapperScannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
-        mapperScannerConfigurer.setBasePackage("com.tmindtech.api.**.db");
+        mapperScannerConfigurer.setBasePackage("com.ylli.api.**.db");
         return mapperScannerConfigurer;
     }
 

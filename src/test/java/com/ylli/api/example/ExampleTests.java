@@ -1,4 +1,4 @@
-package com.ylli.api.example.controller;
+package com.ylli.api.example;
 
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
