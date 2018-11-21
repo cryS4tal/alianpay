@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.user.mapper.UserAppMapper">
+    <resultMap id="userAppMap" type="com.ylli.api.user.model.UserApp"/>
+
+    <select id="selectApps" resultMap="userAppMap">
+        SELECT
+            *
+        FROM t_user_app
+        <where>
+            <if test="user_id != null">
+               user_id = ${user_id}
+            </if>
+        </where>
+    </select>
+</mapper>

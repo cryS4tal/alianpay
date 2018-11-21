@@ -69,6 +69,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             14, "角色与权限类型不匹配");
 
+    public static final ErrorCode ERROR_PERMISSION_DENY
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            15, "权限不足");
+
 
 
     /**

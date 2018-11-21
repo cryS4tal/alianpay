@@ -32,6 +32,11 @@ public class Config {
     public static final ErrorCode ERROR_DEBUG_ONLY
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             5, "仅调试模式可以");
+
+    public static final ErrorCode ERROR_PARAM_NOT_NULL
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            6, "参数：%s不能为空");
+
     /**
      * 超级管理员Id
      */

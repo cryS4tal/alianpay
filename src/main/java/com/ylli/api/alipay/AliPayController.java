@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/pay/ali")
+@Auth
 public class AliPayController {
 
     @Autowired
@@ -22,7 +23,6 @@ public class AliPayController {
      * @return
      */
     @PostMapping("/order")
-    //@Auth
     public Object createAliPayOrder() {
         return aliPayService.createAliPayOrder();
     }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.user.mapper.UserInfoMapper">
+    <resultMap id="userInfoMap" type="com.ylli.api.user.model.UserInfo"/>
+
+    <select id="selectByCondition" resultMap="userInfoMap">
+        SELECT
+            *
+        FROM t_user_info
+        <where>
+            <if test="user_id != null">
+               user_id = ${user_id}
+            </if>
+            <if test="name != null">
+                <bind name="name_like_ext" value="name + '%'" />
+                AND name LIKE #{name_like_ext}
+            </if>
+            <if test="identity_card != null">
+                AND identity_card = #{identity_card}
+            </if>
+            <if test="bankcard_number != null">
+                AND bankcard_number = #{bankcard_number}
+            </if>
+            <if test="reserved_phone != null">
+                AND reserved_phone = #{reserved_phone}
+            </if>
+            <if test="open_bank != null">
+                AND open_bank = #{open_bank}
+            </if>
+            <if test="sub_bank != null">
+                AND sub_bank = #{sub_bank}
+            </if>
+            <if test="begin_time != null">
+                AND create_time >= #{begin_time}
+            </if>
+            <if test="end_time != null">
+                AND create_time &lt; #{end_time}
+            </if>
+        </where>
+    </select>
+</mapper>

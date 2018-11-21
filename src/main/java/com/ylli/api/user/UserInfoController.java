@@ -1,0 +1,77 @@
+package com.ylli.api.user;
+
+import com.ylli.api.base.annotation.Auth;
+import com.ylli.api.base.annotation.AwesomeParam;
+import com.ylli.api.base.annotation.Permission;
+import com.ylli.api.base.auth.AuthSession;
+import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.base.util.AwesomeDateTime;
+import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.user.model.UserChargeInfo;
+import com.ylli.api.user.model.UserOwnInfo;
+import com.ylli.api.user.service.UserInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/user")
+@Auth
+public class UserInfoController {
+
+    @Autowired
+    UserInfoService userInfoService;
+
+    @Autowired
+    AuthSession authSession;
+
+    @PostMapping("/own")
+    public Object saveUserInfo(@RequestBody UserOwnInfo ownInfo) {
+        ServiceUtil.checkNotEmptyIgnore(ownInfo, true, "bankType");
+        if (authSession.getAuthId() != ownInfo.userId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        return userInfoService.saveUserInfo(ownInfo);
+    }
+
+    @PostMapping("/charge")
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
+    public Object saveChargeInfo(@RequestBody UserChargeInfo userChargeInfo) {
+        ServiceUtil.checkNotEmpty(userChargeInfo);
+
+        return userInfoService.saveChargeInfo(userChargeInfo);
+    }
+
+    @GetMapping("/list")
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
+    public Object getUserList(@AwesomeParam(required = false) Long userId,
+                              @AwesomeParam(required = false) String name,
+                              @AwesomeParam(required = false) String identityCard,
+                              @AwesomeParam(required = false) String bankcardNumber,
+                              @AwesomeParam(required = false) String reservedPhone,
+                              @AwesomeParam(required = false) String openBank,
+                              @AwesomeParam(required = false) String subBank,
+                              @AwesomeParam(required = false) AwesomeDateTime beginTime,
+                              @AwesomeParam(required = false) AwesomeDateTime endTime,
+                              @AwesomeParam(defaultValue = "0") int offset,
+                              @AwesomeParam(defaultValue = "10") int limit) {
+
+
+        return userInfoService.getUserList(userId, name, identityCard, bankcardNumber, reservedPhone, openBank, subBank,
+                beginTime == null ? null : beginTime.getTimestamp(), endTime == null ? null : endTime.getTimestamp(), offset, limit);
+    }
+
+    @GetMapping
+    public Object getUserInfo(@AwesomeParam Long userId) {
+        if (authSession.getAuthId() != userId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        return userInfoService.getUserInfo(userId);
+    }
+
+
+
+}

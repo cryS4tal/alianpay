@@ -73,3 +73,13 @@ SET @role_personal = 100;
 
 -- 预设部门管理员
 SET @role_dept_manager = 1001;
+
+/**
+ * user
+ */
+-- 初始化
+SELECT _init(5);
+-- 系统权限
+-- 管理商户提现费率
+SET @pm_sys.manage_user_charge = @pm_sys_base + 1;
+SET @pm_sys.manage_user_app = @pm_sys_base + 2;
