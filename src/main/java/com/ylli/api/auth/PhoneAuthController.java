@@ -31,11 +31,14 @@ public class PhoneAuthController {
     @PostMapping
     public Object login(@RequestBody PhoneLogin request) {
 
-        /**
-         * todo 加入参数非空校验
-         */
+        if (Strings.isNullOrEmpty(request.phone)) {
+            throw new AwesomeException(Config.ERROR_PHONE_NOT_EMPTY);
+        }
+        if (Strings.isNullOrEmpty(request.password)) {
+            throw new AwesomeException(Config.ERROR_PASSWORD_NOT_EMPTY);
+        }
 
-        //todo 支持验证码登陆，验证码正确不校验密码
+        //todo 接入短信认证
         //smsService.checkVerifyCode(request.phone, request.code);
 
         Account account = phoneAuthService.getByPhone(request.phone);

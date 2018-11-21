@@ -1,4 +1,4 @@
-package com.ylli.api.example.db;
+package com.ylli.api.example.mapper;
 
 import com.ylli.api.example.model.Example;
 import tk.mybatis.mapper.common.Mapper;

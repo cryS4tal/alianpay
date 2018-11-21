@@ -2,7 +2,7 @@ package com.ylli.api.example.service;
 
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.example.Config;
-import com.ylli.api.example.db.ExampleMapper;
+import com.ylli.api.example.mapper.ExampleMapper;
 import com.ylli.api.example.model.Example;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;

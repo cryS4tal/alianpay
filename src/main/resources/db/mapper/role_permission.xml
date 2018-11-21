@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.auth.mapper.RolePermissionMapper">
+    <resultMap id="permissionMap" autoMapping="true" type="com.ylli.api.auth.model.PermissionModel"/>
+    <select id="getPermissionsByRoleId" resultType="permissionMap">
+        SELECT
+            t_permission.*
+        FROM t_role_permission
+        JOIN t_permission
+        ON t_role_permission.permission_id = t_permission.id
+        WHERE
+        t_role_permission.role_id = ${role_id}
+    </select>
+</mapper>

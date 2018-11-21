@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.auth.mapper.NoticeMapper">
+    <resultMap id="noticeMap" autoMapping="true" type="com.ylli.api.auth.model.Notice"/>
+    <select id="getList" resultMap="noticeMap" >
+        SELECT
+        *
+        FROM t_notice
+        <where>
+            <if test="owner_id != null">
+                owner_id = ${owner_id}
+            </if>
+            <if test="type != null">
+                AND type = ${type}
+            </if>
+            <if test="state != null">
+                AND state = ${state}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+</mapper>

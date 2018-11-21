@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.auth.mapper.DepartmentMapper">
+
+    <resultMap id="deptMap"
+               type="com.ylli.api.auth.model.Department"/>
+
+    <select id="getDeptList" resultMap="deptMap">
+        SELECT t_department.* FROM t_department
+        <where>
+            t_department.type = 0
+            <if test="name_like != null">
+                <bind name="name_like_ext" value="name_like + '%'" />
+                AND name LIKE #{name_like_ext}
+            </if>
+        </where>
+    </select>
+</mapper>

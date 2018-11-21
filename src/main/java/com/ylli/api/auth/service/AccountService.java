@@ -3,6 +3,7 @@ package com.ylli.api.auth.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
+import com.ylli.api.auth.Config;
 import com.ylli.api.auth.mapper.AccountMapper;
 import com.ylli.api.auth.model.Account;
 import java.util.UUID;
@@ -18,8 +19,8 @@ public class AccountService {
     @Autowired
     AccountMapper accountMapper;
 
-    //@Autowired
-    //RoleService roleService;
+    @Autowired
+    RoleService roleService;
 
     public Account getById(long id) {
         return accountMapper.selectByPrimaryKey(id);
@@ -58,8 +59,8 @@ public class AccountService {
         accountMapper.insertSelective(account);
 
         // add to personal dept
-        //roleService.addRole(Config.DEFAULT_PERSONAL_DEPT_ID,
-        //        account.id, Config.ROLE_PERSONAL);
+        roleService.addRole(Config.DEFAULT_PERSONAL_DEPT_ID,
+                account.id, Config.ROLE_PERSONAL);
 
         return accountMapper.selectByPrimaryKey(account.id);
     }
