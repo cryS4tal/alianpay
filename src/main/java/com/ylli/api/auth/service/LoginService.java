@@ -21,11 +21,11 @@ public class LoginService {
     @Autowired
     AuthSession authSession;
 
-    //@Autowired
-    //DepartmentService departmentService;
+    @Autowired
+    DepartmentService departmentService;
 
-    //@Autowired
-    //RoleService roleService;
+    @Autowired
+    RoleService roleService;
 
     @Autowired
     AccountService accountService;
@@ -65,8 +65,8 @@ public class LoginService {
         Account account = accountService.getById(id);
         Map map = mergeUtil.builder()
                 .merge(account)
-                //.merge("depts", departmentService.getDeptsByAccount(account.id))
-                //.merge("roles", roleService.getListByAccountAndDept(account.id, null))
+                .merge("depts", departmentService.getDeptsByAccount(account.id))
+                .merge("roles", roleService.getListByAccountAndDept(account.id, null))
                 //.merge("wechatBinding", () -> auth2WechatService.getByAccountId(id) != null)
                 //.merge("uaaBinding", () -> auth2UaaService.getByAccountId(id) != null)
                 .merge("phone", () -> {
