@@ -70,4 +70,9 @@ public class UserInfoService {
     public Object getUserInfo(Long userId) {
         return userInfoMapper.selectByUserId(userId);
     }
+
+    @Transactional
+    public void removeUserInfo(long id) {
+        userInfoMapper.deleteByPrimaryKey(id);
+    }
 }

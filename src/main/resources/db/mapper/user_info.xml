@@ -25,10 +25,12 @@
                 AND reserved_phone = #{reserved_phone}
             </if>
             <if test="open_bank != null">
-                AND open_bank = #{open_bank}
+                <bind name="name_like_ext" value="open_bank + '%'" />
+                AND open_bank LIKE #{name_like_ext}
             </if>
             <if test="sub_bank != null">
-                AND sub_bank = #{sub_bank}
+                <bind name="name_like_ext" value="sub_bank + '%'" />
+                AND sub_bank LIKE #{name_like_ext}
             </if>
             <if test="begin_time != null">
                 AND create_time >= #{begin_time}
