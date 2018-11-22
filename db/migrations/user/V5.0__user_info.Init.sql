@@ -1,4 +1,4 @@
-CREATE TABLE t_user_info (
+CREATE TABLE t_user_settlement (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   user_id BIGINT COMMENT '用户id',
   identity_card VARCHAR(64) NOT NULL
@@ -23,5 +23,5 @@ CREATE TABLE t_user_info (
   modify_time DATETIME NOT NULL DEFAULT now()
 );
 
-ALTER TABLE `t_user_info`
+ALTER TABLE `t_user_settlement`
 ADD UNIQUE INDEX `u_user_id` (`user_id`) ;

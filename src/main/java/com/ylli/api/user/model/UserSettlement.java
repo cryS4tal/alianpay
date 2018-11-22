@@ -6,8 +6,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "t_user_info")
-public class UserInfo {
+@Table(name = "t_user_settlement")
+public class UserSettlement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

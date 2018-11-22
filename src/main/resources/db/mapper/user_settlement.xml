@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ylli.api.user.mapper.UserInfoMapper">
-    <resultMap id="userInfoMap" type="com.ylli.api.user.model.UserInfo"/>
+<mapper namespace="com.ylli.api.user.mapper.UserSettlementMapper">
+    <resultMap id="userSettlementMap" type="com.ylli.api.user.model.UserSettlement"/>
 
-    <select id="selectByCondition" resultMap="userInfoMap">
+    <select id="selectByCondition" resultMap="userSettlementMap">
         SELECT
             *
-        FROM t_user_info
+        FROM t_user_settlement
         <where>
             <if test="user_id != null">
                user_id = ${user_id}

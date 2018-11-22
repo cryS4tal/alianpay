@@ -7,8 +7,7 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.MergeUtil;
 import com.ylli.api.user.service.UserAppService;
-import com.ylli.api.user.service.UserInfoService;
-import java.util.LinkedHashMap;
+import com.ylli.api.user.service.UserSettlementService;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +35,7 @@ public class LoginService {
     PhoneAuthService phoneAuthService;
 
     @Autowired
-    UserInfoService userInfoService;
+    UserSettlementService userInfoService;
 
     @Autowired
     UserAppService userAppService;

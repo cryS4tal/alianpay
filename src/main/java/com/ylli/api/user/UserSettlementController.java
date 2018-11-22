@@ -9,7 +9,7 @@ import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.user.model.UserOwnInfo;
-import com.ylli.api.user.service.UserInfoService;
+import com.ylli.api.user.service.UserSettlementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/user/settlement")
 @Auth
-public class UserInfoController {
+public class UserSettlementController {
 
     @Autowired
-    UserInfoService userInfoService;
+    UserSettlementService userSettlementService;
 
     @Autowired
     AuthSession authSession;
@@ -36,14 +36,14 @@ public class UserInfoController {
         if (authSession.getAuthId() != ownInfo.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return userInfoService.saveUserInfo(ownInfo);
+        return userSettlementService.saveUserInfo(ownInfo);
     }
 
     @PostMapping("/charge")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
     public Object saveChargeInfo(@RequestBody UserChargeInfo userChargeInfo) {
         ServiceUtil.checkNotEmpty(userChargeInfo);
-        return userInfoService.saveChargeInfo(userChargeInfo);
+        return userSettlementService.saveChargeInfo(userChargeInfo);
     }
 
     @GetMapping("/list")
@@ -61,7 +61,7 @@ public class UserInfoController {
                               @AwesomeParam(defaultValue = "10") int limit) {
 
 
-        return userInfoService.getUserList(userId, name, identityCard, bankcardNumber, reservedPhone, openBank, subBank,
+        return userSettlementService.getUserList(userId, name, identityCard, bankcardNumber, reservedPhone, openBank, subBank,
                 beginTime == null ? null : beginTime.getTimestamp(), endTime == null ? null : endTime.getTimestamp(), offset, limit);
     }
 
@@ -70,12 +70,12 @@ public class UserInfoController {
         if (authSession.getAuthId() != userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return userInfoService.getUserInfo(userId);
+        return userSettlementService.getUserInfo(userId);
     }
 
     @DeleteMapping("/{id}")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
     public void removeUserInfo(@PathVariable Long id) {
-        userInfoService.removeUserInfo(id);
+        userSettlementService.removeUserInfo(id);
     }
 }
