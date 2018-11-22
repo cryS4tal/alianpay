@@ -24,6 +24,10 @@ public class Config {
     public static final ErrorCode ERROR_APP_NOT_FOUND
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             3, "应用不存在");
+
+    public static final ErrorCode ERROR_APP_IN_USERD
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            4, "应用正在使用中");
     /**
      * 权限
      */

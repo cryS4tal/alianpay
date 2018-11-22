@@ -7,7 +7,9 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.user.service.UserAppService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,7 +48,7 @@ public class UserAppController {
                           @AwesomeParam(defaultValue = "0") int offset,
                           @AwesomeParam(defaultValue = "10") int limit) {
 
-        if (authSession.getAuthId() != userId && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_APP)) {
+        if (authSession.getAuthId() != (userId == null ? 0 : userId) && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_APP)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         return userAppService.getApps(userId, offset, limit);
@@ -63,4 +65,10 @@ public class UserAppController {
     public void appSwitch(@RequestBody Switch s) {
         userAppService.appSwitch(s.userId, s.appId, s.status, permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_APP));
     }
+
+    @DeleteMapping("/{id}")
+    public void removeApp(@PathVariable long id) {
+        userAppService.removeApp(id);
+    }
+
 }

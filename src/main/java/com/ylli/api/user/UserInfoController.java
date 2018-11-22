@@ -43,7 +43,6 @@ public class UserInfoController {
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
     public Object saveChargeInfo(@RequestBody UserChargeInfo userChargeInfo) {
         ServiceUtil.checkNotEmpty(userChargeInfo);
-
         return userInfoService.saveChargeInfo(userChargeInfo);
     }
 
@@ -74,9 +73,9 @@ public class UserInfoController {
         return userInfoService.getUserInfo(userId);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
-    public void removeUserInfo(@PathVariable long id) {
+    public void removeUserInfo(@PathVariable Long id) {
         userInfoService.removeUserInfo(id);
     }
 }

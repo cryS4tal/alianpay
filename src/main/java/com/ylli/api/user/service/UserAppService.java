@@ -83,12 +83,29 @@ public class UserAppService {
         }
         UserApp userApp = new UserApp();
         userApp.appId = appId;
-        userApp = userAppMapper.selectByAppId(appId);
+        userApp.userId = userId;
+        userApp = userAppMapper.selectOne(userApp);
         if (userApp == null) {
             throw new AwesomeException(Config.ERROR_APP_NOT_FOUND);
         }
         userApp.status = status;
         userAppMapper.updateByPrimaryKeySelective(userApp);
+    }
+
+    @Transactional
+    public void removeApp(long id) {
+        //todo 前置账单查询，存在进行中得app 不能删除。
+        if (false) {
+            throw new AwesomeException(Config.ERROR_APP_IN_USERD);
+        }
+        UserApp userApp = userAppMapper.selectByPrimaryKey(id);
+        if (userApp == null) {
+            throw new AwesomeException(Config.ERROR_APP_NOT_FOUND);
+        }
+        if (userApp.userId != authSession.getAuthId()) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        userAppMapper.delete(userApp);
     }
 
 

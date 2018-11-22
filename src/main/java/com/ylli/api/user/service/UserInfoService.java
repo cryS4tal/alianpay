@@ -47,7 +47,8 @@ public class UserInfoService {
         if (userInfo == null) {
             throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
         }
-        modelMapper.map(userChargeInfo, userInfo);
+        userInfo.chargeType = userChargeInfo.chargeType;
+        userInfo.chargeRate = userChargeInfo.chargeRate;
         userInfo.modifyTime = Timestamp.from(Instant.now());
         userInfoMapper.updateByPrimaryKeySelective(userInfo);
         return userInfoMapper.selectByPrimaryKey(userInfo.id);

@@ -10,7 +10,7 @@ public class UserChargeInfo {
      * chargeType = 1; 定额；chargeType = 2; 百分比
      * chargeRate 分 / n % 100 * 100.
      */
-    public String chargeType;
+    public Integer chargeType;
 
-    public String chargeRate;
+    public Integer chargeRate;
 }
