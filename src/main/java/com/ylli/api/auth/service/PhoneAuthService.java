@@ -40,16 +40,28 @@ public class PhoneAuthService {
         }
         Account account = accountService.create(phone, null);
         //bindPhone(account.id, phone);
+        create(account.id, phone);
         return account;
+    }
+
+    @Transactional
+    public PhoneAuth create(Long id, String phone) {
+        PhoneAuth auth = new PhoneAuth();
+        auth.id = id;
+        auth.phone = phone;
+        phoneAuthMapper.insertSelective(auth);
+        return phoneAuthMapper.selectByPrimaryKey(id);
     }
 
     /*@Transactional
     public Long bindPhone(long accountId, String phone) {
 
-        *//**
-         * 微信用户第一次进入，绑定手机（此时手机应该没有绑定），可以任意绑定已存在手机，新注册手机
-         * 已绑定手机用户更改绑定手机，只允许更改未被绑定的手机
-         *//*
+        */
+
+    /**
+     * 微信用户第一次进入，绑定手机（此时手机应该没有绑定），可以任意绑定已存在手机，新注册手机
+     * 已绑定手机用户更改绑定手机，只允许更改未被绑定的手机
+     *//*
         PhoneAuth orgPhone = phoneAuthMapper.selectByPrimaryKey(accountId);
 
         PhoneAuth phoneAuth = new PhoneAuth();
@@ -100,7 +112,6 @@ public class PhoneAuthService {
         }
         phoneAuthMapper.deleteByPrimaryKey(accountId);
     }*/
-
     public Account getByPhone(String phone) {
         PhoneAuth phoneAuth = new PhoneAuth();
         phoneAuth.phone = phone;

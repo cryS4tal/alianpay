@@ -69,6 +69,13 @@ public class UserAppService {
         return dataList;
     }
 
+    public List<UserApp> getApp(Long userId) {
+        UserApp userApp = new UserApp();
+        userApp.userId = userId;
+        List<UserApp> list = userAppMapper.select(userApp);
+        return list;
+    }
+
     @Transactional
     public void appSwitch(Long userId, String appId, Boolean status, boolean admin) {
         if (!admin && authSession.getAuthId() != userId) {

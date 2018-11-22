@@ -6,6 +6,8 @@ import com.ylli.api.auth.model.PhoneAuth;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.MergeUtil;
+import com.ylli.api.user.service.UserAppService;
+import com.ylli.api.user.service.UserInfoService;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +35,11 @@ public class LoginService {
     @Autowired
     PhoneAuthService phoneAuthService;
 
-    //@Autowired
-    //OAuth2WechatService auth2WechatService;
+    @Autowired
+    UserInfoService userInfoService;
 
-    //@Autowired
-    //OAuth2UaaService auth2UaaService;
-
-    //@Autowired
-    //VerifyService verifyService;
-
-    //@Autowired
-    //BankCardMapper bankCardMapper;
+    @Autowired
+    UserAppService userAppService;
 
     @Autowired
     MergeUtil mergeUtil;
@@ -67,25 +63,12 @@ public class LoginService {
                 .merge(account)
                 .merge("depts", departmentService.getDeptsByAccount(account.id))
                 .merge("roles", roleService.getListByAccountAndDept(account.id, null))
-                //.merge("wechatBinding", () -> auth2WechatService.getByAccountId(id) != null)
-                //.merge("uaaBinding", () -> auth2UaaService.getByAccountId(id) != null)
                 .merge("phone", () -> {
                     PhoneAuth phoneAuth = phoneAuthService.getByAccountId(id);
                     return phoneAuth != null ? phoneAuth.phone : null;
                 })
-                /*.merge(() -> {
-                    //添加实名认证信息和绑卡信息
-                    Map map1 = new LinkedHashMap();
-                    RealNameVerify realNameVerify = verifyService.get(id);
-                    map1.put("idNo", realNameVerify != null ? realNameVerify.cardId : null);
-                    map1.put("realName", realNameVerify != null ? realNameVerify.name : null);
-                    return map1;
-                })*/
-                /*.merge("bankCardBinded", () -> {
-                    BankBindInfo bankBindInfoQuery = new BankBindInfo();
-                    bankBindInfoQuery.userId = id;
-                    return bankCardMapper.selectCount(bankBindInfoQuery) > 0;
-                })*/
+                //.merge("user_info", userInfoService.getUserInfo(account.id))
+                //.merge("apps", userAppService.getApp(account.id))
                 .create();
         return map;
     }
