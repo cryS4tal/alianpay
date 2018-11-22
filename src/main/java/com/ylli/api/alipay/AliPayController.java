@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 此类并非接入原生ali支付. 对接产品为支付供应商 kypay 提供的支付宝通道
+ */
 @RestController
 @RequestMapping("/pay/ali")
 @Auth

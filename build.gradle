@@ -58,6 +58,12 @@ dependencies {
     compile 'org.modelmapper:modelmapper:0.7.5'
 }
 
+dependencies {
+    //先锋支付
+    compile files('libs/xf-pay.jar')
+}
+
+
 checkstyle {
     toolVersion = '7.6.1'
 }
