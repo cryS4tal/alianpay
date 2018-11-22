@@ -1,5 +1,6 @@
 package com.ylli.api.base.util;
 
+import com.google.common.base.CaseFormat;
 import com.ylli.api.base.Config;
 import com.ylli.api.base.exception.AwesomeException;
 import java.lang.reflect.Field;
@@ -14,8 +15,6 @@ public class ServiceUtil {
 
     /**
      * obj包含参数不可为null
-     *
-     * @param object javaBean
      */
     public static void checkNotEmpty(Object object) {
         Field[] fields = object.getClass().getDeclaredFields();
@@ -27,8 +26,13 @@ public class ServiceUtil {
                 exception.printStackTrace();
             }
             try {
+                //加入string 空字符串限制
+                if (field.get(object) instanceof String && (field.get(object) == null || ((String) field.get(object)).length() == 0)) {
+                    //驼峰转下划线
+                    throw new AwesomeException(Config.ERROR_PARAM_NOT_NULL.format(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName())));
+                }
                 if (null == field.get(object)) {
-                    throw new AwesomeException(Config.ERROR_PARAM_NOT_NULL.format(field.getName()));
+                    throw new AwesomeException(Config.ERROR_PARAM_NOT_NULL.format(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName())));
                 }
             } catch (IllegalAccessException exception) {
                 exception.printStackTrace();
@@ -37,9 +41,7 @@ public class ServiceUtil {
     }
 
     /**
-     * obj包含参数不可为null，忽略 id, createTime, modifyTime
-     *
-     * @param object javaBean
+     * obj包含参数不可为null，忽略 id, createTime, modifyTime, args
      */
     public static void checkNotEmptyIgnore(Object object, Boolean ignore, String... args) {
         Field[] fields = object.getClass().getDeclaredFields();
@@ -55,8 +57,11 @@ public class ServiceUtil {
                 exception.printStackTrace();
             }
             try {
+                if (field.get(object) instanceof String && (field.get(object) == null || ((String) field.get(object)).length() == 0)) {
+                    throw new AwesomeException(Config.ERROR_PARAM_NOT_NULL.format(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName())));
+                }
                 if (null == field.get(object)) {
-                    throw new AwesomeException(Config.ERROR_PARAM_NOT_NULL.format(field.getName()));
+                    throw new AwesomeException(Config.ERROR_PARAM_NOT_NULL.format(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName())));
                 }
             } catch (IllegalAccessException exception) {
                 exception.printStackTrace();

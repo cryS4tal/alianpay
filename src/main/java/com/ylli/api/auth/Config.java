@@ -73,6 +73,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             15, "权限不足");
 
+    public static final ErrorCode ERROR_USER_NOT_EMPTY
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            16, "用户不能为null");
 
 
     /**

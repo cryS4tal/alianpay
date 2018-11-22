@@ -2,6 +2,7 @@ package com.ylli.api.user.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.base.CaseFormat;
 import com.ylli.api.auth.mapper.AccountMapper;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
@@ -110,7 +111,7 @@ public class UserAppService {
 
 
     /*public static void main(String[] args) {
-        UserAppService service = new UserAppService();
-        System.out.println(service.generateAppId());
+        //UserAppService service = new UserAppService();
+        System.out.println(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "TestData"));
     }*/
 }

@@ -68,7 +68,7 @@ public class UserSettlementService {
         return dataList;
     }
 
-    public Object getUserInfo(Long userId) {
+    public UserSettlement getUserInfo(Long userId) {
         return userSettlementMapper.selectByUserId(userId);
     }
 
