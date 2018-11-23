@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -33,7 +34,12 @@ public class ObjectHttpMessageConverter implements HttpMessageConverter<Object> 
     private final FormHttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private Charset charset = StandardCharsets.UTF_8;
+    public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+    private Charset charset = DEFAULT_CHARSET;
+
+    private static final LinkedMultiValueMap<String, String> LINKED_MULTI_VALUE_MAP = new LinkedMultiValueMap<>();
+    private static final Class<? extends MultiValueMap<String, ?>> LINKED_MULTI_VALUE_MAP_CLASS
+            = (Class<? extends MultiValueMap<String, ?>>) LINKED_MULTI_VALUE_MAP.getClass();
 
     public ObjectHttpMessageConverter() {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -59,7 +65,6 @@ public class ObjectHttpMessageConverter implements HttpMessageConverter<Object> 
         return formHttpMessageConverter.getSupportedMediaTypes();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object read(Class clazz, HttpInputMessage inputMessage)
             throws IOException, HttpMessageNotReadableException {
