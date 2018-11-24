@@ -32,6 +32,15 @@ public class Config {
     public static final ErrorCode ERROR_USER_TYPE
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             5, "用户类型不正确");
+
+    public static final ErrorCode ERROR_AUDIT_PASS
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            6, "审核已通过，请勿重复注册");
+
+    public static final ErrorCode ERROR_AUDIT_ING
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            7, "信息待审核");
+
     /**
      * 权限
      */

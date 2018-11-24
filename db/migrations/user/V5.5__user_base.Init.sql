@@ -19,3 +19,6 @@ CREATE TABLE t_user_base (
 
 ALTER TABLE `t_user_base`
 ADD UNIQUE INDEX `u_user_id` (`user_id`) ;
+
+ALTER TABLE `t_user_base`
+ADD COLUMN `state`  int NULL COMMENT '审核状态：1-通过，0-不通过' AFTER `legal_phone`;

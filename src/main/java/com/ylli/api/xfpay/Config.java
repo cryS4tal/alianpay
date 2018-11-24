@@ -17,6 +17,14 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             1, "权限不足");
 
+    public static final ErrorCode ERROR_BALANCE_NOT_ENOUGH
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            2, "余额不足");
+
+    public static final ErrorCode ERROR_REPEAT_ORDER
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            3, "重复下单");
+
     /**
      * 权限
      */

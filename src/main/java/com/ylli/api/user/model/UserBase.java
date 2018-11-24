@@ -13,6 +13,9 @@ public class UserBase {
     public static final Integer COMPANY = 1;
     public static final Integer PERSON = 2;
 
+    public static final Integer PASS = 1;
+    public static final Integer FAIL = 0;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
@@ -48,6 +51,9 @@ public class UserBase {
     public String legalPerson;
 
     public String legalPhone;
+
+    //审核状态
+    public Integer state;
 
     public Timestamp createTime;
 

@@ -50,19 +50,35 @@ public class XfClient {
 
     /**
      * 单笔代发
+     *
+     * @param merchantNo  订单编号
+     * @param amount      金额
+     * @param accountNo   银行卡号
+     * @param accountName 持卡人姓名
+     * @param mobileNo    手机号
+     * @param bankNo      银行编码
+     * @param userType    用户类型
+     * @param accountType 账户类型
+     * @param memo        保留域
+     * @return
      */
-    public String agencyPayment() {
+    public XfPaymentResponse agencyPayment(String merchantNo, Integer amount, String accountNo, String accountName,
+                                String mobileNo, String bankNo, Integer userType, Integer accountType, String memo) {
 
         XfPaymentRequest request = new XfPaymentRequest();
-        request.merchantNo = "20181123A0001";
-        request.amount = 100;
-        request.transCur = transCur;
-        request.userType = userTypePerson;
-        request.accountNo = "6217920274920375";
-        request.accountName = "李玉龙";
-        request.mobileNo = "15755378327";
-        request.bankNo = "SPDB";
 
+        request.merchantNo = merchantNo;
+        request.amount = amount;
+        request.accountNo = accountNo;
+        request.accountName = accountName;
+        request.mobileNo = mobileNo;
+        request.bankNo = bankNo;
+        request.userType = userType;
+        request.accountType = accountType;
+        request.memo = memo;
+
+        request.transCur = transCur;
+        request.noticeUrl = "";
         Map<String, String> map = objectToMap(request);
 
         //System.out.println(new Gson().toJson(map));
@@ -89,20 +105,7 @@ public class XfClient {
 
         XfPaymentResponse paymentResponse = new Gson().fromJson(str, XfPaymentResponse.class);
 
-        /**
-         * 99000 - 接口调用成功
-         * 99001 - 接口调用异常
-         * 其他返回码，接口调用失败，可置订单为失败
-         */
-        if (paymentResponse.code.equals("99000")) {
-            //Data data = new Gson().fromJson()
-
-        } else if (paymentResponse.code.equals("99001")) {
-
-        } else {
-
-        }
-        return str;
+        return paymentResponse;
     }
 
     /**

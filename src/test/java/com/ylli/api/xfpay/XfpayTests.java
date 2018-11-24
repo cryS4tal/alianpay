@@ -21,8 +21,8 @@ public class XfpayTests {
 
     @Test
     public void createOrder() {
-        String s = client.agencyPayment();
-        System.out.println(s);
+        /*String s = client.agencyPayment();
+        System.out.println(s);*/
     }
 
     @Test

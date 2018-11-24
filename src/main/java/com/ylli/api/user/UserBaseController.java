@@ -41,4 +41,10 @@ public class UserBaseController {
         }
         userBaseService.register(userBase);
     }
+
+    //todo
+    //userBase 审核接口
+    //userBase 更新接口
+    //列表
+    //详情
 }
