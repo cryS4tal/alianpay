@@ -28,6 +28,10 @@ public class Config {
     public static final ErrorCode ERROR_APP_IN_USERD
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             4, "应用正在使用中");
+
+    public static final ErrorCode ERROR_USER_TYPE
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            5, "用户类型不正确");
     /**
      * 权限
      */

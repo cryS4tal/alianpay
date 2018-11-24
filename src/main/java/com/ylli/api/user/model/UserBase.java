@@ -10,11 +10,16 @@ import javax.persistence.Table;
 @Table(name = "t_user_base")
 public class UserBase {
 
+    public static final Integer COMPANY = 1;
+    public static final Integer PERSON = 2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
     public Long userId;
+
+    public Integer userType;
 
     //商户号
     public String merchantNo;
@@ -37,6 +42,7 @@ public class UserBase {
 
     public String address;
 
+    //营业执照
     public String businessLicense;
 
     public String legalPerson;

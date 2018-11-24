@@ -1,6 +1,6 @@
-package com.ylli.api.xfpay;
+package com.ylli.api.user;
 
-import com.ylli.api.xfpay.service.XfClient;
+import com.ylli.api.user.service.UserBaseService;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,20 +14,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Ignore
-public class XfpayTests {
+public class UserBaseTests {
 
     @Autowired
-    XfClient client;
+    UserBaseService userBaseService;
 
     @Test
-    public void createOrder() {
-        String s = client.agencyPayment();
-        System.out.println(s);
+    public void testRedis() {
+        for (int i = 0; i < 10; i++) {
+            System.out.println(userBaseService.getCode(1));
+        }
     }
 
-    @Test
-    public void orderQuery() {
-        String s = client.orderQuery();
-        System.out.println(s);
-    }
 }
