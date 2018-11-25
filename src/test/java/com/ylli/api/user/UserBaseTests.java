@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Ignore
+@Ignore
 public class UserBaseTests {
 
     @Autowired
