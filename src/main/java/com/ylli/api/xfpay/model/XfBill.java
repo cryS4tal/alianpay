@@ -21,28 +21,28 @@ public class XfBill {
 
     public Long userId;
 
-    //订单编号.
+    //平台订单编号.
     public String orderNo;
 
-    public Integer amount;
-
-    //订单状态（new / finish / cancel）
-    public Integer status;
-
     //商户订单号;
-    public String  subNo;
+    public String subNo;
 
     //先锋订单号
     public String superNo;
 
+    public Integer amount;
+
+    //订单状态（new 1 / ing 2 / finish 3 / cancel 4）
+    public Integer status;
 
     /**
-     * 以下字段带记录.
-     * sql 需要加入
-     *
-     *
-     *
-     *
+     * 银行卡号
+     * 账户名
+     * 手机
+     * 银行编码
+     * 用户类型
+     * 账户类型
+     * 保留域
      */
     public String accountNo;
     public String accountName;
@@ -59,8 +59,11 @@ public class XfBill {
      *  userType = 2; accountType 默认4
      */
     public Integer accountType;
+
     public String memo;     //not required
 
+    //交易成立时间
+    public Timestamp tradeTime;
 
     public Timestamp createTime;
 

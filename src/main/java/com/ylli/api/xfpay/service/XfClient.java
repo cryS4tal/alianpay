@@ -63,7 +63,7 @@ public class XfClient {
      * @return
      */
     public XfPaymentResponse agencyPayment(String merchantNo, Integer amount, String accountNo, String accountName,
-                                String mobileNo, String bankNo, Integer userType, Integer accountType, String memo) {
+                                           String mobileNo, String bankNo, Integer userType, Integer accountType, String memo) {
 
         XfPaymentRequest request = new XfPaymentRequest();
 
@@ -170,4 +170,12 @@ public class XfClient {
         return map;
     }
 
+    /**
+     * 异步通知校验
+     *
+     * @return
+     */
+    public boolean verify(String params) throws Exception {
+        return UcfForOnline.verify(params, xf_pub_key);
+    }
 }

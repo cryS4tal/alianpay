@@ -4,6 +4,8 @@ import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.xfpay.service.XfPayService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping
+@RequestMapping("/xfpay")
 @Auth
 public class XfPayController {
 
@@ -46,12 +48,17 @@ public class XfPayController {
     }
 
 
-    @PostMapping
+    @PostMapping("/wage")
     public Object wagesPay(@RequestBody Request request) {
         if (request.userId == null || authSession.getAuthId() != request.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         return xfPayService.wagesPay(request.userId, request.amount, request.accountNo, request.accountName,
                 request.mobileNo, request.bankNo, request.userType, request.accountType, request.memo,request.orderNo );
+    }
+
+    @PostMapping("/notify")
+    public void payNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        xfPayService.payNotify(request, response);
     }
 }

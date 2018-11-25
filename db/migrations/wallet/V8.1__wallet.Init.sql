@@ -1,5 +1,5 @@
 /**
- * 先锋银行代码表.
+ * 钱包.
  */
 CREATE TABLE t_wallet (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
