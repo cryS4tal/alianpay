@@ -26,7 +26,7 @@ public class Config {
             3, "用户已被禁用");
 
     public static final ErrorCode ERROR_VERIFY
-            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             4, "账号密码校验错误");
 
     public static final ErrorCode ERROR_PASSWORD_NOT_EMPTY
