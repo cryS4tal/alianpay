@@ -2,6 +2,7 @@ package com.ylli.api.xfpay.service;
 
 import com.google.gson.Gson;
 import com.ucf.sdk.UcfForOnline;
+import com.ylli.api.xfpay.model.Data;
 import com.ylli.api.xfpay.model.XfPaymentRequest;
 import com.ylli.api.xfpay.model.XfPaymentResponse;
 import java.lang.reflect.Field;
@@ -78,7 +79,7 @@ public class XfClient {
         request.memo = memo;
 
         request.transCur = transCur;
-        request.noticeUrl = "";
+        request.noticeUrl = "http://47.99.180.135:8080/xfpay/notify";
         Map<String, String> map = objectToMap(request);
 
         //System.out.println(new Gson().toJson(map));
@@ -177,5 +178,13 @@ public class XfClient {
      */
     public boolean verify(String params) throws Exception {
         return UcfForOnline.verify(params, xf_pub_key);
+    }
+
+    /**
+     * 异步通知 业务数据解析
+     */
+    public Data decryptData(String data) throws Exception {
+        String bizData = UcfForOnline.decryptData(data, mer_pri_key);
+        return new Gson().fromJson(bizData, Data.class);
     }
 }

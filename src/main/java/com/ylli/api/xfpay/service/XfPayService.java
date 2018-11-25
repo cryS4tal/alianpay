@@ -7,6 +7,7 @@ import com.ylli.api.wallet.service.WalletService;
 import com.ylli.api.xfpay.Config;
 import com.ylli.api.xfpay.mapper.XfBillMapper;
 import com.ylli.api.xfpay.model.Data;
+import com.ylli.api.xfpay.model.NotifyModel;
 import com.ylli.api.xfpay.model.WagesPayResponse;
 import com.ylli.api.xfpay.model.XfBill;
 import com.ylli.api.xfpay.model.XfPaymentResponse;
@@ -147,7 +148,7 @@ public class XfPayService {
     }
 
     @Transactional
-    public void payNotify(HttpServletRequest request, HttpServletResponse response) {
+    public void payNotify(HttpServletRequest request, HttpServletResponse response) throws IOException {
         InputStream inputStream;
         OutputStream outputStream = null;
         try {
@@ -163,70 +164,62 @@ public class XfPayService {
             inputStream.close();
             outputStream = response.getOutputStream();
             if (sb.length() == 0) {
-                outputStream.write(getResStr("success").getBytes("UTF-8"));
+                outputStream.write(getResStr("fail").getBytes("UTF-8"));
                 return;
             }
             //verify sign
             boolean flag = xfClient.verify(sb.toString());
 
             if (flag) {
+                NotifyModel model = new Gson().fromJson(sb.toString(), NotifyModel.class);
+                if (model.code.equals("99000")) {//接口调用成功
+                    Data data = xfClient.decryptData(model.data);
+                    XfBill xfBill = new XfBill();
+                    xfBill.orderNo = data.merchantNo;
+                    xfBill = xfBillMapper.selectOne(xfBill);
+                    if (xfBill == null) {
+                        outputStream.write(getResStr("订单不存在").getBytes("UTF-8"));
+                        return;
+                    }
+                    xfBill.status = data.status.equals("S") ? XfBill.FINISH : XfBill.FAIL;
+                    xfBill.superNo = data.tradeNo;
+                    xfBill.modifyTime = Timestamp.from(Instant.now());
+                    xfBill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
+                    xfBillMapper.updateByPrimaryKeySelective(xfBill);
+
+                    // 加入异步通知第三方.
+
+                    outputStream.write(getResStr("success").getBytes("UTF-8"));
+                    return;
+
+                } else if (model.code.equals("99001")) {//接口调用异常
+                    // todo 调用订单查询接口确定结果.
 
 
-                //xml to map
-                /*Map<String, String> map = WXPayUtil.xmlToMap(sb.toString());
-                //verify return info
-                String outTradeNo = map.get("out_trade_no");
-                PayTradeRecord record = payRecordMapper.selectForUpdate(outTradeNo);
-                if (record == null) {
-                    outputStream.write(
-                            getResXml(false, "商户订单校验错误").getBytes("UTF-8"));
-                    LOGGER.info(map.toString());
+                    outputStream.write(getResStr("fail").getBytes("UTF-8"));
+                    return;
+
+                } else {//接口调用失败，可置订单为失败。
+                    Data data = xfClient.decryptData(model.data);
+                    XfBill xfBill = new XfBill();
+                    xfBill.orderNo = data.merchantNo;
+                    xfBill = xfBillMapper.selectOne(xfBill);
+                    if (xfBill == null) {
+                        outputStream.write(getResStr("订单不存在").getBytes("UTF-8"));
+                        return;
+                    }
+                    xfBill.status = XfBill.FAIL;
+                    xfBill.modifyTime = Timestamp.from(Instant.now());
+                    xfBillMapper.updateByPrimaryKeySelective(xfBill);
+                    // todo 加入 通知第三方.
+
+                    outputStream.write(getResStr("fail").getBytes("UTF-8"));
                     return;
                 }
-                //allow repeated check
-                if (record.state == PayTradeRecord.FINISH) {
-                    outputStream.write(getResXml(true, "OK").getBytes("UTF-8"));
-                    return;
-                }
-
-                //check money
-                Bill bill = billMapper.selectByPrimaryKey(record.billId);
-                if (bill == null || !bill.money.equals(Integer.parseInt(map.get("total_fee")))) {
-                    //金额校验失败废除流水
-                    record.state = PayTradeRecord.CANCEL;
-                    payRecordMapper.updateByPrimaryKeySelective(record);
-                    outputStream.write(
-                            getResXml(false, "金额校验错误").getBytes("UTF-8"));
-                    LOGGER.info(map.toString());
-                    return;
-                }
-
-                //默认支付成功
-                record.state = PayTradeRecord.FINISH;
-                record.payTime = Timestamp.from(Instant.now());
-                record.transactionId = map.get("transaction_id");
-                payRecordMapper.updateByPrimaryKeySelective(record);
-
-                bill.state = Bill.FINISH;
-                bill.modifyTime = Timestamp.from(Instant.now());
-                billMapper.updateByPrimaryKeySelective(bill);
-
-                //展期
-                if (record.extensionId != 0) {
-                    extensionConfirm(record);
-                    outputStream.write(getResXml(true, "OK").getBytes("UTF-8"));
-                    return;
-                }
-                //借条支付
-                iouConfirm(record.iouId, outTradeNo, outputStream);
-                outputStream.write(getResXml(true, "OK").getBytes("UTF-8"));
-                return;*/
             }
-
-
             outputStream.write(getResStr("签名校验失败").getBytes("UTF-8"));
         } catch (Exception ex) {
-            ex.getMessage();
+            outputStream.write(getResStr("fail").getBytes("UTF-8"));
         } finally {
             try {
                 outputStream.flush();
