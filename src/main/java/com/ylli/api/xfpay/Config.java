@@ -17,13 +17,13 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             1, "权限不足");
 
-    public static final ErrorCode ERROR_BALANCE_NOT_ENOUGH
-            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            2, "余额不足");
+    public static final ErrorCode ERROR_ORDERNO_NOT_EMPTY
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            2, "订单号不能为空");
 
-    public static final ErrorCode ERROR_REPEAT_ORDER
-            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            3, "重复下单");
+    public static final ErrorCode ERROR_ORDER_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            3, "订单号不存在");
 
     /**
      * 权限

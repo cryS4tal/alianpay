@@ -26,3 +26,7 @@ ADD UNIQUE INDEX `u_order_no` (`order_no`) ,
 ADD UNIQUE INDEX `u_sub_no` (`sub_no`) ,
 ADD UNIQUE INDEX `u_supper_no` (`super_no`) ,
 ADD INDEX `n_user_id` (`user_id`) ;
+
+ALTER TABLE `t_xf_bill`
+ADD COLUMN `res_code`  varchar(64) NULL COMMENT '先锋支付返回code' AFTER `trade_time`,
+ADD COLUMN `res_message`  varchar(256) NULL COMMENT '先锋支付返回message' AFTER `res_code`;

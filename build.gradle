@@ -60,7 +60,9 @@ dependencies {
 
 dependencies {
     //先锋支付
-    compile files('libs/xf-pay.jar')
+    compile files('libs/ucf-java-sdk-1.0.7.jar')
+    //stringUtils
+    compile files('libs/rop-common-2.0.1-20160704.083917-2.jar')
 }
 
 

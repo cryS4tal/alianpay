@@ -41,11 +41,6 @@ public class XfClient {
     //币种_固定值：156（表示人民币）
     public static final String transCur = "156";
 
-    //用户类型_对私
-    public static final Integer userTypePerson = 1;
-    //用户类型_对公
-    public static final Integer userTypeCompany = 2;
-
     @Autowired
     RestTemplate restTemplate;
 
@@ -63,7 +58,7 @@ public class XfClient {
      * @param memo        保留域
      * @return
      */
-    public XfPaymentResponse agencyPayment(String merchantNo, Integer amount, String accountNo, String accountName,
+    public String agencyPayment(String merchantNo, Integer amount, String accountNo, String accountName,
                                            String mobileNo, String bankNo, Integer userType, Integer accountType, String memo) {
 
         XfPaymentRequest request = new XfPaymentRequest();
@@ -102,20 +97,16 @@ public class XfClient {
         } catch (Exception ex) {
             ex.getMessage();
         }
-        String str = response.getBody();
-
-        XfPaymentResponse paymentResponse = new Gson().fromJson(str, XfPaymentResponse.class);
-
-        return paymentResponse;
+        return response.getBody();
     }
 
     /**
      * 单笔订单查询
      */
-    public String orderQuery() {
+    public String orderQuery(String merchantNo) {
 
         Map<String, String> map = new HashMap<>();
-        map.put("merchantNo", "20181123A0001");
+        map.put("merchantNo", merchantNo);
         String reqData = null;
         try {
             reqData = UcfForOnline.generateRequest("REQ_WITHDRAW_QUERY_BY_ID", version, merchantId, map, xf_pub_key,
@@ -136,21 +127,6 @@ public class XfClient {
         }
         String str = response.getBody();
 
-        XfPaymentResponse paymentResponse = new Gson().fromJson(str, XfPaymentResponse.class);
-
-        /**
-         * 99000 - 接口调用成功
-         * 99001 - 接口调用异常
-         * 其他返回码，接口调用失败，可置订单为失败
-         */
-        if (paymentResponse.code.equals("99000")) {
-            //Data data = new Gson().fromJson()
-
-        } else if (paymentResponse.code.equals("99001")) {
-
-        } else {
-
-        }
         return str;
     }
 
@@ -184,7 +160,9 @@ public class XfClient {
      * 异步通知 业务数据解析
      */
     public Data decryptData(String data) throws Exception {
+
         String bizData = UcfForOnline.decryptData(data, mer_pri_key);
+
         return new Gson().fromJson(bizData, Data.class);
     }
 }

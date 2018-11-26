@@ -62,6 +62,13 @@ public class XfBill {
 
     public String memo;     //not required
 
+    /**
+     * 记录先锋支付返回code/message.
+     */
+    public String resCode;
+
+    public String resMessage;
+
     //交易成立时间
     public Timestamp tradeTime;
 

@@ -37,9 +37,9 @@ public class XfPayController {
          * 2（贷记卡）
          * 4（对公账户）
          * not required.
-         *
-         *  userType = 1; accountType = (1,2) 默认1
-         *  userType = 2; accountType 默认4
+         * <p>
+         * userType = 1; accountType = (1,2) 默认1
+         * userType = 2; accountType 默认4
          */
         public Integer accountType;
         public String memo;     //not required
@@ -49,16 +49,31 @@ public class XfPayController {
 
 
     @PostMapping("/wage")
-    public Object wagesPay(@RequestBody Request request) {
+    public Object wagesPay(@RequestBody Request request) throws Exception {
         if (request.userId == null || authSession.getAuthId() != request.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         return xfPayService.wagesPay(request.userId, request.amount, request.accountNo, request.accountName,
-                request.mobileNo, request.bankNo, request.userType, request.accountType, request.memo,request.orderNo );
+                request.mobileNo, request.bankNo, request.userType, request.accountType, request.memo, request.orderNo);
     }
 
     @PostMapping("/notify")
     public void payNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
         xfPayService.payNotify(request, response);
+    }
+
+    static class A {
+        public Long userId;
+        //平台订单号
+        //开放给下游服务商需要变成 商户订单号
+        public String orderNo;
+    }
+
+    @PostMapping("/query")
+    public Object orderQuery(@RequestBody A request) throws Exception {
+        if (request.userId == null || authSession.getAuthId() != request.userId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        return xfPayService.orderQuery(request.userId, request.orderNo);
     }
 }

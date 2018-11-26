@@ -27,7 +27,7 @@ public class XfpayTests {
 
     @Test
     public void orderQuery() {
-        String s = client.orderQuery();
+        String s = client.orderQuery("111");
         System.out.println(s);
     }
 }
