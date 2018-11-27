@@ -32,9 +32,9 @@ public class UserBaseController {
             throw new AwesomeException(Config.ERROR_USER_TYPE);
         }
         if (userBase.userType == UserBase.COMPANY) {
-            ServiceUtil.checkNotEmptyIgnore(userBase, true);
+            ServiceUtil.checkNotEmptyIgnore(userBase, true, "merchantNo", "state");
         } else {
-            ServiceUtil.checkNotEmptyIgnore(userBase, true, "companyName", "address", "businessLicense", "legalPerson", "legalPhone");
+            ServiceUtil.checkNotEmptyIgnore(userBase, true, "merchantNo", "state", "companyName", "address", "businessLicense", "legalPerson", "legalPhone");
         }
         if (authSession.getAuthId() != userBase.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);

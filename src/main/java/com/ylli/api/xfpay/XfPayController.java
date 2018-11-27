@@ -3,6 +3,7 @@ package com.ylli.api.xfpay;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.xfpay.model.CreditPay;
 import com.ylli.api.xfpay.service.XfPayService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/xfpay")
-@Auth
 public class XfPayController {
 
     @Autowired
@@ -49,6 +49,7 @@ public class XfPayController {
 
 
     @PostMapping("/wage")
+    @Auth
     public Object wagesPay(@RequestBody Request request) throws Exception {
         if (request.userId == null || authSession.getAuthId() != request.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
@@ -58,6 +59,7 @@ public class XfPayController {
     }
 
     @PostMapping("/notify")
+    @Auth
     public void payNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
         xfPayService.payNotify(request, response);
     }
@@ -70,10 +72,20 @@ public class XfPayController {
     }
 
     @PostMapping("/query")
+    @Auth
     public Object orderQuery(@RequestBody A request) throws Exception {
         if (request.userId == null || authSession.getAuthId() != request.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         return xfPayService.orderQuery(request.userId, request.orderNo);
+    }
+
+    /**
+     * 提供给服务商的带单代发接口.
+     * @return
+     */
+    @PostMapping("/wage/credit")
+    public Object wagesPayNoAuth(@RequestBody CreditPay pay) throws Exception {
+        return xfPayService.wagesPayNoAuth(pay);
     }
 }

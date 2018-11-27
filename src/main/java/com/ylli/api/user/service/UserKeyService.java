@@ -27,4 +27,10 @@ public class UserKeyService {
             userKeyMapper.updateByPrimaryKeySelective(userKey);
         }
     }
+
+    public UserKey getKeyByUserId(Long userId) {
+        UserKey userKey = new UserKey();
+        userKey.userId = userId;
+        return userKeyMapper.selectOne(userKey);
+    }
 }

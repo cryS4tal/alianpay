@@ -11,8 +11,8 @@ CREATE TABLE t_user_base (
   company_name VARCHAR(256) COMMENT '公司姓名',
   address VARCHAR(512) COMMENT '开户支行',
   business_license VARCHAR(128) COMMENT '营业执照',
-  legal_person VARCHAR(128) NOT NULL COMMENT '法人',
-  legal_phone VARCHAR(32) NOT NULL COMMENT '法人手机',
+  legal_person VARCHAR(128) COMMENT '法人',
+  legal_phone VARCHAR(32) COMMENT '法人手机',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );

@@ -4,15 +4,21 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ucf.sdk.UcfForOnline;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.user.model.UserBase;
+import com.ylli.api.user.model.UserKey;
+import com.ylli.api.user.service.UserBaseService;
+import com.ylli.api.user.service.UserKeyService;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import com.ylli.api.xfpay.Config;
 import com.ylli.api.xfpay.mapper.XfBillMapper;
+import com.ylli.api.xfpay.model.CreditPay;
 import com.ylli.api.xfpay.model.Data;
 import com.ylli.api.xfpay.model.NotifyModel;
 import com.ylli.api.xfpay.model.WagesPayResponse;
 import com.ylli.api.xfpay.model.XfBill;
 import com.ylli.api.xfpay.model.XfPaymentResponse;
+import com.ylli.api.xfpay.util.SignUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +29,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -46,6 +53,12 @@ public class XfPayService {
 
     @Autowired
     XfBillMapper xfBillMapper;
+
+    @Autowired
+    UserBaseService userBaseService;
+
+    @Autowired
+    UserKeyService userKeyService;
 
     @Value("${xf.pay.mer_pri_key}")
     public String mer_pri_key;
@@ -170,7 +183,7 @@ public class XfPayService {
                 bill.resMessage = data.resMessage;
                 xfBillMapper.updateByPrimaryKeySelective(bill);
 
-                return getResJson("A005", "交易失败", null);
+                return getResJson("A005", data.resMessage, null);
             }
             if (data.status != null && data.status.toUpperCase().equals("I")) {
                 bill.status = XfBill.ING;
@@ -204,8 +217,14 @@ public class XfPayService {
      * A002 -  余额不足.
      * A003 -  用户余额数据异常（丢失）
      * A004 -  订单重复提交. 具体见 message
-     * A005 -  交易失败
+     * A005 -  业务处理失败（并非一定是交易失败） 具体见message.
      * A006 -  交易正在进行中
+     * <p>
+     * A100 -  商户不存在
+     * A101 -  商户资格待审核
+     * A102 -  请先上传商户私钥
+     * <p>
+     * A200 -  签名校验错误
      * <p>
      * A999 -  未知错误.
      * <p>
@@ -383,7 +402,12 @@ public class XfPayService {
             }
             if (data.status != null && data.status.toUpperCase().equals("F")) {
                 if (bill.status == XfBill.FAIL) {
-                    return getResJson("A005", "交易失败", null);
+                    bill.resCode = data.resCode;
+                    bill.resMessage = data.resMessage;
+                    xfBillMapper.updateByPrimaryKeySelective(bill);
+
+                    //业务处理失败. 具体返回先锋message.
+                    return getResJson("A005", data.resMessage, null);
                 }
 
                 bill.status = XfBill.FAIL;
@@ -398,7 +422,7 @@ public class XfPayService {
                 bill.resMessage = data.resMessage;
                 xfBillMapper.updateByPrimaryKeySelective(bill);
 
-                return getResJson("A005", "交易失败", null);
+                return getResJson("A005", data.resMessage, null);
             }
             if (data.status != null && data.status.toUpperCase().equals("I")) {
                 if (bill.status == XfBill.ING) {
@@ -427,5 +451,35 @@ public class XfPayService {
             //对下游服务商隐藏先锋返回message，统一返回请求失败
             return getResJson(response.code, "请求失败", null);
         }
+    }
+
+    public Object wagesPayNoAuth(CreditPay pay) throws Exception {
+        if (pay.merchantNo == null) {
+            return getResJson("A001", "商户号不能为空", pay);
+        }
+        UserBase userBase = userBaseService.selectByMerchantNo(pay.merchantNo);
+        if (userBase == null) {
+            return getResJson("A100", "商户不存在", null);
+        }
+        if (userBase.state != UserBase.PASS) {
+            return getResJson("A1001", "商户资格待审核", null);
+        }
+        UserKey userKey = userKeyService.getKeyByUserId(userBase.userId);
+        if (userKey == null) {
+            return getResJson("A102", "请先上传商户私钥", null);
+        }
+        String sign = sign(pay, userKey.secretKey);
+        boolean flag = sign.equals(pay.sign);
+        if (flag) {
+            wagesPay(userBase.userId, pay.amount, pay.accountNo, pay.accountName, pay.mobileNo, pay.bankNo, pay.userType, pay.accountType, pay.memo, pay.orderNo);
+        } else {
+            return getResJson("A200", "签名校验错误", null);
+        }
+        return null;
+    }
+
+    public String sign(CreditPay pay, String secret) throws Exception {
+        Map<String, String> map = SignUtil.objectToMap(pay);
+        return SignUtil.generateSignature(map, secret);
     }
 }

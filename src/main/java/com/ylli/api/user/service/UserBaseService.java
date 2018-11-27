@@ -65,6 +65,11 @@ public class UserBaseService {
         exist.userId = userBase.userId;
         exist = userBaseMapper.selectOne(exist);
         if (exist != null) {
+            /**
+             * state null 待审核
+             * 1 pass
+             * 0 fail
+             */
             if (exist.state == UserBase.PASS) {
                 throw new AwesomeException(Config.ERROR_AUDIT_PASS);
             }
@@ -75,4 +80,9 @@ public class UserBaseService {
     }
 
 
+    public UserBase selectByMerchantNo(String merchantNo) {
+        UserBase base = new UserBase();
+        base.merchantNo = merchantNo;
+        return userBaseMapper.selectOne(base);
+    }
 }
