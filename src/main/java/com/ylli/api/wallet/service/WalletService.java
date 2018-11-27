@@ -2,6 +2,8 @@ package com.ylli.api.wallet.service;
 
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
+import com.ylli.api.xfpay.mapper.XfBillMapper;
+import com.ylli.api.xfpay.model.XfBill;
 import java.sql.Timestamp;
 import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,9 @@ public class WalletService {
 
     @Autowired
     WalletMapper walletMapper;
+
+    @Autowired
+    XfBillMapper xfBillMapper;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Wallet getOwnWallet(Long userId) {
@@ -49,32 +54,38 @@ public class WalletService {
     }
 
     @Transactional
-    public boolean finishOrder(Long userId, Integer amount) {
+    public void finishOrder(Long billId, Integer amount) {
+        XfBill bill = xfBillMapper.selectByPrimaryKey(billId);
+        if (bill == null || bill.status == XfBill.FINISH) {
+            return;
+        }
         Wallet wallet = new Wallet();
-        wallet.userId = userId;
+        wallet.userId = bill.userId;
         wallet = walletMapper.selectOne(wallet);
         if (wallet == null) {
-            return true;
+            return;
         }
         wallet.abnormalMoney = wallet.abnormalMoney - amount;
         wallet.totalMoney = wallet.avaliableMoney + wallet.abnormalMoney;
         wallet.modifyTime = Timestamp.from(Instant.now());
         walletMapper.updateByPrimaryKeySelective(wallet);
-        return false;
     }
 
     @Transactional
-    public boolean failedOrder(Long userId, Integer amount) {
+    public void failedOrder(Long billId, Integer amount) {
+        XfBill bill = xfBillMapper.selectByPrimaryKey(billId);
+        if (bill == null || bill.status == XfBill.FAIL) {
+            return;
+        }
         Wallet wallet = new Wallet();
-        wallet.userId = userId;
+        wallet.userId = bill.userId;
         wallet = walletMapper.selectOne(wallet);
         if (wallet == null) {
-            return true;
+            return;
         }
         wallet.abnormalMoney = wallet.abnormalMoney - amount;
         wallet.avaliableMoney = wallet.avaliableMoney + amount;
         wallet.modifyTime = Timestamp.from(Instant.now());
         walletMapper.updateByPrimaryKeySelective(wallet);
-        return false;
     }
 }

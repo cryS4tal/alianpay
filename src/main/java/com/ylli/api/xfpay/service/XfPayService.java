@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.HashMap;
@@ -150,22 +149,13 @@ public class XfPayService {
 
             bill.superNo = data.tradeNo;
             if (data.tradeTime != null) {
-                try {
-                    bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
             }
 
             if (data.status != null && data.status.toUpperCase().equals("S")) {
-                bill.status = XfBill.FINISH;
-                //wallet.abnormalMoney = wallet.abnormalMoney - amount;
-                //wallet.totalMoney = wallet.avaliableMoney + wallet.abnormalMoney;
-                boolean flag = walletService.finishOrder(userId, amount);
-                if (flag) {
-                    return getResJson("A003", "用户钱包数据异常，请联系管理员", null);
-                }
+                walletService.finishOrder(bill.id, amount);
 
+                bill.status = XfBill.FINISH;
                 bill.resCode = data.resCode;
                 bill.resMessage = data.resMessage;
                 xfBillMapper.updateByPrimaryKeySelective(bill);
@@ -173,14 +163,9 @@ public class XfPayService {
                 return getResJson("A000", "交易成功", null);
             }
             if (data.status != null && data.status.toUpperCase().equals("F")) {
-                bill.status = XfBill.FAIL;
-                //wallet.abnormalMoney = wallet.abnormalMoney - amount;
-                //wallet.avaliableMoney = wallet.avaliableMoney + amount;
-                boolean flag = walletService.failedOrder(userId, amount);
-                if (flag) {
-                    return getResJson("A003", "用户钱包数据异常，请联系管理员", null);
-                }
+                walletService.failedOrder(bill.id, amount);
 
+                bill.status = XfBill.FAIL;
                 bill.resCode = data.resCode;
                 bill.resMessage = data.resMessage;
                 xfBillMapper.updateByPrimaryKeySelective(bill);
@@ -273,8 +258,6 @@ public class XfPayService {
             params.put(key, values[0]);
         }
 
-        //System.out.println("服务器端通知-接收到先锋支付返回报文：" + params.toString());
-
         PrintWriter writer = response.getWriter();
         try {
             //报文参数验证签名
@@ -284,7 +267,6 @@ public class XfPayService {
 
                 //解密业务数据
                 String decryptData = UcfForOnline.decryptData(JSONObject.toJSONString(params), mer_pri_key);
-                //System.out.println("解密后的业务数据：" + decryptData);
 
                 //服务调用成功
                 if ("99000".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
@@ -297,20 +279,39 @@ public class XfPayService {
                         writer.write("订单不存在");
                         return;
                     }
-                    xfBill.status = data.status.equals("S") ? XfBill.FINISH : XfBill.FAIL;
-                    xfBill.superNo = data.tradeNo;
-                    xfBill.modifyTime = Timestamp.from(Instant.now());
                     if (data.tradeTime != null) {
                         xfBill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
                     }
 
-                    xfBill.resCode = data.resCode;
-                    xfBill.resMessage = data.resMessage;
-                    xfBillMapper.updateByPrimaryKeySelective(xfBill);
+                    if (data.status != null && data.status.toUpperCase().equals("S")) {
+                        walletService.finishOrder(xfBill.id, xfBill.amount);
 
-                    // 加入异步通知第三方.
+                        xfBill.status = XfBill.FINISH;
+                        xfBill.resCode = data.resCode;
+                        xfBill.resMessage = data.resMessage;
+                        xfBillMapper.updateByPrimaryKeySelective(xfBill);
 
-                    writer.write(getResStr("SUCCESS"));
+                        writer.write(getResStr("SUCCESS"));
+                    }
+                    if (data.status != null && data.status.toUpperCase().equals("F")) {
+                        walletService.failedOrder(xfBill.id, xfBill.amount);
+
+                        xfBill.status = XfBill.FAIL;
+                        xfBill.resCode = data.resCode;
+                        xfBill.resMessage = data.resMessage;
+                        xfBillMapper.updateByPrimaryKeySelective(xfBill);
+
+                        writer.write("FAIL");
+                    }
+                    if (data.status != null && data.status.toUpperCase().equals("I")) {
+                        xfBill.status = XfBill.ING;
+
+                        xfBill.resCode = data.resCode;
+                        xfBill.resMessage = data.resMessage;
+                        xfBillMapper.updateByPrimaryKeySelective(xfBill);
+
+                        writer.write("ING");
+                    }
                 } else if ("99001".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
                     decryptData = params.get("code").toString() + "|" + params.get("message").toString();
                     //System.out.println("返回数据：" + decryptData);
@@ -334,7 +335,7 @@ public class XfPayService {
                     xfBillMapper.updateByPrimaryKeySelective(xfBill);
                     // todo 加入 通知第三方.
 
-                    writer.write(getResStr("fail"));
+                    writer.write(getResStr("FAIL"));
                 }
             } else {
                 writer.write("先锋报文签名验证：验签失败");
@@ -382,14 +383,9 @@ public class XfPayService {
                 if (bill.status == XfBill.FINISH) {
                     return getResJson("A000", "交易成功", null);
                 }
+                walletService.finishOrder(bill.id, bill.amount);
 
                 bill.status = XfBill.FINISH;
-                //wallet.abnormalMoney = wallet.abnormalMoney - amount;
-                //wallet.totalMoney = wallet.avaliableMoney + wallet.abnormalMoney;
-                boolean flag = walletService.finishOrder(userId, bill.amount);
-                if (flag) {
-                    return getResJson("A003", "用户钱包数据异常，请联系管理员", null);
-                }
                 bill.resCode = data.resCode;
                 bill.resMessage = data.resMessage;
                 xfBillMapper.updateByPrimaryKeySelective(bill);
@@ -405,15 +401,9 @@ public class XfPayService {
                     //业务处理失败. 具体返回先锋message.
                     return getResJson("A005", data.resMessage, null);
                 }
+                walletService.failedOrder(bill.id, bill.amount);
 
                 bill.status = XfBill.FAIL;
-                //wallet.abnormalMoney = wallet.abnormalMoney - amount;
-                //wallet.avaliableMoney = wallet.avaliableMoney + amount;
-                boolean flag = walletService.failedOrder(userId, bill.amount);
-                if (flag) {
-                    return getResJson("A003", "用户钱包数据异常，请联系管理员", null);
-                }
-
                 bill.resCode = data.resCode;
                 bill.resMessage = data.resMessage;
                 xfBillMapper.updateByPrimaryKeySelective(bill);

@@ -16,4 +16,7 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             1, "钱包数据丢失");
 
+    public static final ErrorCode ERROR_BILL_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            2, "账单不存在");
 }
