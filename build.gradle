@@ -61,8 +61,11 @@ dependencies {
 dependencies {
     //先锋支付
     compile files('libs/ucf-java-sdk-1.0.7.jar')
-    //stringUtils
-    compile files('libs/rop-common-2.0.1-20160704.083917-2.jar')
+    // https://mvnrepository.com/artifact/com.alibaba/fastjson
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.47'
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+
 }
 
 

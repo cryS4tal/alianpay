@@ -1,10 +1,7 @@
 package com.ylli.api.xfpay.service;
 
-import com.google.gson.Gson;
 import com.ucf.sdk.UcfForOnline;
-import com.ylli.api.xfpay.model.Data;
 import com.ylli.api.xfpay.model.XfPaymentRequest;
-import com.ylli.api.xfpay.model.XfPaymentResponse;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,7 +56,7 @@ public class XfClient {
      * @return
      */
     public String agencyPayment(String merchantNo, Integer amount, String accountNo, String accountName,
-                                           String mobileNo, String bankNo, Integer userType, Integer accountType, String memo) {
+                                String mobileNo, String bankNo, Integer userType, Integer accountType, String memo) {
 
         XfPaymentRequest request = new XfPaymentRequest();
 
@@ -145,24 +142,5 @@ public class XfClient {
             }
         }
         return map;
-    }
-
-    /**
-     * 异步通知校验
-     *
-     * @return
-     */
-    public boolean verify(String params) throws Exception {
-        return UcfForOnline.verify(params, xf_pub_key);
-    }
-
-    /**
-     * 异步通知 业务数据解析
-     */
-    public Data decryptData(String data) throws Exception {
-
-        String bizData = UcfForOnline.decryptData(data, mer_pri_key);
-
-        return new Gson().fromJson(bizData, Data.class);
     }
 }

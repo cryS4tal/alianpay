@@ -1,5 +1,6 @@
 package com.ylli.api.xfpay.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ucf.sdk.UcfForOnline;
@@ -14,31 +15,29 @@ import com.ylli.api.xfpay.Config;
 import com.ylli.api.xfpay.mapper.XfBillMapper;
 import com.ylli.api.xfpay.model.CreditPay;
 import com.ylli.api.xfpay.model.Data;
-import com.ylli.api.xfpay.model.NotifyModel;
 import com.ylli.api.xfpay.model.WagesPayResponse;
 import com.ylli.api.xfpay.model.XfBill;
 import com.ylli.api.xfpay.model.XfPaymentResponse;
 import com.ylli.api.xfpay.util.SignUtil;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rop.thirdparty.org.apache.commons.lang3.StringUtils;
 
 @Service
 public class XfPayService {
@@ -62,6 +61,9 @@ public class XfPayService {
 
     @Value("${xf.pay.mer_pri_key}")
     public String mer_pri_key;
+
+    @Value("${xf.pay.xf_pub_key}")
+    public String xf_pub_key;
 
     @Transactional
     public Object wagesPay(Long userId, Integer amount, String accountNo, String accountName, String mobileNo,
@@ -256,40 +258,43 @@ public class XfPayService {
 
     @Transactional
     public void payNotify(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        InputStream inputStream;
-        OutputStream outputStream = null;
+
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-type", "text/html;charset=UTF-8");
+
+        //接收参数
+        Map parameters = request.getParameterMap();// 保存request中参数的临时变量
+        Map<String, String> params = new HashMap<String, String>();// 参与签名业务字段集合
+        Iterator paiter = parameters.keySet().iterator();
+        while (paiter.hasNext()) {
+            String key = paiter.next().toString();
+            String[] values = (String[]) parameters.get(key);
+            params.put(key, values[0]);
+        }
+
+        //System.out.println("服务器端通知-接收到先锋支付返回报文：" + params.toString());
+
+        PrintWriter writer = response.getWriter();
         try {
-            //读取参数
-            StringBuffer sb = new StringBuffer();
-            inputStream = request.getInputStream();
-            String s;
-            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            while ((s = in.readLine()) != null) {
-                sb.append(s);
-            }
-            in.close();
-            inputStream.close();
-            outputStream = response.getOutputStream();
-            if (sb.length() == 0) {
-                outputStream.write(getResStr("fail").getBytes("UTF-8"));
-                return;
-            }
-            //verify sign
-            // todo verify is ok?
-            boolean flag = xfClient.verify(sb.toString());
+            //报文参数验证签名
+            if (UcfForOnline.verify(JSONObject.toJSONString(params), xf_pub_key)) {
 
-            if (flag) {
-                // todo sb 需要解密？
-                //String bizData = UcfForOnline.decryptData(sb.toString(), mer_pri_key);
+                String code = params.get("code").toString();
 
-                NotifyModel model = new Gson().fromJson(sb.toString(), NotifyModel.class);
-                if (model.code.equals("99000")) {//接口调用成功
-                    Data data = xfClient.decryptData(model.data);
+                //解密业务数据
+                String decryptData = UcfForOnline.decryptData(JSONObject.toJSONString(params), mer_pri_key);
+                //System.out.println("解密后的业务数据：" + decryptData);
+
+                //服务调用成功
+                if ("99000".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
+
+                    Data data = new Gson().fromJson(decryptData, Data.class);
                     XfBill xfBill = new XfBill();
                     xfBill.orderNo = data.merchantNo;
                     xfBill = xfBillMapper.selectOne(xfBill);
                     if (xfBill == null) {
-                        outputStream.write(getResStr("订单不存在").getBytes("UTF-8"));
+                        writer.write("订单不存在");
                         return;
                     }
                     xfBill.status = data.status.equals("S") ? XfBill.FINISH : XfBill.FAIL;
@@ -305,25 +310,20 @@ public class XfPayService {
 
                     // 加入异步通知第三方.
 
-                    outputStream.write(getResStr("success").getBytes("UTF-8"));
-                    return;
+                    writer.write(getResStr("SUCCESS"));
+                } else if ("99001".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
+                    decryptData = params.get("code").toString() + "|" + params.get("message").toString();
+                    //System.out.println("返回数据：" + decryptData);
 
-                } else if (model.code.equals("99001")) {//接口调用异常
-                    // todo 调用订单查询接口确定结果.
-
-                    outputStream.write(getResStr("fail").getBytes("UTF-8"));
-                    return;
-
-                } else {//接口调用失败，可置订单为失败。
-                    //todo 数据解析.？？？
-                    Data data = xfClient.decryptData(model.data);
-
+                    writer.write(decryptData);
+                } else {
+                    Data data = new Gson().fromJson(decryptData, Data.class);
 
                     XfBill xfBill = new XfBill();
                     xfBill.orderNo = data.merchantNo;
                     xfBill = xfBillMapper.selectOne(xfBill);
                     if (xfBill == null) {
-                        outputStream.write(getResStr("订单不存在").getBytes("UTF-8"));
+                        writer.write(getResStr("订单不存在"));
                         return;
                     }
                     xfBill.status = XfBill.FAIL;
@@ -334,20 +334,16 @@ public class XfPayService {
                     xfBillMapper.updateByPrimaryKeySelective(xfBill);
                     // todo 加入 通知第三方.
 
-                    outputStream.write(getResStr("fail").getBytes("UTF-8"));
-                    return;
+                    writer.write(getResStr("fail"));
                 }
+            } else {
+                writer.write("先锋报文签名验证：验签失败");
             }
-            outputStream.write(getResStr("签名校验失败").getBytes("UTF-8"));
-        } catch (Exception ex) {
-            outputStream.write(getResStr("fail").getBytes("UTF-8"));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
-            try {
-                outputStream.flush();
-                outputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            writer.close();
         }
     }
 
