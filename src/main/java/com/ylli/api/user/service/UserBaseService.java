@@ -5,7 +5,9 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.user.Config;
 import com.ylli.api.user.mapper.UserBaseMapper;
 import com.ylli.api.user.model.UserBase;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -75,6 +77,7 @@ public class UserBaseService {
             }
             throw new AwesomeException(Config.ERROR_AUDIT_ING);
         }
+        userBase.state = null;
         userBase.merchantNo = getCode(userBase.userType);
         userBaseMapper.insertSelective(userBase);
     }
@@ -84,5 +87,19 @@ public class UserBaseService {
         UserBase base = new UserBase();
         base.merchantNo = merchantNo;
         return userBaseMapper.selectOne(base);
+    }
+
+    @Transactional
+    public Object audit(Long userId, Integer state) {
+        UserBase userBase = new UserBase();
+        userBase.userId = userId;
+        userBase = userBaseMapper.selectOne(userBase);
+        if (userBase == null) {
+            throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
+        }
+        userBase.state = state;
+        userBase.modifyTime = Timestamp.from(Instant.now());
+        userBaseMapper.updateByPrimaryKeySelective(userBase);
+        return userBaseMapper.selectByPrimaryKey(userBase);
     }
 }

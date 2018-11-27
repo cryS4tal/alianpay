@@ -1,13 +1,16 @@
 package com.ylli.api.user;
 
 import com.ylli.api.base.annotation.Auth;
+import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.user.model.Audit;
 import com.ylli.api.user.model.UserBase;
 import com.ylli.api.user.service.UserBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,8 +46,19 @@ public class UserBaseController {
     }
 
     //todo
-    //userBase 审核接口
     //userBase 更新接口
     //列表
     //详情
+
+    @PostMapping("/audit")
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_AUDIT))
+    public Object audit(@RequestBody Audit audit) {
+        ServiceUtil.checkNotEmpty(audit);
+        return userBaseService.audit(audit.userId, audit.state);
+    }
+
+    @PutMapping
+    public Object update() {
+        return null;
+    }
 }

@@ -52,5 +52,8 @@ public class Config {
         public static final long MANAGE_USER_CHARGE = BASE + 1;
 
         public static final long MANAGE_USER_APP = BASE + 2;
+
+        //审核用户（代付）
+        public static final long MANAGE_USER_AUDIT = 3;
     }
 }

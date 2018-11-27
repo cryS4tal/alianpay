@@ -83,3 +83,4 @@ SELECT _init(5);
 -- 管理商户提现费率
 SET @pm_sys.manage_user_charge = @pm_sys_base + 1;
 SET @pm_sys.manage_user_app = @pm_sys_base + 2;
+SET @pm_sys.manage_user_audit = @pm_sys_base + 3;
