@@ -1,4 +1,4 @@
-package com.ylli.api.xfpay.util;
+package com.ylli.api.pay.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

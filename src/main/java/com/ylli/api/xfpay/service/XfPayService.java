@@ -5,6 +5,8 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ucf.sdk.UcfForOnline;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.user.model.UserBase;
 import com.ylli.api.user.model.UserKey;
 import com.ylli.api.user.service.UserBaseService;
@@ -18,10 +20,8 @@ import com.ylli.api.xfpay.model.Data;
 import com.ylli.api.xfpay.model.WagesPayResponse;
 import com.ylli.api.xfpay.model.XfBill;
 import com.ylli.api.xfpay.model.XfPaymentResponse;
-import com.ylli.api.xfpay.util.SignUtil;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -57,6 +57,9 @@ public class XfPayService {
 
     @Autowired
     UserKeyService userKeyService;
+
+    @Autowired
+    SerializeUtil serializeUtil;
 
     @Value("${xf.pay.mer_pri_key}")
     public String mer_pri_key;
@@ -115,7 +118,7 @@ public class XfPayService {
             xfBillMapper.insertSelective(bill);
 
             bill = xfBillMapper.selectOne(bill);
-            bill.orderNo = generateOrderNo(userId, bill.id);
+            bill.orderNo = serializeUtil.generateOrderNo(SerializeUtil.XF_PAY, userId, bill.id);
             xfBillMapper.updateByPrimaryKeySelective(bill);
 
             //钱包金额变更
@@ -225,20 +228,6 @@ public class XfPayService {
         response.message = msg;
         response.object = object;
         return new Gson().toJson(response);
-    }
-
-    /**
-     * yyyyMMddHHmmss + leftPad(userId,8,0) + leftPad(billId,8,0)
-     *
-     * @return
-     */
-    public String generateOrderNo(Long userId, Long billId) {
-
-        return new StringBuffer()
-                .append(new SimpleDateFormat("yyyyMMddHHmmss").format(Date.from(Instant.now())))
-                .append(StringUtils.leftPad(String.valueOf(userId), 8, "0"))
-                .append(StringUtils.leftPad(String.valueOf(billId), 8, "0"))
-                .toString();
     }
 
     @Transactional
