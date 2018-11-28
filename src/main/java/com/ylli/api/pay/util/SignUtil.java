@@ -63,6 +63,24 @@ public class SignUtil {
     }
 
     /**
+     * 生成 MD5
+     *
+     * @param data 待处理数据
+     * @param charsetName 编码
+     * @return MD5结果
+     */
+    public static String MD5(String data,String charsetName) throws Exception {
+        java.security.MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] array = md.digest(data.getBytes(charsetName));
+        StringBuilder sb = new StringBuilder();
+        for (byte item : array) {
+            sb.append(Integer.toHexString((item & 0xFF) | 0x100).substring(1, 3));
+        }
+        return sb.toString().toUpperCase();
+    }
+
+
+    /**
      * 判断签名是否正确
      *
      * @param xmlStr XML格式数据
