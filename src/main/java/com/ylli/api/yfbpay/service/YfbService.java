@@ -112,7 +112,7 @@ public class YfbService {
                     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
                     bill.memo));
 
-            if (bill.isSuccess) {
+            if (bill.isSuccess != null && bill.isSuccess) {
                 return "opstate=0";
             } else {
                 //隐藏真实返回.待商户系统返回success再做正确处理
