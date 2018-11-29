@@ -4,6 +4,7 @@ import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.yfbpay.service.YfbClient;
 import com.ylli.api.yfbpay.service.YfbService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +30,7 @@ public class YfbController {
      * @param msg 订单结果说明
      * @return
      */
-    @PostMapping("/notify")
+    @GetMapping("/notify")
     public String payNotify(@AwesomeParam(required = false) String orderid,
                             @AwesomeParam(required = false) String opstate,
                             @AwesomeParam(required = false) String ovalue,
