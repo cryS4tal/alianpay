@@ -6,6 +6,7 @@ import com.ylli.api.yfbpay.model.YfbBill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,6 +32,8 @@ public class YfbClient {
     @Autowired
     YfbBillMapper yfbBillMapper;
 
+    //@Value("")
+    public String notifyUrl = "http://47.99.180.135:8080/pay/yfb/notify";
 
     /**
      * @param type        银行类型
@@ -49,11 +52,11 @@ public class YfbClient {
                 .queryParam("type", type)
                 .queryParam("value", value)
                 .queryParam("orderid", orderid)
-                .queryParam("callbackurl", "http://47.99.180.135:8080/pay/yfb/notify")
+                .queryParam("callbackurl", notifyUrl)
                 .queryParam("hrefbackurl", hrefbackurl)
                 .queryParam("payerIp", payerIp)
                 .queryParam("attach", attach)
-                .queryParam("sign", generateSign(parter, type, value, orderid, callbackurl))
+                .queryParam("sign", generateSign(parter, type, value, orderid, notifyUrl))
                 .build().toUriString();
 
         try {

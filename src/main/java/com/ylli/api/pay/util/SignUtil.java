@@ -36,13 +36,14 @@ public class SignUtil {
         Arrays.sort(keyArray);
         StringBuilder sb = new StringBuilder();
         for (String k : keyArray) {
-            if (k.equals("gign")) {
+            if (k.equals("sign")) {
                 continue;
             }
             if (data.get(k).trim().length() > 0) // 参数值为空，则不参与签名
                 sb.append(k).append("=").append(data.get(k).trim()).append("&");
         }
         sb.append("key=").append(key);
+        System.out.println(MD5(sb.toString()).toUpperCase());
         return MD5(sb.toString()).toUpperCase();
     }
 

@@ -2,10 +2,13 @@ package com.ylli.api.yfbpay.service;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.user.model.UserKey;
 import com.ylli.api.user.service.UserKeyService;
+import com.ylli.api.yfbpay.Config;
 import com.ylli.api.yfbpay.mapper.YfbBillMapper;
 import com.ylli.api.yfbpay.model.NotifyRes;
 import com.ylli.api.yfbpay.model.YfbBill;
@@ -37,7 +40,7 @@ public class YfbService {
     @Autowired
     UserKeyService userKeyService;
 
-    @Transactional
+    @Transactional(rollbackFor = AwesomeException.class)
     public Object createOrder(Long mchId, String payType, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, Object extra) throws Exception {
         //加入商户系统订单.
         //todo 综合账单加入支付类型
@@ -56,7 +59,9 @@ public class YfbService {
         yfbBillMapper.updateByPrimaryKeySelective(bill);
 
         String str = yfbClient.order(payType, String.valueOf(((double) money / 100)), orderNo, notifyUrl, redirectUrl, null, reserve);
-
+        if (str.contains("error")) {
+            throw new AwesomeException(Config.ERROR_SERVER_CONNECTION);
+        }
         return str;
     }
 

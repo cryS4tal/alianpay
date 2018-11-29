@@ -11,19 +11,3 @@ CREATE TABLE t_account (
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );
-
-/* oauth uaa */
-CREATE TABLE t_oauth2_uaa (
-  id BIGINT PRIMARY KEY
-  COMMENT '=t_account.id',
-  open_id VARCHAR(256) UNIQUE
-  COMMENT '第三方openId',
-  access_token VARCHAR(256)
-  COMMENT '第三方接口调用凭证',
-  expired_time DATETIME
-  COMMENT 'access token失效时间',
-  refresh_token VARCHAR(256)
-  COMMENT '用于刷新access token',
-  create_time DATETIME NOT NULL DEFAULT now(),
-  modify_time DATETIME NOT NULL DEFAULT now()
-);

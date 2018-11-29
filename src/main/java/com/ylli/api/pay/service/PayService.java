@@ -43,6 +43,8 @@ public class PayService {
      */
     public Object createOrder(BaseOrder baseOrder) throws Exception {
 
+        //todo 参数非空前置校验
+
         //sign 前置校验
         String secretKey = userKeyService.getKeyById(baseOrder.mchId);
         if (secretKey == null) {

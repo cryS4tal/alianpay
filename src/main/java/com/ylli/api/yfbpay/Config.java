@@ -17,13 +17,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             1, "权限不足");
 
-    public static final ErrorCode ERROR_ORDERNO_NOT_EMPTY
+    public static final ErrorCode ERROR_SERVER_CONNECTION
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            2, "订单号不能为空");
-
-    public static final ErrorCode ERROR_ORDER_NOT_FOUND
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            3, "订单号不存在");
+            2, "服务连通失败");
 
     /**
      * 权限
