@@ -10,4 +10,4 @@ CREATE TABLE t_account (
   COMMENT '用户状态。启用：enable, 禁用：disable',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
-);
+) AUTO_INCREMENT = 1000;

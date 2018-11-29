@@ -65,11 +65,11 @@ public class SignUtil {
     /**
      * 生成 MD5
      *
-     * @param data 待处理数据
+     * @param data        待处理数据
      * @param charsetName 编码
      * @return MD5结果
      */
-    public static String MD5(String data,String charsetName) throws Exception {
+    public static String MD5(String data, String charsetName) throws Exception {
         java.security.MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] array = md.digest(data.getBytes(charsetName));
         StringBuilder sb = new StringBuilder();

@@ -1,6 +1,7 @@
 package com.ylli.api.yfbpay;
 
 import com.ylli.api.yfbpay.service.YfbClient;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Ignore
+@Ignore
 public class YfbPayTests {
 
     @Autowired
@@ -20,7 +21,11 @@ public class YfbPayTests {
 
     @Test
     public void createOrder() throws Exception {
-        client.order("1004", "1.00", "20181128test15", "http://127.0.0.1:8080", "", "", "");
+        //client.order("992", "1.00", "20181128test20", "http://47.99.180.135:8080/pay/yfb/notify", "", "", "");
+
+        //client.sendNotify();
+        String string = client.orderQuery("20181128test20");
+        System.out.println(string);
     }
 
 }

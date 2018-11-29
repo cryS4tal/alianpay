@@ -1,14 +1,23 @@
 package com.ylli.api.yfbpay.service;
 
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.yfbpay.mapper.YfbBillMapper;
+import com.ylli.api.yfbpay.model.YfbBill;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class YfbClient {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(YfbClient.class);
 
     //@Value("")
     public String parter = "3568";
@@ -18,6 +27,9 @@ public class YfbClient {
 
     @Autowired
     RestTemplate restTemplate;
+
+    @Autowired
+    YfbBillMapper yfbBillMapper;
 
 
     /**
@@ -29,7 +41,7 @@ public class YfbClient {
      * @param payerIp     支付用户 IP
      * @param attach      备注消息
      */
-    public void order(String type, String value, String orderid, String callbackurl, String hrefbackurl, String payerIp, String attach) throws Exception {
+    public String order(String type, String value, String orderid, String callbackurl, String hrefbackurl, String payerIp, String attach) throws Exception {
 
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
                 "http://api.qianyipay.com/chargebank.aspx")
@@ -47,12 +59,13 @@ public class YfbClient {
         try {
 
             String result = restTemplate.getForObject(requestUrl, String.class);
-            System.out.println(result);
+            //System.out.println(result);
+            return result;
         } catch (RestClientResponseException ex) {
             ex.printStackTrace();
-            //LOGGER.error(ex.toString());
-            //throw new AwesomeException(Config.ERROR_VERIFY_SERVER);
+            LOGGER.error(ex.toString());
         }
+        return null;
     }
 
     public String generateSign(String parter, String type, String value, String orderid, String callbackurl) throws Exception {
@@ -67,8 +80,62 @@ public class YfbClient {
         return SignUtil.MD5(sb.toString(), "GB2312").toLowerCase();
     }
 
+    public boolean signVerify(String orderid, String opstate, String ovalue, String sign) throws Exception {
+        StringBuffer sb = new StringBuffer()
+                .append("orderid=").append(orderid)
+                .append("&opstate=").append(opstate)
+                .append("&ovalue=").append(ovalue)
+                .append(secret);
+        return SignUtil.MD5(sb.toString(), "GB2312").toLowerCase().equals(sign.toLowerCase());
+    }
 
-    public void payNotify(String orderid) {
+
+    /**
+     * 向第三方发送回调通知
+     *
+     * @return
+     */
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public String sendNotify(Long billId, String url, String params) {
+
+        String res = restTemplate.postForObject(url, params, String.class);
+
+        if (res.toUpperCase().equals("SUCCESS")) {
+            YfbBill bill = yfbBillMapper.selectByPrimaryKey(billId);
+            if (bill != null) {
+                bill.isSuccess = true;
+                yfbBillMapper.updateByPrimaryKeySelective(bill);
+            }
+        }
+        return res;
+    }
+
+    public String orderQuery(String orderid) throws Exception {
+        String requestUrl = UriComponentsBuilder.fromHttpUrl(
+                "http://www.qianyipay.com/order.aspx")
+                .queryParam("parter", parter)
+                .queryParam("orderid", orderid)
+                .queryParam("sign", generateSign(parter, orderid))
+                .build().toUriString();
+
+        try {
+            String result = restTemplate.getForObject(requestUrl, String.class);
+            //System.out.println(result);
+            return result;
+        } catch (RestClientResponseException ex) {
+            ex.printStackTrace();
+            LOGGER.error(ex.toString());
+        }
+        return null;
+    }
+
+    private Object generateSign(String parter, String orderid) throws Exception {
+        StringBuffer sb = new StringBuffer()
+                .append("parter=").append(parter)
+                .append("&orderid=").append(orderid)
+                .append(secret);
+        return SignUtil.MD5(sb.toString(), "GB2312").toLowerCase();
 
     }
 }

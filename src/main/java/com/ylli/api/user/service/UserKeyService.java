@@ -33,4 +33,28 @@ public class UserKeyService {
         userKey.userId = userId;
         return userKeyMapper.selectOne(userKey);
     }
+
+    /**
+     * 代付
+     * 通过商户号 查询商户私钥.
+     *
+     * @param mchId
+     * @return
+     */
+    public String getKeyByMchId(String mchId) {
+        String key = userKeyMapper.getKeyByMchId(mchId);
+        return key;
+    }
+
+    /**
+     * 支付
+     * 根据用户id 查询商户私钥
+     *
+     * @param mchId
+     * @return
+     */
+    public String getKeyById(Long mchId) {
+        String key = userKeyMapper.getKeyById(mchId);
+        return key;
+    }
 }
