@@ -1,5 +1,6 @@
 package com.ylli.api.pay.service;
 
+import com.google.common.base.Strings;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
@@ -43,7 +44,12 @@ public class PayService {
      */
     public Object createOrder(BaseOrder baseOrder) throws Exception {
 
-        //todo 参数非空前置校验
+        if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
+                || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
+                || Strings.isNullOrEmpty(baseOrder.sign)) {
+            return new Response("Invalid arguments", "参数为空", baseOrder);
+        }
+
 
         //sign 前置校验
         String secretKey = userKeyService.getKeyById(baseOrder.mchId);
