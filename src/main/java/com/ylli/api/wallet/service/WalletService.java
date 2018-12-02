@@ -88,4 +88,42 @@ public class WalletService {
         wallet.modifyTime = Timestamp.from(Instant.now());
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
+
+    @Transactional
+    public Wallet incr(Long userId, Integer money) {
+        Wallet wallet = new Wallet();
+        wallet.userId = userId;
+        wallet = walletMapper.selectOne(wallet);
+        if (wallet == null) {
+            wallet = new Wallet();
+            wallet.userId = userId;
+            wallet.totalMoney = money;
+            wallet.avaliableMoney = money;
+            wallet.abnormalMoney = 0;
+            walletMapper.insertSelective(wallet);
+        } else {
+            wallet.avaliableMoney = wallet.avaliableMoney + money;
+            wallet.totalMoney = wallet.totalMoney + money;
+            wallet.modifyTime = Timestamp.from(Instant.now());
+            walletMapper.updateByPrimaryKeySelective(wallet);
+        }
+        return walletMapper.selectByUserId(userId);
+    }
+
+    @Transactional
+    public Object getWallet(Long userId) {
+        Wallet wallet = new Wallet();
+        wallet.userId = userId;
+        wallet = walletMapper.selectOne(wallet);
+        if (wallet == null) {
+            wallet = new Wallet();
+            wallet.userId = userId;
+            wallet.totalMoney = 0;
+            wallet.avaliableMoney = 0;
+            wallet.abnormalMoney = 0;
+            walletMapper.insertSelective(wallet);
+            wallet = walletMapper.selectByUserId(userId);
+        }
+        return wallet;
+    }
 }
