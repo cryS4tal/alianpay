@@ -2,6 +2,8 @@ package com.ylli.api.user.service;
 
 import com.ylli.api.user.mapper.UserKeyMapper;
 import com.ylli.api.user.model.UserKey;
+import com.ylli.api.user.model.UserKeyRes;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,5 +58,18 @@ public class UserKeyService {
     public String getKeyById(Long mchId) {
         String key = userKeyMapper.getKeyById(mchId);
         return key;
+    }
+
+    public UserKeyRes getKey(Long userId) {
+        String key = userKeyMapper.getKeyById(userId);
+        UserKeyRes res = new UserKeyRes();
+        res.key = key;
+        return res;
+    }
+
+    public UserKeyRes randomKey() {
+        UserKeyRes res = new UserKeyRes();
+        res.key = UUID.randomUUID().toString().replaceAll("-", "");
+        return res;
     }
 }

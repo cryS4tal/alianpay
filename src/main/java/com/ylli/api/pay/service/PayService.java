@@ -96,8 +96,8 @@ public class PayService {
         return !SignUtil.generateSignature(map, secretKey).equals(order.sign.toUpperCase());
     }
 
-    public String successSign(String code, String message, Object o, String key) throws Exception {
-        Response response = new Response(code, message, o);
+    public String successSign(String code, String message, Object data, String key) throws Exception {
+        Response response = new Response(code, message, data);
         Map<String, String> map = SignUtil.objectToMap(response);
         return SignUtil.generateSignature(map, key);
     }
@@ -129,7 +129,7 @@ public class PayService {
         if (sign.equals(orderQuery.sign.toUpperCase())) {
             YfbBill bill = yfbService.selectByMchOrderId(orderQuery.mchOrderId);
             if (bill == null) {
-                return new OrderQueryRes("FAIL", "订单不存在");
+                return new OrderQueryRes("A006", "订单不存在");
             }
             if (bill.status == YfbBill.FINISH || bill.status == YfbBill.FAIL) {
 
@@ -140,18 +140,20 @@ public class PayService {
             }
             //直接返回订单信息
             OrderQueryRes res = new OrderQueryRes();
-            res.code = "SUCCESS";
+            res.code = "A000";
             res.message = "成功";
             res.money = bill.amount;
             res.mchOrderId = bill.subNo;
             res.sysOrderId = bill.orderNo;
             res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
-            res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
+            if (bill.tradeTime != null) {
+                res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
+            }
 
             Map<String, String> map1 = SignUtil.objectToMap(res);
             res.sign = SignUtil.generateSignature(map1, key);
             return res;
         }
-        return new OrderQueryRes("FAIL", "签名校验失败");
+        return new OrderQueryRes("A001", "签名校验失败");
     }
 }
