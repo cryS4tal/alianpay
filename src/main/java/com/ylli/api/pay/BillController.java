@@ -67,7 +67,6 @@ public class BillController {
             }
             permissionService.permissionDeny();
         } while (false);
-
         return billService.getTodayDetail(userId);
     }
 
