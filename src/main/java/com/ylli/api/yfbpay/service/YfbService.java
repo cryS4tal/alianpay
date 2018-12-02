@@ -216,6 +216,9 @@ public class YfbService {
 
     public SumAndCount getTodayDetail(Long userId) {
         SumAndCount sumAndCount = yfbBillMapper.getTodayDetail(userId);
+        if (sumAndCount.total == null) {
+            sumAndCount.total = 0L;
+        }
         return sumAndCount;
     }
 }

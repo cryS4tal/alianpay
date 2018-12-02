@@ -59,7 +59,7 @@ public class BillController {
     @GetMapping("/today")
     public Object getTodayDetail(@AwesomeParam(required = false) Long userId) {
         do {
-            if (authSession.getAuthId() == userId) {
+            if (userId != null && authSession.getAuthId() == userId) {
                 break;
             }
             if (permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
