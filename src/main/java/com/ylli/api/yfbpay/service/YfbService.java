@@ -41,7 +41,7 @@ public class YfbService {
     UserKeyService userKeyService;
 
     @Transactional(rollbackFor = AwesomeException.class)
-    public Object createOrder(Long mchId, String payType, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, Object extra) throws Exception {
+    public String createOrder(Long mchId, String payType, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, Object extra) throws Exception {
         //加入商户系统订单.
         //todo 综合账单加入支付类型
         YfbBill bill = new YfbBill();

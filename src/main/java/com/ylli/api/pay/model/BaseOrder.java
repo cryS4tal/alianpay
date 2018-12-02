@@ -26,6 +26,12 @@ public class BaseOrder {
      */
     public String payType;
 
+    /**
+     * todo 加入交易类型.
+     * like 扫码支付，app支付，网战支付etc.
+     */
+    public String tradeType;
+
     //待定义，解决不同渠道商参数兼容问题。
     public Object extra;
 

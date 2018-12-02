@@ -47,17 +47,17 @@ public class PayService {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
                 || Strings.isNullOrEmpty(baseOrder.sign)) {
-            return new Response("Invalid arguments", "参数为空", baseOrder);
+            return new Response("A003", "非法的请求参数", baseOrder);
         }
 
 
         //sign 前置校验
         String secretKey = userKeyService.getKeyById(baseOrder.mchId);
         if (secretKey == null) {
-            return new Response("empty private key", "请先上传商户私钥", null);
+            return new Response("A002", "请先上传商户私钥", null);
         }
         if (isSignValid(baseOrder, secretKey)) {
-            return new Response("signature check failed", "签名校验失败", baseOrder);
+            return new Response("A001", "签名校验失败", baseOrder);
         }
 
         //加入系统通道管理
@@ -65,12 +65,13 @@ public class PayService {
             //易付宝支付
             //参数前置校验
             if (!payTypes.contains(baseOrder.payType)) {
-                return new Response("Invalid arguments", "不支持的支付类型", baseOrder);
+                return new Response("A004", "不支持的支付类型", baseOrder);
             }
             if (yfbService.exist(baseOrder.mchOrderId)) {
-                return new Response("repeat order number", "订单号重复", baseOrder);
+                return new Response("A005", "订单号重复", baseOrder);
             }
-            return yfbService.createOrder(baseOrder.mchId, typeConvert(null, baseOrder.payType), baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
+            String str = yfbService.createOrder(baseOrder.mchId, typeConvert(null, baseOrder.payType), baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
+            return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
         } else if (true) {
             //快易支付..
             //其他支付...
@@ -78,7 +79,7 @@ public class PayService {
         } else {
             //
 
-            return new Response("fail", "下单失败，暂无可用通道", null);
+            return new Response("A099", "下单失败，暂无可用通道", null);
         }
         return null;
     }
@@ -93,6 +94,12 @@ public class PayService {
     public boolean isSignValid(BaseOrder order, String secretKey) throws Exception {
         Map<String, String> map = SignUtil.objectToMap(order);
         return !SignUtil.generateSignature(map, secretKey).equals(order.sign.toUpperCase());
+    }
+
+    public String successSign(String code, String message, Object o, String key) throws Exception {
+        Response response = new Response(code, message, o);
+        Map<String, String> map = SignUtil.objectToMap(response);
+        return SignUtil.generateSignature(map, key);
     }
 
     /**

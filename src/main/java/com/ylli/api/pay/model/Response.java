@@ -6,6 +6,8 @@ public class Response {
 
     public String message;
 
+    public String sign;
+
     //具体待定义.
     public Object data;
 
@@ -21,5 +23,12 @@ public class Response {
     }
 
     public Response() {
+    }
+
+    public Response(String code, String message, String sign, Object data) {
+        this.code = code;
+        this.message = message;
+        this.sign = sign;
+        this.data = data;
     }
 }
