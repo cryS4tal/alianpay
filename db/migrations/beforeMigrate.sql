@@ -84,3 +84,12 @@ SELECT _init(5);
 SET @pm_sys.manage_user_charge = @pm_sys_base + 1;
 SET @pm_sys.manage_user_app = @pm_sys_base + 2;
 SET @pm_sys.manage_user_audit = @pm_sys_base + 3;
+
+/**
+ * pay
+ */
+-- 初始化
+SELECT _init(9);
+-- 系统权限
+-- 管理商户账单
+SET @pm_sys.manage_user_bill = @pm_sys_base + 1;

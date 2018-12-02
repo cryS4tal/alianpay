@@ -31,9 +31,6 @@ public class PayService {
     public static final String Ali = "alipay";
     public static final String Wx = "wx";
 
-    public static final String Yfb_Ali = "992";
-    public static final String Yfb_Wx = "1004";
-
 
     /**
      * 中央调度server. 根据情况选择不同通道
@@ -70,7 +67,7 @@ public class PayService {
             if (yfbService.exist(baseOrder.mchOrderId)) {
                 return new Response("A005", "订单号重复", baseOrder);
             }
-            String str = yfbService.createOrder(baseOrder.mchId, typeConvert(null, baseOrder.payType), baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
+            String str = yfbService.createOrder(baseOrder.mchId, baseOrder.payType, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
             return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
         } else if (true) {
             //快易支付..
@@ -102,24 +99,6 @@ public class PayService {
         return SignUtil.generateSignature(map, key);
     }
 
-    /**
-     * 支付类型转换
-     *
-     * @return
-     */
-    public String typeConvert(Long channelId, String type) {
-
-        if (true) { //channelId 为通道id.
-            if (type.equals(Ali)) {
-                return Yfb_Ali;
-            } else if (type.equals(Wx)) {
-                return Yfb_Wx;
-            } else {
-                return null;
-            }
-        }
-        return "";
-    }
 
     @Transactional
     public Object orderQuery(OrderQueryReq orderQuery) throws Exception {

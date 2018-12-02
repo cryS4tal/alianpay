@@ -47,6 +47,9 @@ public class YfbBill {
     //子系统是否接受通知.
     public Boolean isSuccess;
 
+    //支付类型：支付宝，微信
+    public String payType;
+
     //交易成立时间
     public Timestamp tradeTime;
 

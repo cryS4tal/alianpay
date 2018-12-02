@@ -3,7 +3,9 @@ package com.ylli.api.yfbpay.service;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.model.SumAndCount;
+import static com.ylli.api.pay.service.PayService.Ali;
+import static com.ylli.api.pay.service.PayService.Wx;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.user.model.UserKey;
@@ -14,6 +16,8 @@ import com.ylli.api.yfbpay.model.NotifyRes;
 import com.ylli.api.yfbpay.model.YfbBill;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class YfbService {
 
     private static Logger LOGGER = LoggerFactory.getLogger(YfbService.class);
+
+    public static final String Yfb_Ali = "992";
+    public static final String Yfb_Wx = "1004";
 
     @Autowired
     YfbClient yfbClient;
@@ -52,17 +59,37 @@ public class YfbService {
         bill.notifyUrl = notifyUrl;
         bill.redirectUrl = redirectUrl;
         bill.subNo = mchOrderId;
+        bill.payType = payType;
         yfbBillMapper.insertSelective(bill);
         bill = yfbBillMapper.selectOne(bill);
         String orderNo = serializeUtil.generateOrderNo(SerializeUtil.YFB_PAY, mchId, bill.id);
         bill.orderNo = orderNo;
         yfbBillMapper.updateByPrimaryKeySelective(bill);
 
-        String str = yfbClient.order(payType, String.valueOf(((double) money / 100)), orderNo, notifyUrl, redirectUrl, null, reserve);
+        String str = yfbClient.order(typeConvert(null, payType), String.valueOf(((double) money / 100)), orderNo, notifyUrl, redirectUrl, null, reserve);
         if (str.contains("error")) {
             throw new AwesomeException(Config.ERROR_SERVER_CONNECTION);
         }
         return str;
+    }
+
+    /**
+     * 支付类型转换
+     *
+     * @return
+     */
+    public String typeConvert(Long channelId, String type) {
+
+        if (true) { //channelId 为通道id.
+            if (type.equals(Ali)) {
+                return Yfb_Ali;
+            } else if (type.equals(Wx)) {
+                return Yfb_Wx;
+            } else {
+                return null;
+            }
+        }
+        return "";
     }
 
     public boolean exist(String mchOrderId) {
@@ -90,14 +117,18 @@ public class YfbService {
                 bill.superNo = sysorderid;
                 bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYY/MM/DD hh:mm:ss").parse(systime).getTime());
                 bill.status = YfbBill.FINISH;
-                bill.msg = msg;
+                //todo msg暂时先记录实际交易金额/元 两位小数
+                bill.msg = ovalue;
+                //bill.msg = msg;
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
 
             } else {
                 bill.superNo = sysorderid;
                 bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYY/MM/DD hh:mm:ss").parse(systime).getTime());
                 bill.status = YfbBill.FAIL;
-                bill.msg = msg;
+                //todo msg暂时先记录实际交易金额/元 两位小数
+                bill.msg = ovalue;
+                //bill.msg = msg;
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
 
             }
@@ -160,7 +191,7 @@ public class YfbService {
     }
 
     public YfbBill orderQuery(String mchOrderId) throws Exception {
-        String str =  yfbClient.orderQuery(mchOrderId);
+        String str = yfbClient.orderQuery(mchOrderId);
 
         /**
          * todo .
@@ -169,5 +200,22 @@ public class YfbService {
         YfbBill bill = new YfbBill();
         bill.subNo = mchOrderId;
         return yfbBillMapper.selectOne(bill);
+    }
+
+    public List<YfbBill> getBills(Long userId,
+                                  Integer status,
+                                  String mchOrderId,
+                                  String sysOrderId,
+                                  String payType,
+                                  String tradeType,
+                                  Date tradeTime,
+                                  Date startTime,
+                                  Date endTime) {
+        return yfbBillMapper.getBills(userId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
+    }
+
+    public SumAndCount getTodayDetail(Long userId) {
+        SumAndCount sumAndCount = yfbBillMapper.getTodayDetail(userId);
+        return sumAndCount;
     }
 }
