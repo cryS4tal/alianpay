@@ -1,7 +1,5 @@
 package com.ylli.api.pay.model;
 
-import java.sql.Timestamp;
-
 /**
  * 核心账单类.
  * todo 账单系统没有统一之前，先由其他账单转化
