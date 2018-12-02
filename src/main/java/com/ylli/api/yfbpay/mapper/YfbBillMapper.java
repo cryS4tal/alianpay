@@ -21,4 +21,7 @@ public interface YfbBillMapper extends Mapper<YfbBill> {
 
     @Select("SELECT SUM(amount) as total,COUNT(*) as count FROM t_yfb_bill WHERE user_id = ${user_id} AND status = 3")
     SumAndCount getTodayDetail(@Param("user_id") Long userId);
+
+    @Select("SELECT SUM(amount) FROM t_yfb_bill WHERE user_id = ${user_id} AND status = 3")
+    Integer getMaxCash(@Param("user_id") Long userId);
 }

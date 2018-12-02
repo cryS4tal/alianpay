@@ -15,7 +15,7 @@ public class UserKeyService {
     UserKeyMapper userKeyMapper;
 
     @Transactional
-    public void saveKey(Long userId, String secretKey) {
+    public UserKeyRes saveKey(Long userId, String secretKey) {
         UserKey userKey = new UserKey();
         userKey.userId = userId;
         userKey = userKeyMapper.selectOne(userKey);
@@ -28,6 +28,9 @@ public class UserKeyService {
             userKey.secretKey = secretKey;
             userKeyMapper.updateByPrimaryKeySelective(userKey);
         }
+        UserKeyRes res = new UserKeyRes();
+        res.key = userKeyMapper.getKeyById(userId);
+        return res;
     }
 
     public UserKey getKeyByUserId(Long userId) {

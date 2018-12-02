@@ -7,6 +7,7 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.user.model.Cash;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.user.model.UserOwnInfo;
 import com.ylli.api.user.service.UserSettlementService;
@@ -77,5 +78,15 @@ public class UserSettlementController {
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
     public void removeUserInfo(@PathVariable Long id) {
         userSettlementService.removeUserInfo(id);
+    }
+
+
+    @PostMapping("/cash")
+    public void cash(@RequestBody Cash cash) {
+        ServiceUtil.checkNotEmpty(cash);
+        if (authSession.getAuthId() != cash.userId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        userSettlementService.cash(cash.userId, cash.money, cash.password);
     }
 }

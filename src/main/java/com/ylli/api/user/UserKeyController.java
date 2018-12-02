@@ -4,6 +4,8 @@ import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.user.model.Key;
 import com.ylli.api.user.model.UserKeyRes;
 import com.ylli.api.user.service.UserKeyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +26,13 @@ public class UserKeyController {
     @Autowired
     AuthSession authSession;
 
-    static class Key {
-        public Long userId;
-        public String secretKey;
-    }
-
     @PostMapping
-    public void saveKey(@RequestBody Key key) {
+    public UserKeyRes saveKey(@RequestBody Key key) {
+        ServiceUtil.checkNotEmpty(key);
         if (authSession.getAuthId() != key.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        userKeyService.saveKey(key.userId, key.secretKey);
+        return userKeyService.saveKey(key.userId, key.secretKey);
     }
 
     @PostMapping("/random")

@@ -221,4 +221,9 @@ public class YfbService {
         }
         return sumAndCount;
     }
+
+    public Integer getMaxCash(Long userId) {
+        Integer max = yfbBillMapper.getMaxCash(userId);
+        return max;
+    }
 }

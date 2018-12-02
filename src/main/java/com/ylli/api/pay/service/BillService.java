@@ -74,4 +74,11 @@ public class BillService {
         SumAndCount sumAndCount = yfbService.getTodayDetail(userId);
         return sumAndCount;
     }
+
+    public Integer getMaxCash(Long userId) {
+        //暂时走易付宝
+        Integer max = yfbService.getMaxCash(userId);
+
+        return max;
+    }
 }

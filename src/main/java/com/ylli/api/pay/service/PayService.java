@@ -68,6 +68,7 @@ public class PayService {
                 return new Response("A005", "订单号重复", baseOrder);
             }
             String str = yfbService.createOrder(baseOrder.mchId, baseOrder.payType, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
+            //return str;
             return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
         } else if (true) {
             //快易支付..

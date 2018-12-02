@@ -33,6 +33,10 @@ public class WalletController {
         public Integer money;
     }
 
+    /**
+     * todo 钱包加入日志表
+     */
+
     @PostMapping
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_WALLET))
     public Object incr(@RequestBody Incr incr) {
