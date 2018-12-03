@@ -29,3 +29,6 @@ ADD COLUMN `is_success`  tinyint(4) NULL AFTER `msg`;
 
 ALTER TABLE `t_yfb_bill`
 ADD COLUMN `pay_type`  varchar(32) NULL COMMENT '支付类型' AFTER `is_success`;
+
+ALTER TABLE `t_yfb_bill`
+ADD INDEX `n_status` (`status`) ;

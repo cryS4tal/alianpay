@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import tk.mybatis.mapper.common.Mapper;
 
 public interface YfbBillMapper extends Mapper<YfbBill> {
@@ -24,4 +25,7 @@ public interface YfbBillMapper extends Mapper<YfbBill> {
 
     @Select("SELECT SUM(amount) FROM t_yfb_bill WHERE user_id = ${user_id} AND status = 3")
     Integer getMaxCash(@Param("user_id") Long userId);
+
+    @Update("UPDATE t_yfb_bill SET status = 9 WHERE status = 1 AND DATE_ADD(create_time,INTERVAL 10 HOUR) < NOW()")
+    void closeExpiredBill();
 }

@@ -14,6 +14,7 @@ public class YfbBill {
     public static final Integer ING = 2;
     public static final Integer FINISH = 3;
     public static final Integer FAIL = 4;
+    public static final Integer AUTO_CLOSE = 9;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

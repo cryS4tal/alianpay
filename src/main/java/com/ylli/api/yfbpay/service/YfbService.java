@@ -245,4 +245,9 @@ public class YfbService {
         Integer max = yfbBillMapper.getMaxCash(userId);
         return max;
     }
+
+    @Transactional
+    public void closeExpiredBill() {
+        yfbBillMapper.closeExpiredBill();
+    }
 }
