@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -192,14 +193,32 @@ public class YfbService {
 
     public YfbBill orderQuery(String mchOrderId) throws Exception {
         String str = yfbClient.orderQuery(mchOrderId);
+        //orderid=20181203040702B000100200000025&opstate=0&ovalue=100.00&sign=52aeb9d6083a43130f3050468a37e30c&msg=查询成功
+        str = StringUtils.substringAfter(str, "=");
+        String orderid = StringUtils.substringBefore(str, "&");
 
-        /**
-         * todo .
-         * 对易付宝返回结果进行逻辑处理
-         */
+        str = StringUtils.substringAfter(str, "=");
+        String opstate = StringUtils.substringBefore(str, "&");
+
+        str = StringUtils.substringAfter(str, "=");
+        String ovalue = StringUtils.substringBefore(str, "&");
+
+        str = StringUtils.substringAfter(str, "=");
+        String sign = StringUtils.substringBefore(str, "&");
+
+        boolean flag = yfbClient.signVerify(orderid, opstate, ovalue, sign);
         YfbBill bill = new YfbBill();
         bill.subNo = mchOrderId;
-        return yfbBillMapper.selectOne(bill);
+        bill = yfbBillMapper.selectOne(bill);
+        if (flag && (bill.status == YfbBill.NEW || bill.status == YfbBill.ING)) {
+            if (opstate.equals("0")) {
+                bill.status = YfbBill.FINISH;
+                bill.msg = ovalue;
+                yfbBillMapper.updateByPrimaryKeySelective(bill);
+            }
+            //其他情况 暂时不做处理.
+        }
+        return bill;
     }
 
     public List<YfbBill> getBills(Long userId,

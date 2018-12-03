@@ -47,8 +47,6 @@ public class SignUtil {
         }
         sb.append("key=").append(key);
         String sign = MD5(sb.toString()).toUpperCase();
-        System.out.println(MD5(sb.toString()).toUpperCase());
-        LOGGER.error(sign);
         return sign;
     }
 

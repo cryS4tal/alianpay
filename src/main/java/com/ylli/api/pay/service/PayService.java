@@ -148,7 +148,7 @@ public class PayService {
 
             } else {
                 //主动请求易付宝服务，获取当前订单信息
-                bill = yfbService.orderQuery(orderQuery.mchOrderId);
+                bill = yfbService.orderQuery(bill.orderNo);
 
             }
             //直接返回订单信息

@@ -10,8 +10,8 @@ CREATE TABLE t_yfb_bill (
   amount INTEGER NOT NULL COMMENT '交易金额 /元',
   status TINYINT NOT NULL COMMENT '订单状态：new 1 / ing 2 / finish 3 / cancel 4',
   memo VARCHAR(256) COMMENT '商户系统保留域',
-  notify_url VARCHAR(128) COMMENT '异步通知地址',
-  redirect_url VARCHAR(128) COMMENT '前端跳转地址',
+  notify_url VARCHAR(512) COMMENT '异步通知地址',
+  redirect_url VARCHAR(512) COMMENT '前端跳转地址',
   trade_time DATETIME COMMENT '交易成立时间',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()

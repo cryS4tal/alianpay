@@ -116,15 +116,14 @@ public class YfbClient {
 
     public String orderQuery(String orderid) throws Exception {
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
-                "http://www.qianyipay.com/order.aspx")
-                .queryParam("parter", parter)
+                "http://api.qianyipay.com/Search.aspx")
                 .queryParam("orderid", orderid)
+                .queryParam("parter", parter)
                 .queryParam("sign", generateSign(parter, orderid))
                 .build().toUriString();
 
         try {
             String result = restTemplate.getForObject(requestUrl, String.class);
-            //System.out.println(result);
             return result;
         } catch (RestClientResponseException ex) {
             ex.printStackTrace();
@@ -133,12 +132,11 @@ public class YfbClient {
         return null;
     }
 
-    private Object generateSign(String parter, String orderid) throws Exception {
+    private String generateSign(String parter, String orderid) throws Exception {
         StringBuffer sb = new StringBuffer()
-                .append("parter=").append(parter)
-                .append("&orderid=").append(orderid)
+                .append("orderid=").append(orderid)
+                .append("&parter=").append(parter)
                 .append(secret);
         return SignUtil.MD5(sb.toString(), "GB2312").toLowerCase();
-
     }
 }
