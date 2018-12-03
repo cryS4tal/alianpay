@@ -69,6 +69,8 @@ public class PayService {
             }
             String str = yfbService.createOrder(baseOrder.mchId, baseOrder.payType, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
             //return str;
+            str = str.replace("/pay/alipay/scanpay.aspx","http://api.qianyipay.com/pay/alipay/scanpay.aspx");
+            str = str.replace("/pay/weixin/scanpay.aspx","http://api.qianyipay.com/pay/weixin/scanpay.aspx");
             return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
         } else if (true) {
             //快易支付..

@@ -67,7 +67,7 @@ public class BillService {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
 
-        return null;
+        return baseBill;
     }
 
     public Object getTodayDetail(Long userId) {
