@@ -58,4 +58,20 @@ public class YfbBill {
 
     public Timestamp modifyTime;
 
+    public static String statusToString(int status) {
+        if (status == NEW) {
+            return "新订单";
+        } else if (status == ING) {
+            return "交易进行中";
+        } else if (status == FINISH) {
+            return "交易成功";
+        } else if (status == FAIL) {
+            return "交易失败";
+        } else if (status == AUTO_CLOSE) {
+            return "超时关闭";
+        } else {
+            return "状态异常";
+        }
+    }
+
 }

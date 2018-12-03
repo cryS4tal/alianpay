@@ -10,9 +10,11 @@ public class YfbJobs {
     @Autowired
     YfbService yfbService;
 
-    @Scheduled(cron = "0 0/10 * * * ?")
-    public void autoCloseIouJobs() {
-        yfbService.closeExpiredBill();
-    }
+    // todo  加入超时关闭是否会对订单逻辑产生影响 需要确认.
+
+    //@Scheduled(cron = "0 0/10 * * * ?")
+    //public void autoCloseIouJobs() {
+    //    yfbService.closeExpiredBill();
+    //}
 
 }

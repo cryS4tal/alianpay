@@ -62,7 +62,8 @@ public class BillService {
         baseBill.sysOrderId = bill.orderNo;
         baseBill.money = bill.amount;
         baseBill.payType = bill.payType;
-        baseBill.state = bill.status == YfbBill.NEW ? "新订单" : bill.status == YfbBill.ING ? "进行中" : bill.status == YfbBill.FINISH ? "成功" : "失败";
+        //baseBill.state = bill.status == YfbBill.NEW ? "新订单" : bill.status == YfbBill.ING ? "进行中" : bill.status == YfbBill.FINISH ? "成功" : "失败";
+        baseBill.state = YfbBill.statusToString(bill.status);
         if (bill.tradeTime != null) {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
