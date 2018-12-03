@@ -20,11 +20,11 @@ public class YfbClient {
 
     private static Logger LOGGER = LoggerFactory.getLogger(YfbClient.class);
 
-    //@Value("")
-    public String parter = "3568";
+    @Value("${yfb.mch.id}")
+    public String parter;// = "3568";
 
-    //@Value("")
-    public String secret = "002a3ebc1a8e4fb19e517aa3c7037262";
+    @Value("${yfb.secret}")
+    public String secret;// = "002a3ebc1a8e4fb19e517aa3c7037262";
 
     @Autowired
     RestTemplate restTemplate;
@@ -32,8 +32,8 @@ public class YfbClient {
     @Autowired
     YfbBillMapper yfbBillMapper;
 
-    //@Value("")
-    public String notifyUrl = "http://47.99.180.135:8080/pay/yfb/notify";
+    @Value("${yfb.notify.url}")
+    public String notifyUrl;// = "http://47.99.180.135:8080/pay/yfb/notify";
 
     /**
      * @param type        银行类型

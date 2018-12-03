@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,12 @@ public class PayService {
     public static final String Ali = "alipay";
     public static final String Wx = "wx";
 
+
+    @Value("${yfb.ali.min}")
+    public Integer Ali_Min;
+
+    @Value("${yfb.ali.max}")
+    public Integer Ali_Max;
 
     /**
      * 中央调度server. 根据情况选择不同通道
@@ -67,10 +74,22 @@ public class PayService {
             if (yfbService.exist(baseOrder.mchOrderId)) {
                 return new Response("A005", "订单号重复", baseOrder);
             }
+            //订单金额校验.
+            if (baseOrder.payType.equals(Ali)) {
+                //10-9999
+                if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
+                    return new Response("A007", "交易金额限制：支付宝 10 -9999 元", baseOrder);
+                }
+            } else if (baseOrder.payType.equals(Wx)) {
+                //20 30 50 100 200 300 500
+                if (!Wx_Allow.contains(baseOrder.money)) {
+                    return new Response("A007", "交易金额限制：微信 20，30，50，100，200，300，500 元", baseOrder);
+                }
+            }
             String str = yfbService.createOrder(baseOrder.mchId, baseOrder.payType, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
             //return str;
-            str = str.replace("/pay/alipay/scanpay.aspx","http://api.qianyipay.com/pay/alipay/scanpay.aspx");
-            str = str.replace("/pay/weixin/scanpay.aspx","http://api.qianyipay.com/pay/weixin/scanpay.aspx");
+            str = str.replace("/pay/alipay/scanpay.aspx", "http://api.qianyipay.com/pay/alipay/scanpay.aspx");
+            str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
             return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
         } else if (true) {
             //快易支付..
@@ -83,6 +102,18 @@ public class PayService {
         }
         return null;
     }
+
+    public static List<Integer> Wx_Allow = new ArrayList<Integer>() {
+        {
+            add(2000);
+            add(3000);
+            add(5000);
+            add(10000);
+            add(20000);
+            add(30000);
+            add(50000);
+        }
+    };
 
     public static List<String> payTypes = new ArrayList<String>() {
         {
