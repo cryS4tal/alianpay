@@ -1,5 +1,7 @@
 package com.ylli.api.pay.util;
 
+import com.google.common.base.CaseFormat;
+import com.ylli.api.alipay.service.AliPayService;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -11,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -21,7 +24,7 @@ import org.w3c.dom.NodeList;
  */
 @SuppressWarnings("all")
 public class SignUtil {
-
+    private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AliPayService.class);
 
     /**
      * 签名处理
@@ -43,8 +46,10 @@ public class SignUtil {
                 sb.append(k).append("=").append(data.get(k).trim()).append("&");
         }
         sb.append("key=").append(key);
+        String sign = MD5(sb.toString()).toUpperCase();
         System.out.println(MD5(sb.toString()).toUpperCase());
-        return MD5(sb.toString()).toUpperCase();
+        LOGGER.error(sign);
+        return sign;
     }
 
     /**
@@ -135,7 +140,7 @@ public class SignUtil {
             Field field = null;
             try {
                 field = object.getClass().getDeclaredField(entityField.getName());
-                map.put(field.getName(), field.get(object) == null ? "" : field.get(object).toString());
+                map.put(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName()), field.get(object) == null ? "" : field.get(object).toString());
             } catch (NoSuchFieldException exception) {
                 exception.printStackTrace();
             } catch (IllegalAccessException e) {
