@@ -129,6 +129,13 @@ public class UserSettlementService {
         log.money = money;
         log.isOk = false;
         cashLogMapper.insertSelective(log);
+
+        //接收到用户提现请求之后。。
+        //先去 cash_log... 获得需要提现的总金额。
+
+        //去wallet 分润金额减去 金额。  更新相应的  bonus  total. (暂时不考虑手续费？)
+        //回头更新 cash_log 对应的提现请求  is_ok = true.
+
     }
 
     //结算金额计算
