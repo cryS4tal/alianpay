@@ -63,9 +63,6 @@ public class YfbBill {
     //分润金额
     public Double bonusMoney;
 
-    //是否分润 好像不需要这个字段...
-    public Boolean isBonus;
-
     public Timestamp createTime;
 
     public Timestamp modifyTime;
