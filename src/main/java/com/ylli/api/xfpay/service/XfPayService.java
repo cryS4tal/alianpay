@@ -90,12 +90,12 @@ public class XfPayService {
             return getResJson("A001", "商户订单号不能为空", null);
         }
 
-        Wallet wallet = walletService.getOwnWallet(userId);
-        if (wallet.avaliableMoney < amount) {
+        //Wallet wallet = walletService.getOwnWallet(userId);
+        /*if (wallet.avaliableMoney < amount) {
             //余额不足
             return getResJson("A002", "余额不足", null);
             //throw new AwesomeException(Config.ERROR_BALANCE_NOT_ENOUGH);
-        }
+        }*/
 
         XfBill bill = new XfBill();
         bill.subNo = orderNo;
@@ -124,10 +124,10 @@ public class XfPayService {
             //钱包金额变更
             //wallet.avaliableMoney = wallet.avaliableMoney - amount;
             //wallet.abnormalMoney = wallet.abnormalMoney + amount;
-            boolean flag = walletService.preOrder(userId, amount);
-            if (flag) {
+            //boolean flag = walletService.preOrder(userId, amount);
+            /*if (flag) {
                 return getResJson("A003", "用户钱包数据异常，请联系管理员", null);
-            }
+            }*/
         }
         if (bill.status != XfBill.NEW) {
             //case status return
@@ -156,7 +156,7 @@ public class XfPayService {
             }
 
             if (data.status != null && data.status.toUpperCase().equals("S")) {
-                walletService.finishOrder(bill.id, amount);
+                //walletService.finishOrder(bill.id, amount);
 
                 bill.status = XfBill.FINISH;
                 bill.resCode = data.resCode;
@@ -166,7 +166,8 @@ public class XfPayService {
                 return getResJson("A000", "交易成功", null);
             }
             if (data.status != null && data.status.toUpperCase().equals("F")) {
-                walletService.failedOrder(bill.id, amount);
+
+                //walletService.failedOrder(bill.id, amount);
 
                 bill.status = XfBill.FAIL;
                 bill.resCode = data.resCode;
@@ -273,7 +274,7 @@ public class XfPayService {
                     }
 
                     if (data.status != null && data.status.toUpperCase().equals("S")) {
-                        walletService.finishOrder(xfBill.id, xfBill.amount);
+                        //walletService.finishOrder(xfBill.id, xfBill.amount);
 
                         xfBill.status = XfBill.FINISH;
                         xfBill.resCode = data.resCode;
@@ -283,7 +284,7 @@ public class XfPayService {
                         writer.write(getResStr("SUCCESS"));
                     }
                     if (data.status != null && data.status.toUpperCase().equals("F")) {
-                        walletService.failedOrder(xfBill.id, xfBill.amount);
+                        //walletService.failedOrder(xfBill.id, xfBill.amount);
 
                         xfBill.status = XfBill.FAIL;
                         xfBill.resCode = data.resCode;
@@ -372,7 +373,7 @@ public class XfPayService {
                 if (bill.status == XfBill.FINISH) {
                     return getResJson("A000", "交易成功", null);
                 }
-                walletService.finishOrder(bill.id, bill.amount);
+                //walletService.finishOrder(bill.id, bill.amount);
 
                 bill.status = XfBill.FINISH;
                 bill.resCode = data.resCode;
@@ -390,7 +391,7 @@ public class XfPayService {
                     //业务处理失败. 具体返回先锋message.
                     return getResJson("A005", data.resMessage, null);
                 }
-                walletService.failedOrder(bill.id, bill.amount);
+                //walletService.failedOrder(bill.id, bill.amount);
 
                 bill.status = XfBill.FAIL;
                 bill.resCode = data.resCode;

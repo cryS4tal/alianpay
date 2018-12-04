@@ -3,7 +3,6 @@ package com.ylli.api.wallet.service;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.xfpay.mapper.XfBillMapper;
-import com.ylli.api.xfpay.model.XfBill;
 import java.sql.Timestamp;
 import java.time.Instant;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,28 +19,30 @@ public class WalletService {
     @Autowired
     XfBillMapper xfBillMapper;
 
+    /**
+     * 获取用户钱包数据，默认初始化
+     *
+     * @param userId
+     * @return
+     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Wallet getOwnWallet(Long userId) {
-        Wallet wallet = new Wallet();
-        wallet.userId = userId;
-        wallet = walletMapper.selectOne(wallet);
+        Wallet wallet = walletMapper.selectByPrimaryKey(userId);
         //默认插入
         if (wallet == null) {
             Wallet w = new Wallet();
-            w.userId = userId;
-            w.totalMoney = 0;
-            w.abnormalMoney = 0;
-            w.avaliableMoney = 0;
+            w.id = userId;
             walletMapper.insertSelective(w);
-            return walletMapper.selectOne(wallet);
+
+            return walletMapper.selectByPrimaryKey(userId);
         }
         return wallet;
     }
 
-    @Transactional
+    /*@Transactional
     public boolean preOrder(Long userId, Integer amount) {
         Wallet wallet = new Wallet();
-        wallet.userId = userId;
+        //wallet.userId = userId;
         wallet = walletMapper.selectOne(wallet);
         if (wallet == null) {
             return true;
@@ -51,16 +52,16 @@ public class WalletService {
         wallet.modifyTime = Timestamp.from(Instant.now());
         walletMapper.updateByPrimaryKeySelective(wallet);
         return false;
-    }
+    }*/
 
-    @Transactional
+    /*@Transactional
     public void finishOrder(Long billId, Integer amount) {
         XfBill bill = xfBillMapper.selectByPrimaryKey(billId);
         if (bill == null || bill.status == XfBill.FINISH) {
             return;
         }
         Wallet wallet = new Wallet();
-        wallet.userId = bill.userId;
+        //wallet.userId = bill.userId;
         wallet = walletMapper.selectOne(wallet);
         if (wallet == null) {
             return;
@@ -69,16 +70,16 @@ public class WalletService {
         wallet.totalMoney = wallet.avaliableMoney + wallet.abnormalMoney;
         wallet.modifyTime = Timestamp.from(Instant.now());
         walletMapper.updateByPrimaryKeySelective(wallet);
-    }
+    }*/
 
-    @Transactional
+    /*@Transactional
     public void failedOrder(Long billId, Integer amount) {
         XfBill bill = xfBillMapper.selectByPrimaryKey(billId);
         if (bill == null || bill.status == XfBill.FAIL) {
             return;
         }
         Wallet wallet = new Wallet();
-        wallet.userId = bill.userId;
+        //wallet.userId = bill.userId;
         wallet = walletMapper.selectOne(wallet);
         if (wallet == null) {
             return;
@@ -87,43 +88,43 @@ public class WalletService {
         wallet.avaliableMoney = wallet.avaliableMoney + amount;
         wallet.modifyTime = Timestamp.from(Instant.now());
         walletMapper.updateByPrimaryKeySelective(wallet);
-    }
+    }*/
 
     @Transactional
     public Wallet incr(Long userId, Integer money) {
-        Wallet wallet = new Wallet();
-        wallet.userId = userId;
-        wallet = walletMapper.selectOne(wallet);
+        Wallet wallet = walletMapper.selectByPrimaryKey(userId);
         if (wallet == null) {
             wallet = new Wallet();
-            wallet.userId = userId;
-            wallet.totalMoney = money;
-            wallet.avaliableMoney = money;
-            wallet.abnormalMoney = 0;
+            wallet.id = userId;
             walletMapper.insertSelective(wallet);
         } else {
-            wallet.avaliableMoney = wallet.avaliableMoney + money;
-            wallet.totalMoney = wallet.totalMoney + money;
+            wallet.bonus = wallet.bonus + money;
+            wallet.total = wallet.total + money;
             wallet.modifyTime = Timestamp.from(Instant.now());
             walletMapper.updateByPrimaryKeySelective(wallet);
         }
-        return walletMapper.selectByUserId(userId);
+        return walletMapper.selectByPrimaryKey(userId);
     }
 
     @Transactional
-    public Object getWallet(Long userId) {
-        Wallet wallet = new Wallet();
-        wallet.userId = userId;
-        wallet = walletMapper.selectOne(wallet);
+    public Wallet getWallet(Long userId) {
+        Wallet wallet = walletMapper.selectByPrimaryKey(userId);
         if (wallet == null) {
             wallet = new Wallet();
-            wallet.userId = userId;
-            wallet.totalMoney = 0;
-            wallet.avaliableMoney = 0;
-            wallet.abnormalMoney = 0;
+            wallet.id = userId;
+            wallet.total = 0;
+            wallet.bonus = 0;
+            wallet.recharge = 0;
             walletMapper.insertSelective(wallet);
-            wallet = walletMapper.selectByUserId(userId);
+            wallet = walletMapper.selectByPrimaryKey(userId);
         }
         return wallet;
+    }
+
+    @Transactional
+    public void create(Long id) {
+        Wallet wallet = new Wallet();
+        wallet.id = id;
+        walletMapper.insertSelective(wallet);
     }
 }

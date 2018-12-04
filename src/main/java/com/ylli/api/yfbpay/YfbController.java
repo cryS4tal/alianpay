@@ -42,9 +42,4 @@ public class YfbController {
         return yfbService.payNotify(orderid, opstate, ovalue, sign, sysorderid, systime, attach, msg);
     }
 
-    /*@PostMapping("/test")
-    public Object testNotify() {
-        return client.sendNotify();
-    }*/
-
 }

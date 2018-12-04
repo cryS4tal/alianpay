@@ -1,5 +1,6 @@
 package com.ylli.api.pay;
 
+import com.google.common.base.Strings;
 import com.ylli.api.auth.service.PermissionService;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
@@ -50,7 +51,11 @@ public class BillController {
         if (userId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return billService.getBills(userId, status, mchOrderId, sysOrderId, payType, tradeType,
+        return billService.getBills(userId, status,
+                Strings.isNullOrEmpty(mchOrderId) ? null : mchOrderId,
+                Strings.isNullOrEmpty(sysOrderId) ? null : sysOrderId,
+                Strings.isNullOrEmpty(payType) ? null : payType,
+                Strings.isNullOrEmpty(tradeType) ? null : tradeType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(), offset, limit);

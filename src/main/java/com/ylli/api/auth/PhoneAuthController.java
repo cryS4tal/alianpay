@@ -8,6 +8,7 @@ import com.ylli.api.auth.model.PhoneLogin;
 import com.ylli.api.auth.service.LoginService;
 import com.ylli.api.auth.service.PhoneAuthService;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,9 @@ public class PhoneAuthController {
 
     @Autowired
     AccountPasswordMapper accountPasswordMapper;
+
+    @Autowired
+    WalletService walletService;
 
     @PostMapping
     public Object login(@RequestBody PhoneLogin request) {
@@ -50,6 +54,9 @@ public class PhoneAuthController {
             password.id = account.id;
             password.password = BCrypt.hashpw(request.password, BCrypt.gensalt());
             accountPasswordMapper.insertSelective(password);
+
+            walletService.create(account.id);
+
         } else {
             AccountPassword password = accountPasswordMapper.selectByPrimaryKey(account.id);
 
