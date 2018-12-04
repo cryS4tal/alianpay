@@ -79,7 +79,9 @@ public class BillService {
     public Integer getMaxCash(Long userId) {
         //暂时走易付宝
         Integer max = yfbService.getMaxCash(userId);
-
+        if (max == null) {
+            return 0;
+        }
         return max;
     }
 }
