@@ -33,7 +33,7 @@ public class UserSettlementController {
 
     @PostMapping("/own")
     public Object saveUserInfo(@RequestBody UserOwnInfo ownInfo) {
-        ServiceUtil.checkNotEmptyIgnore(ownInfo, true, "bankType");
+        ServiceUtil.checkNotEmptyIgnore(ownInfo, true, "bankType", "openBank");
         if (authSession.getAuthId() != ownInfo.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }

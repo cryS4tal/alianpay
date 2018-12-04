@@ -15,6 +15,7 @@ import com.ylli.api.user.model.CashLog;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.user.model.UserOwnInfo;
 import com.ylli.api.user.model.UserSettlement;
+import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -73,7 +74,7 @@ public class UserSettlementService {
         settlement.modifyTime = Timestamp.from(Instant.now());
         userSettlementMapper.updateByPrimaryKeySelective(settlement);
 
-        walletService.automaticBonus(userChargeInfo.userId,userChargeInfo.chargeType,userChargeInfo.chargeRate);
+        walletService.automaticBonus(userChargeInfo.userId, userChargeInfo.chargeType, userChargeInfo.chargeRate);
 
         return userSettlementMapper.selectByPrimaryKey(settlement.id);
     }
@@ -115,9 +116,10 @@ public class UserSettlementService {
             throw new AwesomeException(Config.ERROR_SETTLEMENT_CHARGE_EMPTY);
         }
         //金额计算.
-        Integer max = billService.getMaxCash(userId);
-        if (max == null || max - doSome(userId) < money) {
-            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (max - doSome(userId)) / 100.0)));
+        Wallet wallet = walletService.getOwnWallet(userId);
+
+        if (money > wallet.recharge + wallet.bonus) {
+            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", wallet.recharge + wallet.bonus)));
         }
         //记录日志
         CashLog log = new CashLog();

@@ -179,6 +179,7 @@ public class WalletService {
             yfbBillMapper.updateByPrimaryKeySelective(bill);
         }
         wallet.bonus = bonus;
+        wallet.total = wallet.bonus.intValue() + wallet.recharge;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
@@ -202,6 +203,7 @@ public class WalletService {
         bill.bonusMoney = getBonus(bill.amount, rate);
         yfbBillMapper.updateByPrimaryKeySelective(bill);
         wallet.bonus = wallet.bonus + bonusMoney;
+        wallet.total = wallet.bonus.intValue() + wallet.recharge;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
