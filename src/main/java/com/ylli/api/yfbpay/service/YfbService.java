@@ -236,7 +236,7 @@ public class YfbService {
 
         boolean flag = yfbClient.signVerify(orderid, opstate, ovalue, sign);
         YfbBill bill = new YfbBill();
-        bill.subNo = mchOrderId;
+        bill.orderNo = mchOrderId;
         bill = yfbBillMapper.selectOne(bill);
         if (flag && (bill.status == YfbBill.NEW || bill.status == YfbBill.ING)) {
             if (opstate.equals("0")) {
