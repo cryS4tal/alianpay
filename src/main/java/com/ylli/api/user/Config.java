@@ -70,6 +70,8 @@ public class Config {
         public static final long MANAGE_USER_APP = BASE + 2;
 
         //审核用户（代付）
-        public static final long MANAGE_USER_AUDIT = 3;
+        public static final long MANAGE_USER_AUDIT = BASE + 3;
+
+        public static final long MANAGE_USER_ACCOUNT = BASE + 4;
     }
 }

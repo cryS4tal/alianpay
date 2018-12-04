@@ -131,18 +131,19 @@ public class YfbService {
                 bill.msg = ovalue;
                 //bill.msg = msg;
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
-
             }
 
             //加入异步通知下游商户系统
             //params jsonStr.
-            yfbClient.sendNotify(bill.id, bill.notifyUrl, generateRes(
+            String params = generateRes(
                     bill.amount.toString(),
                     bill.subNo,
                     bill.orderNo,
                     bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I",
                     new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
-                    bill.memo));
+                    bill.memo);
+
+            yfbClient.sendNotify(bill.id, bill.notifyUrl, params);
 
             if (bill.isSuccess != null && bill.isSuccess) {
                 return "opstate=0";

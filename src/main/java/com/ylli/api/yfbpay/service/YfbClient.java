@@ -102,7 +102,14 @@ public class YfbClient {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String sendNotify(Long billId, String url, String params) {
 
-        String res = restTemplate.postForObject(url, params, String.class);
+        LOGGER.info("商户异步通知，billId：" + billId + "notifyUrl：" + url + "params：" + params);
+        String res = null;
+        try {
+            res = restTemplate.postForObject(url, params, String.class);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+        LOGGER.info("商户回传信息：" + res);
 
         if (res.toUpperCase().equals("SUCCESS")) {
             YfbBill bill = yfbBillMapper.selectByPrimaryKey(billId);
