@@ -61,8 +61,10 @@ public class UserManageService {
 
         info.secret = userKeyMapper.getKeyById(auth.id);
         UserSettlement settlement = userSettlementMapper.selectByUserId(auth.id);
-        info.chargeType = settlement.chargeType;
-        info.chargeRate = settlement.chargeRate;
+        if (settlement != null) {
+            info.chargeType = settlement.chargeType;
+            info.chargeRate = settlement.chargeRate;
+        }
         info.createTime = auth.createTime;
         return info;
     }
