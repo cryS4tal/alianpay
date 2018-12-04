@@ -1,5 +1,6 @@
 package com.ylli.api.user;
 
+import com.google.common.base.Strings;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
@@ -23,7 +24,7 @@ public class UserManageController {
                                  @AwesomeParam(defaultValue = "0") int offset,
                                  @AwesomeParam(defaultValue = "10") int limit) {
 
-        return userManageService.getAccountList(phone, mchId, offset, limit);
+        return userManageService.getAccountList(Strings.emptyToNull(phone), Strings.emptyToNull(mchId), offset, limit);
     }
 
     @GetMapping("/user")
