@@ -51,6 +51,9 @@ public class YfbBill {
     //支付类型：支付宝，微信
     public String payType;
 
+    //支付方式：扫码，wap，app..
+    public String tradeType;
+
     //交易成立时间
     public Timestamp tradeTime;
 

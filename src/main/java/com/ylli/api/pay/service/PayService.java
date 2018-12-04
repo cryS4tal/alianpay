@@ -29,9 +29,12 @@ public class PayService {
     @Autowired
     UserKeyService userKeyService;
 
-    public static final String Ali = "alipay";
-    public static final String Wx = "wx";
+    public static final String ALI = "alipay";
+    public static final String WX = "wx";
 
+    public static final String NATIVE = "native";
+    public static final String WAP = "wap";
+    public static final String APP = "app";
 
     @Value("${yfb.ali.min}")
     public Integer Ali_Min;
@@ -71,25 +74,31 @@ public class PayService {
             if (!payTypes.contains(baseOrder.payType)) {
                 return new Response("A004", "不支持的支付类型", baseOrder);
             }
+            if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
+                return new Response("A008", "不支持的支付方式", baseOrder);
+            }
             if (yfbService.exist(baseOrder.mchOrderId)) {
                 return new Response("A005", "订单号重复", baseOrder);
             }
             //订单金额校验.
-            if (baseOrder.payType.equals(Ali)) {
+            if (baseOrder.payType.equals(ALI)) {
                 //10-9999
                 if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
                     return new Response("A007", "交易金额限制：支付宝 10 -9999 元", baseOrder);
                 }
-            } else if (baseOrder.payType.equals(Wx)) {
+            } else if (baseOrder.payType.equals(WX)) {
                 //20 30 50 100 200 300 500
                 if (!Wx_Allow.contains(baseOrder.money)) {
                     return new Response("A007", "交易金额限制：微信 20，30，50，100，200，300，500 元", baseOrder);
                 }
             }
-            String str = yfbService.createOrder(baseOrder.mchId, baseOrder.payType, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
+            String str = yfbService.createOrder(baseOrder.mchId, baseOrder.payType, baseOrder.tradeType, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
             //return str;
             str = str.replace("/pay/alipay/scanpay.aspx", "http://api.qianyipay.com/pay/alipay/scanpay.aspx");
             str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
+            str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
+            str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
             return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
         } else if (true) {
             //快易支付..
@@ -117,8 +126,16 @@ public class PayService {
 
     public static List<String> payTypes = new ArrayList<String>() {
         {
-            add(Ali);
-            add(Wx);
+            add(ALI);
+            add(WX);
+        }
+    };
+
+    public static List<String> tradeTypes = new ArrayList<String>() {
+        {
+            add(NATIVE);
+            add(APP);
+            add(WAP);
         }
     };
 

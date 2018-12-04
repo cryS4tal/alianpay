@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.auth.mapper.PhoneAuthMapper">
+    <resultMap id="phoneMap" type="com.ylli.api.auth.model.PhoneAuth"/>
+    <select id="selectByQuery" resultMap="phoneMap" >
+        SELECT
+        *
+        FROM t_phone_auth
+        <where>
+            <if test="phone != null">
+                phone = #{phone}
+            </if>
+            <if test="id != null">
+                AND id = ${id}
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -10,21 +10,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping
+@RequestMapping("/admin")
 @Auth(@Permission(Config.SysPermission.MANAGE_USER_ACCOUNT))
 public class UserManageController {
 
     @Autowired
     UserManageService userManageService;
 
-    @GetMapping
+    @GetMapping("/user/list")
     public Object getAccountList(@AwesomeParam(required = false) String phone,
                                  @AwesomeParam(required = false) String mchId,
-                                 @AwesomeParam(required = false) String aaa,
                                  @AwesomeParam(defaultValue = "0") int offset,
                                  @AwesomeParam(defaultValue = "10") int limit) {
 
-        //return userManageService
-        return null;
+        return userManageService.getAccountList(phone, mchId, offset, limit);
+    }
+
+    @GetMapping("/user")
+    public Object getAccountDetail(@AwesomeParam Long mchId) {
+        return userManageService.getAccountDetail(mchId);
     }
 }
