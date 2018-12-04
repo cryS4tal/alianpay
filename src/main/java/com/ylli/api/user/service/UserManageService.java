@@ -34,9 +34,6 @@ public class UserManageService {
     @Autowired
     ModelMapper modelMapper;
 
-    @Autowired
-    UserSettlementMapper userSettlementMapper;
-
     public DataList<MchInfo> getAccountList(String phone, String mchId, int offset, int limit) {
         /**
          * 目前先支持 商户号（id）,手机号搜索。
