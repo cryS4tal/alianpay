@@ -18,4 +18,16 @@ public class MchInfo {
     public Integer chargeRate;
     //创建时间
     public Timestamp createTime;
+
+    public MchInfo(Long mchId, String phone, String secret, Integer chargeType, Integer chargeRate, Timestamp createTime) {
+        this.mchId = mchId;
+        this.phone = phone;
+        this.secret = secret;
+        this.chargeType = chargeType;
+        this.chargeRate = chargeRate;
+        this.createTime = createTime;
+    }
+
+    public MchInfo() {
+    }
 }
