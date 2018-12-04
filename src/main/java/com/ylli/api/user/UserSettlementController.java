@@ -1,5 +1,6 @@
 package com.ylli.api.user;
 
+import com.google.common.base.Strings;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
@@ -66,8 +67,9 @@ public class UserSettlementController {
                               @AwesomeParam(defaultValue = "10") int limit) {
 
 
-        return userSettlementService.getUserList(userId, name, identityCard, bankcardNumber, reservedPhone, openBank, subBank,
-                beginTime == null ? null : beginTime.getTimestamp(), endTime == null ? null : endTime.getTimestamp(), offset, limit);
+        return userSettlementService.getUserList(userId, Strings.emptyToNull(name), Strings.emptyToNull(identityCard),
+                Strings.emptyToNull(bankcardNumber), Strings.emptyToNull(reservedPhone), Strings.emptyToNull(openBank),
+                Strings.emptyToNull(subBank), beginTime == null ? null : beginTime.getTimestamp(), endTime == null ? null : endTime.getTimestamp(), offset, limit);
     }
 
     @GetMapping
