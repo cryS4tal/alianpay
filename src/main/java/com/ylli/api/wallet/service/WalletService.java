@@ -1,7 +1,10 @@
 package com.ylli.api.wallet.service;
 
+import com.ylli.api.base.auth.AuthSession;
+import com.ylli.api.wallet.mapper.WalletLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
+import com.ylli.api.wallet.model.WalletLog;
 import com.ylli.api.xfpay.mapper.XfBillMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -18,6 +21,12 @@ public class WalletService {
 
     @Autowired
     XfBillMapper xfBillMapper;
+
+    @Autowired
+    WalletLogMapper walletLogMapper;
+
+    @Autowired
+    AuthSession authSession;
 
     /**
      * 获取用户钱包数据，默认初始化
@@ -103,6 +112,14 @@ public class WalletService {
             wallet.modifyTime = Timestamp.from(Instant.now());
             walletMapper.updateByPrimaryKeySelective(wallet);
         }
+        WalletLog log = new WalletLog();
+        log.adminId = authSession.getAuthId();
+        log.userId = userId;
+        log.type = WalletLog.CZ;
+        log.money = money;
+        log.currentMoney = wallet.total;
+        walletLogMapper.insertSelective(log);
+
         return walletMapper.selectByPrimaryKey(userId);
     }
 

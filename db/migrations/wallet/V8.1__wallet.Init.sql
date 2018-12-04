@@ -30,3 +30,7 @@ CREATE TABLE t_wallet_log (
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );
+
+ALTER TABLE `t_wallet_log`
+ADD COLUMN `admin_id`  bigint NULL AFTER `id`,
+ADD COLUMN `current_money`  int NULL AFTER `money`;

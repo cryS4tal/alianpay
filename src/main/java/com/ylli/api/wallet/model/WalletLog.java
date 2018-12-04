@@ -16,11 +16,15 @@ public class WalletLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
+    public Long adminId;
+
     public Long userId;
 
     public String type;
 
     public Integer money;
+
+    public Integer currentMoney;
 
     public Timestamp createTime;
 
