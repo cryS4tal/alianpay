@@ -15,6 +15,7 @@ import com.ylli.api.user.model.CashLog;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.user.model.UserOwnInfo;
 import com.ylli.api.user.model.UserSettlement;
+import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -42,6 +43,9 @@ public class UserSettlementService {
     @Autowired
     CashLogMapper cashLogMapper;
 
+    @Autowired
+    WalletService walletService;
+
     @Transactional
     public Object saveUserInfo(UserOwnInfo ownInfo) {
         UserSettlement settlement = userSettlementMapper.selectByUserId(ownInfo.userId);
@@ -68,6 +72,9 @@ public class UserSettlementService {
         settlement.chargeRate = userChargeInfo.chargeRate;
         settlement.modifyTime = Timestamp.from(Instant.now());
         userSettlementMapper.updateByPrimaryKeySelective(settlement);
+
+        walletService.automaticBonus(userChargeInfo.userId,userChargeInfo.chargeType,userChargeInfo.chargeRate);
+
         return userSettlementMapper.selectByPrimaryKey(settlement.id);
     }
 

@@ -10,8 +10,11 @@ import static com.ylli.api.pay.service.PayService.WAP;
 import static com.ylli.api.pay.service.PayService.WX;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.user.mapper.UserSettlementMapper;
 import com.ylli.api.user.model.UserKey;
+import com.ylli.api.user.model.UserSettlement;
 import com.ylli.api.user.service.UserKeyService;
+import com.ylli.api.wallet.service.WalletService;
 import com.ylli.api.yfbpay.Config;
 import com.ylli.api.yfbpay.mapper.YfbBillMapper;
 import com.ylli.api.yfbpay.model.NotifyRes;
@@ -52,6 +55,12 @@ public class YfbService {
 
     @Autowired
     UserKeyService userKeyService;
+
+    @Autowired
+    UserSettlementMapper userSettlementMapper;
+
+    @Autowired
+    WalletService walletService;
 
     @Transactional(rollbackFor = AwesomeException.class)
     public String createOrder(Long mchId, String payType, String tradeType, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, Object extra) throws Exception {
@@ -135,6 +144,10 @@ public class YfbService {
                 //todo msg暂时先记录实际交易金额/元 两位小数
                 bill.msg = ovalue;
                 //bill.msg = msg;
+                UserSettlement settlement = userSettlementMapper.selectByUserId(bill.userId);
+                if (settlement != null) {
+                    walletService.addBonus(bill.userId, bill.bonusMoney, bill.id, settlement.chargeRate);
+                }
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
 
             } else {
@@ -229,6 +242,11 @@ public class YfbService {
             if (opstate.equals("0")) {
                 bill.status = YfbBill.FINISH;
                 bill.msg = ovalue;
+
+                UserSettlement settlement = userSettlementMapper.selectByUserId(bill.userId);
+                if (settlement != null) {
+                    walletService.addBonus(bill.userId, bill.bonusMoney, bill.id, settlement.chargeRate);
+                }
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
             }
             //其他情况 暂时不做处理.

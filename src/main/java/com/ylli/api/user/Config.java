@@ -57,6 +57,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             11, "您当前最大的提现金额为：%s 元");
 
+    public static final ErrorCode ERROR_CHARGE_TYPE
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            12, "不支持的结算类型");
+
     /**
      * 权限
      */

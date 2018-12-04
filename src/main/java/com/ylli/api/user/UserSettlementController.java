@@ -44,6 +44,10 @@ public class UserSettlementController {
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CHARGE))
     public Object saveChargeInfo(@RequestBody UserChargeInfo userChargeInfo) {
         ServiceUtil.checkNotEmpty(userChargeInfo);
+        //目前只支持 百分比
+        if (userChargeInfo.chargeType != UserChargeInfo.TYPE_FLOAT) {
+            throw new AwesomeException(Config.ERROR_CHARGE_TYPE);
+        }
         return userSettlementService.saveChargeInfo(userChargeInfo);
     }
 

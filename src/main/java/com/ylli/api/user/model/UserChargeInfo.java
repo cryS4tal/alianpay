@@ -13,4 +13,9 @@ public class UserChargeInfo {
     public Integer chargeType;
 
     public Integer chargeRate;
+
+
+    public static final Integer TYPE_FIX = 1;
+    public static final Integer TYPE_FLOAT = 2;
+
 }

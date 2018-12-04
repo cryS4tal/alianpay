@@ -10,7 +10,7 @@ import javax.persistence.Table;
 public class WalletLog {
 
     public static final String CZ = "充值";
-
+    public static final String TX = "提现";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

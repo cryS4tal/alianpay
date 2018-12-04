@@ -57,6 +57,15 @@ public class YfbBill {
     //交易成立时间
     public Timestamp tradeTime;
 
+    /**
+     * todo
+     */
+    //分润金额
+    public Double bonusMoney;
+
+    //是否分润 好像不需要这个字段...
+    public Boolean isBonus;
+
     public Timestamp createTime;
 
     public Timestamp modifyTime;

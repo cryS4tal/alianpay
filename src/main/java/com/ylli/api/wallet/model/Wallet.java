@@ -17,7 +17,7 @@ public class Wallet {
     public Integer recharge;
 
     //分润金额
-    public Integer bonus;
+    public Double bonus;
 
     public Timestamp createTime;
 

@@ -34,3 +34,6 @@ CREATE TABLE t_wallet_log (
 ALTER TABLE `t_wallet_log`
 ADD COLUMN `admin_id`  bigint NULL AFTER `id`,
 ADD COLUMN `current_money`  int NULL AFTER `money`;
+
+ALTER TABLE `t_wallet`
+MODIFY COLUMN `bouns`  double(16,2) NULL DEFAULT 0 COMMENT '分润金额' AFTER `recharge`;

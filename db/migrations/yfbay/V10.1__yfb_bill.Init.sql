@@ -35,3 +35,6 @@ ADD INDEX `n_status` (`status`) ;
 
 ALTER TABLE `t_yfb_bill`
 ADD COLUMN `trade_type`  varchar(32) NULL DEFAULT 'native' AFTER `pay_type`;
+
+ALTER TABLE `t_yfb_bill`
+ADD COLUMN `bonus_money`  double(16,2) NULL AFTER `trade_type`;
