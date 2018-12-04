@@ -32,3 +32,6 @@ ADD COLUMN `pay_type`  varchar(32) NULL COMMENT '支付类型' AFTER `is_success
 
 ALTER TABLE `t_yfb_bill`
 ADD INDEX `n_status` (`status`) ;
+
+ALTER TABLE `t_yfb_bill`
+ADD COLUMN `trade_type`  varchar(32) NULL DEFAULT 'native' AFTER `pay_type`;
