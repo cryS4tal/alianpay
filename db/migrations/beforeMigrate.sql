@@ -94,3 +94,12 @@ SELECT _init(9);
 -- 系统权限
 -- 管理商户账单
 SET @pm_sys.manage_user_bill = @pm_sys_base + 1;
+
+/**
+ * pay
+ */
+-- 初始化
+SELECT _init(8);
+-- 系统权限
+-- 管理商户账单
+SET @pm_sys.manage_user_wallet = @pm_sys_base + 1;
