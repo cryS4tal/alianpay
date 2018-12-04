@@ -118,8 +118,9 @@ public class UserSettlementService {
         //金额计算.
         Wallet wallet = walletService.getOwnWallet(userId);
 
-        if (money > wallet.recharge + wallet.bonus) {
-            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", wallet.recharge + wallet.bonus)));
+        Integer already = doSome(userId);
+        if (money > wallet.recharge + wallet.bonus - already) {
+            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.recharge + wallet.bonus - already) / 100.0)));
         }
         //记录日志
         CashLog log = new CashLog();
