@@ -67,7 +67,7 @@ public class UserSettlementService {
     public Object saveChargeInfo(UserChargeInfo userChargeInfo) {
         UserSettlement settlement = userSettlementMapper.selectByUserId(userChargeInfo.userId);
         if (settlement == null) {
-            throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
+            throw new AwesomeException(Config.ERROR_SETTLEMENT_EMPTY);
         }
         settlement.chargeType = userChargeInfo.chargeType;
         settlement.chargeRate = userChargeInfo.chargeRate;

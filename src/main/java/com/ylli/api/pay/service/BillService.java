@@ -91,7 +91,8 @@ public class BillService {
                 .append(tradeType)
                 .toString()
                 .replace(PayService.ALI, "支付宝")
-                .replace(PayService.WX, "微信");
+                .replace(PayService.WX, "微信")
+                .replace(PayService.NATIVE,"");
     }
 
 
