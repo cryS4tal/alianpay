@@ -64,7 +64,9 @@ public class BillService {
         baseBill.money = bill.amount;
 
         //订单手续费 = bill.手续费 （之前时分润）
-        baseBill.mchCharge = bill.bonusMoney.intValue();
+        if (bill.bonusMoney != null) {
+            baseBill.mchCharge = bill.bonusMoney.intValue();
+        }
         baseBill.payType = typeToString(bill.payType, bill.tradeType);
         //baseBill.state = bill.status == YfbBill.NEW ? "新订单" : bill.status == YfbBill.ING ? "进行中" : bill.status == YfbBill.FINISH ? "成功" : "失败";
         baseBill.state = YfbBill.statusToString(bill.status);

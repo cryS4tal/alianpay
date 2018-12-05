@@ -51,7 +51,7 @@ public class Config {
 
     public static final ErrorCode ERROR_SETTLEMENT_CHARGE_EMPTY
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            10, "请联系管理员设置您的分润费率");
+            10, "请联系管理员设置您的费率");
 
     public static final ErrorCode ERROR_CASH_OUT_BOUND
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,

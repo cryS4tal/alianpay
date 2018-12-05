@@ -102,6 +102,8 @@ public class UserSettlementService {
         userSettlementMapper.deleteByPrimaryKey(id);
     }
 
+
+    //该改改
     @Transactional
     public void cash(Long userId, Integer money, String password) {
         AccountPassword accountPassword = accountPasswordMapper.selectByPrimaryKey(userId);
@@ -119,8 +121,8 @@ public class UserSettlementService {
         Wallet wallet = walletService.getOwnWallet(userId);
 
         Integer already = doSome(userId);
-        if (money > wallet.recharge + wallet.bonus - already) {
-            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.recharge + wallet.bonus - already) / 100.0)));
+        if (money + 200 > wallet.recharge - already) {
+            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.recharge - 200 - already) / 100.0)));
         }
         //记录日志
         CashLog log = new CashLog();
@@ -133,7 +135,7 @@ public class UserSettlementService {
         //接收到用户提现请求之后。。
         //先去 cash_log... 获得需要提现的总金额。
 
-        //去wallet 分润金额减去 金额。  更新相应的  bonus  total. (暂时不考虑手续费？)
+        //去wallet  recharge 可用余额。  更新相应的  recharge  total. （- 2 元手续费）
         //回头更新 cash_log 对应的提现请求  is_ok = true.
 
     }
