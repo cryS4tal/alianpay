@@ -6,19 +6,29 @@ package com.ylli.api.pay.model;
  */
 public class BaseBill {
 
+    //交易金额
     public Integer money;
 
+    //手续费
+    public Integer mchCharge;
+
+    //商户号
     public Long mchId;
 
+    //商户订单号
     public String mchOrderId;
 
+    //系统订单号
     public String sysOrderId;
 
-    //支付方式：支付宝/微信
+    //支付方式：支付宝/微信   +   tradeType  native  wap
     public String payType;
 
     public String state;
 
     public String tradeTime;
+
+    //创建时间
+    public String createTime;
 
 }

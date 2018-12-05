@@ -28,27 +28,30 @@ public class WalletController {
     @Autowired
     AuthSession authSession;
 
-    static class Incr {
+    /*static class Incr {
         public Long userId;
         public Integer money;
-    }
+    }*/
 
-    /**
-     * todo 钱包加入日志表
-     */
 
-    @PostMapping
+    //充值金额接口移除，设定不对。支付钱包
+    /*@PostMapping
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_WALLET))
     public Object incr(@RequestBody Incr incr) {
         return walletService.incr(incr.userId, incr.money);
-    }
+    }*/
 
+    /**
+     * 获取用户钱包.
+     * 用户获取自己
+     * 管理员获取所有
+     *
+     * @param userId
+     * @return
+     */
     @GetMapping
-    public Object getWallet(@AwesomeParam(required = false) Long userId) {
-        if (userId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_WALLET)) {
-            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-        }
-        if (userId != null && authSession.getAuthId() != userId) {
+    public Object getWallet(@AwesomeParam Long userId) {
+        if (userId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_WALLET)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         return walletService.getWallet(userId);

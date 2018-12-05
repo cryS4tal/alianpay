@@ -37,3 +37,7 @@ ADD COLUMN `current_money`  int NULL AFTER `money`;
 
 ALTER TABLE `t_wallet`
 MODIFY COLUMN `bonus`  double(16,2) NULL DEFAULT 0 COMMENT '分润金额' AFTER `recharge`;
+
+
+ALTER TABLE `t_wallet`
+MODIFY COLUMN `bonus`  int(11) NULL DEFAULT 0 COMMENT '分润金额' AFTER `recharge`;

@@ -144,9 +144,11 @@ public class YfbService {
                 //todo msg暂时先记录实际交易金额/元 两位小数
                 bill.msg = ovalue;
                 //bill.msg = msg;
+
+                //todo  这部分后续记得修改。。。   settlement 信息在用户激活时插入。
                 UserSettlement settlement = userSettlementMapper.selectByUserId(bill.userId);
                 if (settlement != null) {
-                    walletService.addBonus(bill.userId, bill.bonusMoney, bill.id, settlement.chargeRate);
+                    walletService.addBonus(bill.userId, bill.id, settlement.chargeRate);
                 }
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
 
@@ -245,7 +247,7 @@ public class YfbService {
 
                 UserSettlement settlement = userSettlementMapper.selectByUserId(bill.userId);
                 if (settlement != null) {
-                    walletService.addBonus(bill.userId, bill.bonusMoney, bill.id, settlement.chargeRate);
+                    walletService.addBonus(bill.userId, bill.id, settlement.chargeRate);
                 }
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
             }

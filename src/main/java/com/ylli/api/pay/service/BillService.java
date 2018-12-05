@@ -2,6 +2,7 @@ package com.ylli.api.pay.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.base.Strings;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.SumAndCount;
@@ -61,13 +62,16 @@ public class BillService {
         baseBill.mchOrderId = bill.subNo;
         baseBill.sysOrderId = bill.orderNo;
         baseBill.money = bill.amount;
-        baseBill.payType = bill.payType;
+
+        //订单手续费 = bill.手续费 （之前时分润）
+        baseBill.mchCharge = bill.bonusMoney.intValue();
+        baseBill.payType = typeToString(bill.payType, bill.tradeType);
         //baseBill.state = bill.status == YfbBill.NEW ? "新订单" : bill.status == YfbBill.ING ? "进行中" : bill.status == YfbBill.FINISH ? "成功" : "失败";
         baseBill.state = YfbBill.statusToString(bill.status);
         if (bill.tradeTime != null) {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
-
+        baseBill.createTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.createTime);
         return baseBill;
     }
 
@@ -75,6 +79,19 @@ public class BillService {
         SumAndCount sumAndCount = yfbService.getTodayDetail(userId);
         return sumAndCount;
     }
+
+    public String typeToString(String payType, String tradeType) {
+        if (Strings.isNullOrEmpty(tradeType)) {
+            tradeType = PayService.NATIVE;
+        }
+        return new StringBuffer()
+                .append(payType)
+                .append(tradeType)
+                .toString()
+                .replace(PayService.ALI, "支付宝")
+                .replace(PayService.WX, "微信");
+    }
+
 
     public Integer getMaxCash(Long userId) {
         //暂时走易付宝
