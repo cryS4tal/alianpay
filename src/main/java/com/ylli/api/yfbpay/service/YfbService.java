@@ -138,6 +138,11 @@ public class YfbService {
             }
 
             if (opstate.equals("0") || opstate.equals("-3")) {
+                //todo  这部分后续记得修改。。。   settlement 信息在用户激活时插入。
+                UserSettlement settlement = userSettlementMapper.selectByUserId(bill.userId);
+                if (settlement != null && bill.status != YfbBill.FINISH) {
+                    walletService.addBonus(bill.userId, bill.id, settlement.chargeRate);
+                }
                 bill.superNo = sysorderid;
                 bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYY/MM/DD hh:mm:ss").parse(systime).getTime());
                 bill.status = YfbBill.FINISH;
@@ -145,11 +150,6 @@ public class YfbService {
                 bill.msg = ovalue;
                 //bill.msg = msg;
 
-                //todo  这部分后续记得修改。。。   settlement 信息在用户激活时插入。
-                UserSettlement settlement = userSettlementMapper.selectByUserId(bill.userId);
-                if (settlement != null) {
-                    walletService.addBonus(bill.userId, bill.id, settlement.chargeRate);
-                }
                 yfbBillMapper.updateByPrimaryKeySelective(bill);
 
             } else {
