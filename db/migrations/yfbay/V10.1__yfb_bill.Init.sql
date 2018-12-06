@@ -24,14 +24,14 @@ ADD UNIQUE INDEX `u_supper_no` (`super_no`) ,
 ADD INDEX `n_user_id` (`user_id`) ;
 
 ALTER TABLE `t_yfb_bill`
+ADD INDEX `n_status` (`status`) ;
+
+ALTER TABLE `t_yfb_bill`
 ADD COLUMN `msg`  varchar(256) NULL AFTER `trade_time`,
 ADD COLUMN `is_success`  tinyint(4) NULL AFTER `msg`;
 
 ALTER TABLE `t_yfb_bill`
 ADD COLUMN `pay_type`  varchar(32) NULL COMMENT '支付类型' AFTER `is_success`;
-
-ALTER TABLE `t_yfb_bill`
-ADD INDEX `n_status` (`status`) ;
 
 ALTER TABLE `t_yfb_bill`
 ADD COLUMN `trade_type`  varchar(32) NULL DEFAULT 'native' AFTER `pay_type`;
