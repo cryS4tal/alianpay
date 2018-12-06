@@ -177,14 +177,14 @@ public class WalletService {
             return "已经提现";
         }
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
-        if (wallet.recharge < cashLog.money) {
+        if (wallet.recharge < cashLog.money + 200) {
             throw new AwesomeException(Config.ERROR_CHARGE_REQUEST);
         }
 
         cashLog.isOk = true;
         cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-        wallet.recharge = cashLog.money - 200;
+        wallet.recharge = wallet.recharge - cashLog.money - 200;
         wallet.total = wallet.recharge + wallet.bonus;
         walletMapper.updateByPrimaryKeySelective(wallet);
         return "成功";
