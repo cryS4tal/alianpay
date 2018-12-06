@@ -65,6 +65,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             13, "提现金额大于可用余额。");
 
+    public static final ErrorCode ERROR_CHARGE_MONEY
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            14, "提现金额区间为 1000 - 20W");
+
     /**
      * 权限
      */

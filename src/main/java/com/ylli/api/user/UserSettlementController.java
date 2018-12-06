@@ -97,6 +97,10 @@ public class UserSettlementController {
         if (authSession.getAuthId() != cash.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
+        if (cash.money > 20 * 10000 * 100 || cash.money < 1000 * 100) {
+            throw new AwesomeException(Config.ERROR_CHARGE_MONEY);
+        }
+
         userSettlementService.cash(cash.userId, cash.money, cash.password);
     }
 

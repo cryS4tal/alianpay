@@ -173,6 +173,9 @@ public class WalletService {
         if (cashLog == null) {
             return "失败，提现请求不存在";
         }
+        if (cashLog.isOk) {
+            return "已经提现";
+        }
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
         if (wallet.recharge < cashLog.money) {
             throw new AwesomeException(Config.ERROR_CHARGE_REQUEST);
