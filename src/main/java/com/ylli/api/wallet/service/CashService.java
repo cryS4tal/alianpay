@@ -17,6 +17,7 @@ import com.ylli.api.wallet.model.CashLogDetail;
 import com.ylli.api.wallet.model.Wallet;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,9 @@ public class CashService {
     @Autowired
     WalletMapper walletMapper;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     public Object cashList(Long mchId, String phone, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
@@ -53,7 +57,10 @@ public class CashService {
     }
 
     public CashLogDetail detailConvert(CashLog cashLog, String phone) {
-        return new CashLogDetail(cashLog.userId, cashLog.money, cashLog.isOk, phone);
+        CashLogDetail detail = new CashLogDetail();
+        modelMapper.map(cashLog, detail);
+        detail.phone = phone;
+        return detail;
     }
 
     /**
