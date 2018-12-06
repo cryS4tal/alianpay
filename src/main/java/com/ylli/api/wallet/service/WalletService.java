@@ -1,6 +1,8 @@
 package com.ylli.api.wallet.service;
 
 import com.ylli.api.base.auth.AuthSession;
+import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.user.Config;
 import com.ylli.api.user.mapper.CashLogMapper;
 import com.ylli.api.user.model.CashLog;
 import com.ylli.api.user.model.UserChargeInfo;
@@ -172,6 +174,9 @@ public class WalletService {
             return "失败，提现请求不存在";
         }
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
+        if (wallet.recharge < cashLog.money) {
+            throw new AwesomeException(Config.ERROR_CHARGE_REQUEST);
+        }
 
         cashLog.isOk = true;
         cashLogMapper.updateByPrimaryKeySelective(cashLog);
