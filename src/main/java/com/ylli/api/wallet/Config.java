@@ -43,7 +43,7 @@ public class Config {
 
     public static final ErrorCode ERROR_CASH_HANDLED
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            8, "记录不存在");
+            8, "记录已处理");
     /**
      * 权限
      */
