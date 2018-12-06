@@ -103,7 +103,6 @@ public class UserSettlementController {
     /**
      * 临时方法。满足手动提现成功.
      */
-
     static class Suc {
         public Long cashLogId;
     }

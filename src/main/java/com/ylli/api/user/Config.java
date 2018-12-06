@@ -61,6 +61,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             12, "不支持的结算类型");
 
+    public static final ErrorCode ERROR_CHARGE_REQUEST
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            13, "提现金额大于可用余额。");
+
     /**
      * 权限
      */
