@@ -93,7 +93,8 @@ public class CashService {
 
         Integer already = doSome(userId);
         if (money + 200 > wallet.recharge - already) {
-            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.recharge - 200 - already) / 100.0)));
+            Double allow = wallet.recharge - already > 200 ? wallet.recharge - already - 200 : 0D;
+            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (allow / 100.0))));
         }
         //记录日志
         CashLog log = new CashLog();
