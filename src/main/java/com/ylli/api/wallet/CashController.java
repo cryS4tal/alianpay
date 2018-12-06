@@ -35,7 +35,7 @@ public class CashController {
         return cashService.cashList(mchId, phone, offset, limit);
     }
 
-    @PostMapping()
+    @PostMapping
     public void cash(@RequestBody CashReq req) {
         ServiceUtil.checkNotEmpty(req);
         if (authSession.getAuthId() != req.userId) {
