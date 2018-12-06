@@ -6,7 +6,7 @@ CREATE TABLE t_wallet (
   COMMENT '=t_account.id',
   total INTEGER  DEFAULT 0 COMMENT '总金额',
   recharge INTEGER  DEFAULT 0 COMMENT '充值金额',
-  bouns INTEGER  DEFAULT 0 COMMENT '分润金额',
+  bonus INTEGER  DEFAULT 0 COMMENT '分润金额',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );

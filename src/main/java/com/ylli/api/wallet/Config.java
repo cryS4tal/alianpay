@@ -27,5 +27,7 @@ public class Config {
          * 管理角色与权限
          */
         public static final long MANAGE_USER_WALLET = BASE + 1;
+
+        public static final long MANAGE_USER_CASH = BASE + 2;
     }
 }

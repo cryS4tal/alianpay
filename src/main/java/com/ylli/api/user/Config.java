@@ -85,8 +85,5 @@ public class Config {
         public static final long MANAGE_USER_AUDIT = BASE + 3;
 
         public static final long MANAGE_USER_ACCOUNT = BASE + 4;
-
-        //管理用户提现申请
-        public static final long MABAGE_USER_CASH = BASE + 5;
     }
 }

@@ -2,3 +2,7 @@
 INSERT INTO t_role_permission
 (role_id, permission_id)
 VALUES (@role_sys_manager, @pm_sys.manage_user_wallet);
+
+INSERT INTO t_role_permission
+(role_id, permission_id)
+VALUES (@role_sys_manager, @pm_sys.manage_user_cash);
