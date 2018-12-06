@@ -4,6 +4,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.auth.mapper.AccountPasswordMapper;
+import com.ylli.api.auth.mapper.PhoneAuthMapper;
 import com.ylli.api.auth.model.AccountPassword;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
@@ -16,6 +17,7 @@ import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.CashLogDetail;
 import com.ylli.api.wallet.model.Wallet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class CashService {
     @Autowired
     ModelMapper modelMapper;
 
+    @Autowired
+    PhoneAuthMapper phoneAuthMapper;
+
     public Object cashList(Long mchId, String phone, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
@@ -52,14 +57,14 @@ public class CashService {
         dataList.offset = page.getStartRow();
         dataList.count = page.size();
         dataList.totalCount = page.getTotal();
-        dataList.dataList = page.stream().map(item -> detailConvert(item, phone)).collect(Collectors.toList());
+        dataList.dataList = page.stream().map(item -> detailConvert(item)).collect(Collectors.toList());
         return dataList;
     }
 
-    public CashLogDetail detailConvert(CashLog cashLog, String phone) {
+    public CashLogDetail detailConvert(CashLog cashLog) {
         CashLogDetail detail = new CashLogDetail();
         modelMapper.map(cashLog, detail);
-        detail.phone = phone;
+        detail.phone = Optional.ofNullable(phoneAuthMapper.selectByPrimaryKey(cashLog.userId).phone).orElse(null);
         return detail;
     }
 
