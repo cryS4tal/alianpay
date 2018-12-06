@@ -41,33 +41,18 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             7, "信息待审核");
 
-    public static final ErrorCode ERROR_VERIFY
-            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            8, "密码错误");
-
     public static final ErrorCode ERROR_SETTLEMENT_EMPTY
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            9, "请先设置结算信息.");
-
-    public static final ErrorCode ERROR_SETTLEMENT_CHARGE_EMPTY
-            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            10, "请联系管理员设置您的费率");
-
-    public static final ErrorCode ERROR_CASH_OUT_BOUND
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            11, "您当前最大的提现金额为：%s 元");
+            8, "请先设置结算信息.");
 
     public static final ErrorCode ERROR_CHARGE_TYPE
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            12, "不支持的结算类型");
+            9, "不支持的结算类型");
 
     public static final ErrorCode ERROR_CHARGE_REQUEST
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            13, "提现金额大于可用余额。");
+            10, "提现金额大于可用余额。");
 
-    public static final ErrorCode ERROR_CHARGE_MONEY
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            14, "提现金额区间为 1000 - 20W");
 
     /**
      * 权限

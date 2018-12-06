@@ -1,4 +1,4 @@
-package com.ylli.api.user.model;
+package com.ylli.api.wallet.model;
 
 import java.sql.Timestamp;
 import javax.persistence.GeneratedValue;
@@ -22,4 +22,13 @@ public class CashLog {
     public Timestamp createTime;
 
     public Timestamp modifyTime;
+
+    public CashLog() {
+    }
+
+    public CashLog(Long userId, Integer money, Boolean isOk) {
+        this.userId = userId;
+        this.money = money;
+        this.isOk = isOk;
+    }
 }

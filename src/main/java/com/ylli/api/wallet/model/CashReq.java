@@ -1,6 +1,6 @@
-package com.ylli.api.user.model;
+package com.ylli.api.wallet.model;
 
-public class Cash {
+public class CashReq {
     public Long userId;
     public Integer money;
     public String password;

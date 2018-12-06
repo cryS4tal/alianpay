@@ -1,15 +1,8 @@
 package com.ylli.api.wallet.service;
 
-import com.ylli.api.base.auth.AuthSession;
-import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.user.Config;
-import com.ylli.api.user.mapper.CashLogMapper;
-import com.ylli.api.user.model.CashLog;
 import com.ylli.api.user.model.UserChargeInfo;
-import com.ylli.api.wallet.mapper.WalletLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
-import com.ylli.api.xfpay.mapper.XfBillMapper;
 import com.ylli.api.yfbpay.mapper.YfbBillMapper;
 import com.ylli.api.yfbpay.model.YfbBill;
 import java.util.List;
@@ -25,19 +18,7 @@ public class WalletService {
     WalletMapper walletMapper;
 
     @Autowired
-    XfBillMapper xfBillMapper;
-
-    @Autowired
-    WalletLogMapper walletLogMapper;
-
-    @Autowired
-    AuthSession authSession;
-
-    @Autowired
     YfbBillMapper yfbBillMapper;
-
-    @Autowired
-    CashLogMapper cashLogMapper;
 
     /**
      * 获取用户钱包数据，默认初始化
@@ -167,26 +148,4 @@ public class WalletService {
         return money / 10000.0 * rate;
     }
 
-    @Transactional
-    public String success(Long cashLogId) {
-        CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
-        if (cashLog == null) {
-            return "失败，提现请求不存在";
-        }
-        if (cashLog.isOk) {
-            return "已经提现";
-        }
-        Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
-        if (wallet.recharge < cashLog.money + 200) {
-            throw new AwesomeException(Config.ERROR_CHARGE_REQUEST);
-        }
-
-        cashLog.isOk = true;
-        cashLogMapper.updateByPrimaryKeySelective(cashLog);
-
-        wallet.recharge = wallet.recharge - cashLog.money - 200;
-        wallet.total = wallet.recharge + wallet.bonus;
-        walletMapper.updateByPrimaryKeySelective(wallet);
-        return "成功";
-    }
 }

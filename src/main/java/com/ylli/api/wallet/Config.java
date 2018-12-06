@@ -17,7 +17,33 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             1, "权限不足");
 
+    public static final ErrorCode ERROR_CHARGE_MONEY
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            2, "提现金额区间为 1000 - 20W");
 
+    public static final ErrorCode ERROR_VERIFY
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            3, "密码错误");
+
+    public static final ErrorCode ERROR_SETTLEMENT_CHARGE_EMPTY
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            4, "请联系管理员设置您的费率");
+
+    public static final ErrorCode ERROR_SETTLEMENT_EMPTY
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            5, "请先设置结算信息.");
+
+    public static final ErrorCode ERROR_CASH_OUT_BOUND
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            6, "您当前最大的提现金额为：%s 元");
+
+    public static final ErrorCode ERROR_REQUEST_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            7, "记录不存在");
+
+    public static final ErrorCode ERROR_CASH_HANDLED
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            8, "记录不存在");
     /**
      * 权限
      */
