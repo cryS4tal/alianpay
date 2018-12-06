@@ -1,6 +1,8 @@
 package com.ylli.api.wallet.service;
 
 import com.ylli.api.base.auth.AuthSession;
+import com.ylli.api.user.mapper.CashLogMapper;
+import com.ylli.api.user.model.CashLog;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.wallet.mapper.WalletLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
@@ -31,6 +33,9 @@ public class WalletService {
 
     @Autowired
     YfbBillMapper yfbBillMapper;
+
+    @Autowired
+    CashLogMapper cashLogMapper;
 
     /**
      * 获取用户钱包数据，默认初始化
@@ -158,5 +163,22 @@ public class WalletService {
     //默认的分润 百分比  todo  现在时手续费
     public Double getBonus(Integer money, Integer rate) {
         return money / 10000.0 * rate;
+    }
+
+    @Transactional
+    public String success(Long cashLogId) {
+        CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
+        if (cashLog == null) {
+            return "失败，提现请求不存在";
+        }
+        Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
+
+        cashLog.isOk = true;
+        cashLogMapper.updateByPrimaryKeySelective(cashLog);
+
+        wallet.recharge = cashLog.money - 200;
+        wallet.total = wallet.recharge + wallet.bonus;
+        walletMapper.updateByPrimaryKeySelective(wallet);
+        return "成功";
     }
 }

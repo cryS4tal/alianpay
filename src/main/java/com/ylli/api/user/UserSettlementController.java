@@ -12,6 +12,7 @@ import com.ylli.api.user.model.Cash;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.user.model.UserOwnInfo;
 import com.ylli.api.user.service.UserSettlementService;
+import com.ylli.api.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,9 @@ public class UserSettlementController {
 
     @Autowired
     AuthSession authSession;
+
+    @Autowired
+    WalletService walletService;
 
     @PostMapping("/own")
     public Object saveUserInfo(@RequestBody UserOwnInfo ownInfo) {
@@ -95,4 +99,20 @@ public class UserSettlementController {
         }
         userSettlementService.cash(cash.userId, cash.money, cash.password);
     }
+
+    /**
+     * 临时方法。满足手动提现成功.
+     */
+
+    static class Suc {
+        public Long cashLogId;
+    }
+    @PostMapping("/cash/success")
+    public String success(@RequestBody Suc suc) {
+        if (authSession.getAuthId() != 1002) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        return walletService.success(suc.cashLogId);
+    }
+
 }
