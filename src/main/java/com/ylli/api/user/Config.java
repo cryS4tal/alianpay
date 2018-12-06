@@ -51,7 +51,7 @@ public class Config {
 
     public static final ErrorCode ERROR_CHARGE_REQUEST
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            10, "提现金额大于可用余额。");
+            10, "用户余额不足。");
 
 
     /**
