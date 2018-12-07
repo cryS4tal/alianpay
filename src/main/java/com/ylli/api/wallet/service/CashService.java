@@ -91,10 +91,8 @@ public class CashService {
         //金额计算.
         Wallet wallet = walletService.getOwnWallet(userId);
 
-        Integer already = doSome(userId);
-        if (money + 200 > wallet.recharge - already) {
-            Double allow = wallet.recharge - already > 200 ? wallet.recharge - already - 200 : 0D;
-            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (allow / 100.0))));
+        if (money + 200 > wallet.recharge) {
+            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - 200) / 100.0))));
         }
         //记录日志
         CashLog log = new CashLog();
@@ -110,22 +108,6 @@ public class CashService {
         //去wallet  recharge 可用余额。  更新相应的  recharge  total. （- 2 元手续费）
         //回头更新 cash_log 对应的提现请求  is_ok = true.
 
-    }
-
-    //结算金额计算
-    public Integer doSome(Long userId) {
-        CashLog log = new CashLog();
-        log.userId = userId;
-        log.isOk = true;
-        List<CashLog> logs = cashLogMapper.select(log);
-        if (logs.size() == 0) {
-            return 0;
-        }
-        int sum = 0;
-        for (int i = 0; i < logs.size(); i++) {
-            sum = sum + logs.get(i).money;
-        }
-        return sum;
     }
 
     @Transactional
