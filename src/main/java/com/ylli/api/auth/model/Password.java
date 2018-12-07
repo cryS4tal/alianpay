@@ -8,8 +8,8 @@ import javax.persistence.Table;
  * Created by ylli On 2018/11/20.
  */
 
-@Table(name = "t_account_password")
-public class AccountPassword {
+@Table(name = "t_password")
+public class Password {
 
     @Id
     public Long id;

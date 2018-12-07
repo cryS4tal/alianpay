@@ -1,16 +1,15 @@
 package com.ylli.api.auth;
 
 import com.google.common.base.Strings;
-import com.ylli.api.auth.mapper.AccountPasswordMapper;
 import com.ylli.api.auth.model.Account;
-import com.ylli.api.auth.model.AccountPassword;
 import com.ylli.api.auth.model.PhoneLogin;
 import com.ylli.api.auth.service.LoginService;
+import com.ylli.api.auth.service.PasswordService;
 import com.ylli.api.auth.service.PhoneAuthService;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.phone.service.SmsService;
 import com.ylli.api.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,17 +20,26 @@ import org.springframework.web.bind.annotation.RestController;
 public class PhoneAuthController {
 
     @Autowired
+    SmsService smsService;
+
+    @Autowired
     PhoneAuthService phoneAuthService;
 
     @Autowired
     LoginService loginService;
 
     @Autowired
-    AccountPasswordMapper accountPasswordMapper;
+    PasswordService passwordService;
 
     @Autowired
     WalletService walletService;
 
+    /**
+     * 未接入短信服务.暂时使用密码校验（待移除）.
+     *
+     * @param request
+     * @return
+     */
     @PostMapping
     public Object login(@RequestBody PhoneLogin request) {
 
@@ -49,20 +57,12 @@ public class PhoneAuthController {
         if (account == null) {
             account = phoneAuthService.create(request.phone);
 
-            //插入accountPassword
-            AccountPassword password = new AccountPassword();
-            password.id = account.id;
-            password.password = BCrypt.hashpw(request.password, BCrypt.gensalt());
-            accountPasswordMapper.insertSelective(password);
-
-            walletService.create(account.id);
+            passwordService.init(account.id, request.password);
+            walletService.init(account.id);
 
         } else {
-            AccountPassword password = accountPasswordMapper.selectByPrimaryKey(account.id);
-
-            if (Strings.isNullOrEmpty(request.password) || !BCrypt.checkpw(request.password, password.password)) {
-                throw new AwesomeException(Config.ERROR_VERIFY);
-            }
+            //密码校验..
+            passwordService.checkpw(account.id, request.password);
         }
         return loginService.login(account.id);
     }

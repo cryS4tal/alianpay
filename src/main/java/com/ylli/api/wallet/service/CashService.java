@@ -3,9 +3,9 @@ package com.ylli.api.wallet.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
-import com.ylli.api.auth.mapper.AccountPasswordMapper;
+import com.ylli.api.auth.mapper.PasswordMapper;
 import com.ylli.api.auth.mapper.PhoneAuthMapper;
-import com.ylli.api.auth.model.AccountPassword;
+import com.ylli.api.auth.model.Password;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.user.mapper.UserSettlementMapper;
@@ -32,7 +32,7 @@ public class CashService {
     CashLogMapper cashLogMapper;
 
     @Autowired
-    AccountPasswordMapper passwordMapper;
+    PasswordMapper passwordMapper;
 
     @Autowired
     UserSettlementMapper settlementMapper;
@@ -77,7 +77,7 @@ public class CashService {
      */
     @Transactional
     public void cash(Long userId, Integer money, String password) {
-        AccountPassword accountPassword = passwordMapper.selectByPrimaryKey(userId);
+        Password accountPassword = passwordMapper.selectByPrimaryKey(userId);
         if (Strings.isNullOrEmpty(password) || !BCrypt.checkpw(password, accountPassword.password)) {
             throw new AwesomeException(Config.ERROR_VERIFY);
         }

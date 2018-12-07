@@ -60,7 +60,7 @@ public class WalletService {
     }
 
     @Transactional
-    public void create(Long id) {
+    public void init(Long id) {
         Wallet wallet = new Wallet();
         wallet.id = id;
         walletMapper.insertSelective(wallet);

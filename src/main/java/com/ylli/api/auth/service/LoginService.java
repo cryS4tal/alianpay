@@ -62,10 +62,10 @@ public class LoginService {
                 .merge(account)
                 .merge("depts", departmentService.getDeptsByAccount(account.id))
                 .merge("roles", roleService.getListByAccountAndDept(account.id, null))
-                .merge("phone", () -> {
+                /*.merge("phone", () -> {
                     PhoneAuth phoneAuth = phoneAuthService.getByAccountId(id);
                     return phoneAuth != null ? phoneAuth.phone : null;
-                })
+                })*/
                 //.merge("user_info", userInfoService.getUserInfo(account.id))
                 //.merge("apps", userAppService.getApp(account.id))
                 .create();

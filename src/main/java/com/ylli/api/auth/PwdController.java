@@ -1,7 +1,7 @@
 package com.ylli.api.auth;
 
 import com.ylli.api.auth.model.Forget;
-import com.ylli.api.auth.service.PwdService;
+import com.ylli.api.auth.service.PasswordService;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PwdController {
 
     @Autowired
-    PwdService pwdService;
+    PasswordService pwdService;
 
     @Autowired
     AuthSession authSession;
