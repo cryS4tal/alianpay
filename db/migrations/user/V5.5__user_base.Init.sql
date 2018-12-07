@@ -1,24 +1,30 @@
 CREATE TABLE t_user_base (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  user_id BIGINT COMMENT '用户id',
-  user_type INTEGER  COMMENT '用户类型：1-公司，2-个人',
-  merchant_no VARCHAR(64) NOT NULL COMMENT '商户号',
-  name VARCHAR(128) NOT NULL COMMENT '姓名',
-  identity_card VARCHAR(64) NOT NULL COMMENT '商户号',
-  phone VARCHAR(32) NOT NULL COMMENT '手机',
-  email VARCHAR(32) NOT NULL COMMENT '邮箱',
-  images VARCHAR(1024) COMMENT '图片说明 图片id列表',
-  company_name VARCHAR(256) COMMENT '公司姓名',
-  address VARCHAR(512) COMMENT '开户支行',
-  business_license VARCHAR(128) COMMENT '营业执照',
-  legal_person VARCHAR(128) COMMENT '法人',
+  mch_id BIGINT COMMENT '商户id',
+  mch_name VARCHAR(256) COMMENT '商户名称',
+  nick_name VARCHAR(128) COMMENT '商户简称',
+  address VARCHAR(512) COMMENT '地址',
+  link_name VARCHAR(64) COMMENT '联系人',
+  link_phone VARCHAR(32) COMMENT '联系人手机',
+  identity_card VARCHAR(32) COMMENT '身份证',
+  link_email VARCHAR(64) COMMENT '联系人邮箱',
+  legal_name VARCHAR(64) COMMENT '法人',
   legal_phone VARCHAR(32) COMMENT '法人手机',
+  legal_card VARCHAR(32) COMMENT '法人证件号',
+  legal_email VARCHAR(64) COMMENT '法人邮箱',
+  taxpayer_number VARCHAR(128) COMMENT '纳税人识别号',
+  org_code VARCHAR(128) COMMENT '组织机构代码',
+  business_license VARCHAR(128) COMMENT '营业执照',
+	remark VARCHAR(512) COMMENT '备注',
+  state INTEGER DEFAULT 0 COMMENT '审核状态：0-new,1-pass,2-fail',
+	card_images VARCHAR(1024) COMMENT '身份证照片',
+  license_images VARCHAR(1024) COMMENT '营业执照照片',
+  other_images VARCHAR(1024) COMMENT '其他照片',
   create_time DATETIME NOT NULL DEFAULT now(),
-  modify_time DATETIME NOT NULL DEFAULT now()
+  modify_time DATETIME NOT NULL DEFAULT now(),
+  UNIQUE KEY `u_mch_id` (`mch_id`),
+  UNIQUE KEY `u_taxpayer_number` (`taxpayer_number`),
+  UNIQUE KEY `u_org_code` (`org_code`),
+  UNIQUE KEY `u_business_license` (`business_license`),
+  KEY `n_state` (`state`)
 );
-
-ALTER TABLE `t_user_base`
-ADD UNIQUE INDEX `u_user_id` (`user_id`) ;
-
-ALTER TABLE `t_user_base`
-ADD COLUMN `state`  int NULL COMMENT '审核状态：1-通过，0-不通过' AFTER `legal_phone`;

@@ -2,12 +2,10 @@ package com.ylli.api.auth.service;
 
 import com.ylli.api.auth.Config;
 import com.ylli.api.auth.model.Account;
-import com.ylli.api.auth.model.PhoneAuth;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.MergeUtil;
-import com.ylli.api.user.service.UserAppService;
-import com.ylli.api.user.service.UserSettlementService;
+import com.ylli.api.user.service.UserBaseService;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,13 +30,7 @@ public class LoginService {
     AccountService accountService;
 
     @Autowired
-    PhoneAuthService phoneAuthService;
-
-    @Autowired
-    UserSettlementService userInfoService;
-
-    @Autowired
-    UserAppService userAppService;
+    UserBaseService userBaseService;
 
     @Autowired
     MergeUtil mergeUtil;
@@ -68,6 +60,7 @@ public class LoginService {
                 })*/
                 //.merge("user_info", userInfoService.getUserInfo(account.id))
                 //.merge("apps", userAppService.getApp(account.id))
+                .merge("audit_state", userBaseService.getState(account.id))
                 .create();
         return map;
     }

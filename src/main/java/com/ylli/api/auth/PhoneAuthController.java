@@ -8,6 +8,7 @@ import com.ylli.api.auth.service.PasswordService;
 import com.ylli.api.auth.service.PhoneAuthService;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.phone.service.SmsService;
+import com.ylli.api.user.service.UserBaseService;
 import com.ylli.api.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +35,9 @@ public class PhoneAuthController {
     @Autowired
     WalletService walletService;
 
+    @Autowired
+    UserBaseService userBaseService;
+
     /**
      * 未接入短信服务.暂时使用密码校验（待移除）.
      *
@@ -59,7 +63,7 @@ public class PhoneAuthController {
 
             passwordService.init(account.id, request.password);
             walletService.init(account.id);
-
+            userBaseService.init(account.id, request.phone);
         } else {
             //密码校验..
             passwordService.checkpw(account.id, request.password);

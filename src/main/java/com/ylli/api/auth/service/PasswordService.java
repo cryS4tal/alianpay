@@ -33,12 +33,11 @@ public class PasswordService {
     }
 
     @Transactional
-    public Password init(Long id, String pwd) {
+    public void init(Long id, String pwd) {
         Password password = new Password();
         password.id = id;
         password.password = BCrypt.hashpw(pwd, BCrypt.gensalt());
         passwordMapper.insertSelective(password);
-        return passwordMapper.selectByPrimaryKey(password.id);
     }
 
 
