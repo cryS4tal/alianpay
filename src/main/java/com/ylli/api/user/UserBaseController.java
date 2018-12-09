@@ -6,6 +6,7 @@ import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.base.util.CheckPhone;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.user.model.Audit;
 import com.ylli.api.user.model.UserBase;
@@ -34,10 +35,12 @@ public class UserBaseController {
 
     @PostMapping
     public void register(@RequestBody UserBase userBase) {
-        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkEmail", "legalEmail",
-                "taxpayerNumber", "orgCode", "businessLicense", "otherImages", "remark");
+        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone");
         if (userBase.mchId != authSession.getAuthId()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        if (!CheckPhone.isPhoneOrTel(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isPhoneOrTel(userBase.linkPhone))) {
+            throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
         }
         userBaseService.register(userBase);
     }

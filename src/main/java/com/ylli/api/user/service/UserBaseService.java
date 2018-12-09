@@ -34,6 +34,8 @@ public class UserBaseService {
         if (base.state == UserBase.PASS) {
             throw new AwesomeException(Config.ERROR_AUDIT_PASS);
         }
+        //强制转换.
+        userBase.state = UserBase.NEW;
         modelMapper.map(userBase, base);
         userBaseMapper.updateByPrimaryKeySelective(base);
     }
@@ -68,9 +70,9 @@ public class UserBaseService {
         return Optional.ofNullable(userBase).map(base -> base.state).orElse(UserBase.NEW);
     }
 
-    public DataList<UserBase> getBase(Long mchId, Integer state, String mchName, String name, String phone,  String businessLicense, int offset, int limit) {
+    public DataList<UserBase> getBase(Long mchId, Integer state, String mchName, String name, String phone, String businessLicense, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
-        Page<UserBase> page = (Page<UserBase>) userBaseMapper.getBase(mchId, state, mchName, name, phone,  businessLicense);
+        Page<UserBase> page = (Page<UserBase>) userBaseMapper.getBase(mchId, state, mchName, name, phone, businessLicense);
         DataList<UserBase> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();

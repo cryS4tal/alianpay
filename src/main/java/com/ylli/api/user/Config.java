@@ -29,9 +29,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             4, "应用正在使用中");
 
-    public static final ErrorCode ERROR_USER_TYPE
+    public static final ErrorCode ERROR_ILLEGAL_PHONE
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            5, "用户类型不正确");
+            5, "请输入正确的联系方式.");
 
     public static final ErrorCode ERROR_AUDIT_PASS
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
