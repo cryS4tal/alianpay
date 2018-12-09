@@ -8,7 +8,7 @@ VALUES (@pm_sys.manage_user_app, @pm_type_sys, "商户应用管理", "管理商�
 
 -- 添加系统预置权限
 INSERT INTO t_permission (id, type, name, description)
-VALUES (@pm_sys.manage_user_audit, @pm_type_sys, "代付用户资格审核管理", "审核代付用户资格");
+VALUES (@pm_sys.manage_user_base, @pm_type_sys, "商户基础信息管理", "管理商户基础信息");
 
 -- 系统用户管理权限
 INSERT INTO t_permission (id, type, name, description)

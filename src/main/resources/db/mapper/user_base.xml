@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.user.mapper.UserBaseMapper">
+    <resultMap id="baseMap" type="com.ylli.api.user.model.UserBase"/>
+
+    <select id="getBase" resultMap="baseMap">
+        SELECT
+        *
+        FROM t_user_base
+        <where>
+            <if test="mch_id != null">
+                mch_id = ${mch_id}
+            </if>
+            <if test="name != null">
+                <bind name="name_like_ext" value="name + '%'"/>
+                AND (link_name LIKE #{name_like_ext} OR legal_name LIKE #{name_like_ext})
+            </if>
+            <if test="state != null">
+                AND state = ${state}
+            </if>
+            <if test="mch_name != null">
+                <bind name="name_like_ext" value="mch_name + '%'"/>
+                AND mch_name LIKE #{name_like_ext}
+            </if>
+            <if test="phone != null">
+                <bind name="name_like_ext" value="phone + '%'"/>
+                AND phone LIKE #{name_like_ext}
+            </if>
+            <if test="license != null">
+                <bind name="name_like_ext" value="license + '%'"/>
+                AND business_license LIKE #{name_like_ext}
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,6 +1,8 @@
 package com.ylli.api.user;
 
+import com.ylli.api.auth.service.PermissionService;
 import com.ylli.api.base.annotation.Auth;
+import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
@@ -9,15 +11,13 @@ import com.ylli.api.user.model.Audit;
 import com.ylli.api.user.model.UserBase;
 import com.ylli.api.user.service.UserBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * userBase信息用于平台代付商户
- */
 @Auth
 @RestController
 @RequestMapping("/user/base")
@@ -29,32 +29,39 @@ public class UserBaseController {
     @Autowired
     AuthSession authSession;
 
+    @Autowired
+    PermissionService permissionService;
+
     @PostMapping
     public void register(@RequestBody UserBase userBase) {
-        if (userBase.userType == null || (userBase.userType != UserBase.COMPANY && userBase.userType != UserBase.PERSON)) {
-            throw new AwesomeException(Config.ERROR_USER_TYPE);
-        }
-        if (userBase.userType == UserBase.COMPANY) {
-            ServiceUtil.checkNotEmptyIgnore(userBase, true, "merchantNo", "state");
-        } else {
-            ServiceUtil.checkNotEmptyIgnore(userBase, true, "merchantNo", "state", "companyName", "address", "businessLicense", "legalPerson", "legalPhone");
-        }
-        if (authSession.getAuthId() != userBase.userId) {
+        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkEmail", "legalEmail",
+                "taxpayerNumber", "orgCode", "businessLicense", "otherImages", "remark");
+        if (userBase.mchId != authSession.getAuthId()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         userBaseService.register(userBase);
     }
 
-    //todo
-    //userBase 更新接口
-    //列表
-    //详情
+    @GetMapping
+    public Object getBase(@AwesomeParam(required = false) Long mchId,
+                          @AwesomeParam(required = false) Integer state,
+                          @AwesomeParam(required = false) String mchName,
+                          @AwesomeParam(required = false) String name,
+                          @AwesomeParam(required = false) String phone,
+                          @AwesomeParam(required = false) String businessLicense,
+                          @AwesomeParam(defaultValue = "0") int offset,
+                          @AwesomeParam(defaultValue = "10") int limit) {
+        if (mchId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BASE)) {
+            permissionService.permissionDeny();
+        }
+        return userBaseService.getBase(mchId, state, mchName, name, phone, businessLicense, offset, limit);
+    }
 
     @PostMapping("/audit")
-    @Auth(@Permission(Config.SysPermission.MANAGE_USER_AUDIT))
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
     public Object audit(@RequestBody Audit audit) {
         ServiceUtil.checkNotEmpty(audit);
-        return userBaseService.audit(audit.userId, audit.state);
+        return userBaseService.audit(audit.mchId, audit.state);
     }
 
     @PutMapping

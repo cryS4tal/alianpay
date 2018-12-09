@@ -433,24 +433,24 @@ public class XfPayService {
         if (pay.merchantNo == null) {
             return getResJson("A001", "商户号不能为空", pay);
         }
-        UserBase userBase = userBaseService.selectByMerchantNo(pay.merchantNo);
-        if (userBase == null) {
+        //UserBase userBase = userBaseService.selectByMerchantNo(pay.merchantNo);
+        /*if (userBase == null) {
             return getResJson("A100", "商户不存在", null);
         }
         if (userBase.state != UserBase.PASS) {
             return getResJson("A1001", "商户资格待审核", null);
-        }
-        UserKey userKey = userKeyService.getKeyByUserId(userBase.userId);
+        }*/
+        /*UserKey userKey = userKeyService.getKeyByUserId(userBase.userId);
         if (userKey == null) {
             return getResJson("A102", "请先上传商户私钥", null);
-        }
-        String sign = sign(pay, userKey.secretKey);
+        }*/
+        /*String sign = sign(pay, userKey.secretKey);
         boolean flag = sign.equals(pay.sign);
         if (flag) {
             wagesPay(userBase.userId, pay.amount, pay.accountNo, pay.accountName, pay.mobileNo, pay.bankNo, pay.userType, pay.accountType, pay.memo, pay.orderNo);
         } else {
             return getResJson("A200", "签名校验错误", null);
-        }
+        }*/
         return null;
     }
 

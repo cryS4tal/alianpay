@@ -35,7 +35,7 @@ public class Config {
 
     public static final ErrorCode ERROR_AUDIT_PASS
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            6, "审核已通过，请勿重复注册");
+            6, "审核已通过，如需修改信息请联系客服.");
 
     public static final ErrorCode ERROR_AUDIT_ING
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
@@ -67,7 +67,7 @@ public class Config {
         public static final long MANAGE_USER_APP = BASE + 2;
 
         //审核用户（代付）
-        public static final long MANAGE_USER_AUDIT = BASE + 3;
+        public static final long MANAGE_USER_BASE = BASE + 3;
 
         public static final long MANAGE_USER_ACCOUNT = BASE + 4;
     }

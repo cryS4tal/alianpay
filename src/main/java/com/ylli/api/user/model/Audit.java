@@ -1,7 +1,7 @@
 package com.ylli.api.user.model;
 
 public class Audit {
-    public Long userId;
-    //1-pass 0-fail
+    public Long mchId;
+    //1-pass 2-fail
     public Integer state;
 }

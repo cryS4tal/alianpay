@@ -67,7 +67,3 @@ Intellij IDEA
 商户号           mch_id
 商户手续费       mch_charge
 商户订单号       mch_order_id
-
-
-
-用户id           user_id

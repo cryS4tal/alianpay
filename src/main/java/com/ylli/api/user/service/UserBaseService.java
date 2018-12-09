@@ -1,13 +1,16 @@
 package com.ylli.api.user.service;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.model.base.DataList;
 import com.ylli.api.user.Config;
 import com.ylli.api.user.mapper.UserBaseMapper;
 import com.ylli.api.user.model.UserBase;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,47 +18,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserBaseService {
 
-
     @Autowired
     UserBaseMapper userBaseMapper;
 
     @Autowired
-    SerializeUtil serializeUtil;
+    ModelMapper modelMapper;
 
     @Transactional
     public void register(UserBase userBase) {
 
-        UserBase exist = new UserBase();
-        //exist.userId = userBase.userId;
-        exist = userBaseMapper.selectOne(exist);
-        if (exist != null) {
-            /**
-             * state null 待审核
-             * 1 pass
-             * 0 fail
-             */
-            if (exist.state == UserBase.PASS) {
-                throw new AwesomeException(Config.ERROR_AUDIT_PASS);
-            }
-            throw new AwesomeException(Config.ERROR_AUDIT_ING);
+        UserBase base = userBaseMapper.selectByMchId(userBase.mchId);
+        if (base == null) {
+            base = init(userBase.mchId, userBase.linkPhone);
         }
-        userBase.state = null;
-        //userBase.merchantNo = serializeUtil.getCode(userBase.userType);
-        userBaseMapper.insertSelective(userBase);
+        if (base.state == UserBase.PASS) {
+            throw new AwesomeException(Config.ERROR_AUDIT_PASS);
+        }
+        modelMapper.map(userBase, base);
+        userBaseMapper.updateByPrimaryKeySelective(base);
     }
 
-
-    public UserBase selectByMerchantNo(String merchantNo) {
-        UserBase base = new UserBase();
-        //base.merchantNo = merchantNo;
-        return userBaseMapper.selectOne(base);
-    }
 
     @Transactional
-    public Object audit(Long userId, Integer state) {
-        UserBase userBase = new UserBase();
-        //userBase.userId = userId;
-        userBase = userBaseMapper.selectOne(userBase);
+    public Object audit(Long mchId, Integer state) {
+        UserBase userBase = userBaseMapper.selectByMchId(mchId);
         if (userBase == null) {
             throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
         }
@@ -66,18 +52,30 @@ public class UserBaseService {
     }
 
     @Transactional
-    public void init(Long id, String phone) {
+    public UserBase init(Long mchId, String phone) {
         UserBase userBase = new UserBase();
-        userBase.mchId = id;
+        userBase.mchId = mchId;
         userBase.linkPhone = phone;
         userBase.state = UserBase.NEW;
         userBaseMapper.insertSelective(userBase);
+        return userBaseMapper.selectByPrimaryKey(userBase.id);
     }
 
     public Integer getState(Long id) {
         UserBase userBase = new UserBase();
         userBase.mchId = id;
         userBase = userBaseMapper.selectOne(userBase);
-        return Optional.ofNullable(userBase.state).orElse(null);
+        return Optional.ofNullable(userBase).map(base -> base.state).orElse(UserBase.NEW);
+    }
+
+    public DataList<UserBase> getBase(Long mchId, Integer state, String mchName, String name, String phone,  String businessLicense, int offset, int limit) {
+        PageHelper.offsetPage(offset, limit);
+        Page<UserBase> page = (Page<UserBase>) userBaseMapper.getBase(mchId, state, mchName, name, phone,  businessLicense);
+        DataList<UserBase> dataList = new DataList<>();
+        dataList.offset = page.getStartRow();
+        dataList.count = page.size();
+        dataList.totalCount = page.getTotal();
+        dataList.dataList = page;
+        return dataList;
     }
 }
