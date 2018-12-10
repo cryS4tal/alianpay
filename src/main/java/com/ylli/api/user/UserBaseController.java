@@ -35,7 +35,7 @@ public class UserBaseController {
 
     @PostMapping
     public void register(@RequestBody UserBase userBase) {
-        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone");
+        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone", "businessLicense");
         if (userBase.mchId != authSession.getAuthId()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
@@ -68,7 +68,11 @@ public class UserBaseController {
     }
 
     @PutMapping
-    public Object update() {
-        return null;
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
+    public Object update(@RequestBody UserBase userBase) {
+        if (!CheckPhone.isPhoneOrTel(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isPhoneOrTel(userBase.linkPhone))) {
+            throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
+        }
+        return userBaseService.update(userBase);
     }
 }

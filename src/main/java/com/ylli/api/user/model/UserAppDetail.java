@@ -4,11 +4,12 @@ import java.sql.Timestamp;
 
 public class UserAppDetail {
 
+    public Long id;
+
     public Long mchId;
 
     public String mchName;
 
-    //appId 对应 商户应用id，userAppId
     public Long appId;
 
     public String appName;

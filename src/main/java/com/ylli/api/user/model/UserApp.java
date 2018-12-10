@@ -15,7 +15,7 @@ public class UserApp {
 
     public Long mchId;
 
-    public String appId;
+    public Long appId;
 
     //应用状态：true = 启用
     public Integer rate;

@@ -104,12 +104,30 @@ public class AppService {
     public UserAppDetail convert(UserApp userApp) {
         UserAppDetail detail = new UserAppDetail();
 
-        detail.appId = userApp.id;
+        detail.id = userApp.id;
+        detail.appId = userApp.appId;
         detail.appName = sysAppMapper.selectByPrimaryKey(userApp.appId).appName;
         detail.mchId = userApp.mchId;
         detail.mchName = userBaseMapper.selectByMchId(userApp.mchId).mchName;
         detail.rate = userApp.rate;
         detail.createTime = userApp.createTime;
         return detail;
+    }
+
+    /**
+     * 获得商户应用费率
+     *
+     * @return
+     */
+    public Integer getRate(Long mchId, Long appId) {
+        UserApp userApp = new UserApp();
+        userApp.mchId = mchId;
+        userApp.appId = appId;
+        userApp = userAppMapper.selectOne(userApp);
+        if (userApp == null) {
+            return sysAppMapper.selectByPrimaryKey(appId).rate;
+        } else {
+            return userApp.rate;
+        }
     }
 }

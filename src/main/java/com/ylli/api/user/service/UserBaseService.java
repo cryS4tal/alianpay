@@ -80,4 +80,15 @@ public class UserBaseService {
         dataList.dataList = page;
         return dataList;
     }
+
+    @Transactional
+    public UserBase update(UserBase userBase) {
+        UserBase base = userBaseMapper.selectByMchId(userBase.mchId);
+        if (base == null) {
+            base = init(userBase.mchId, userBase.linkPhone);
+        }
+        modelMapper.map(userBase, base);
+        userBaseMapper.updateByPrimaryKeySelective(base);
+        return userBaseMapper.selectByPrimaryKey(userBase);
+    }
 }
