@@ -36,6 +36,8 @@ public class UserBaseService {
         }
         //强制转换.
         userBase.state = UserBase.NEW;
+        //fix use modelMapper cause not update data
+        userBase.id  = base.id;
         modelMapper.map(userBase, base);
         userBaseMapper.updateByPrimaryKeySelective(base);
     }
