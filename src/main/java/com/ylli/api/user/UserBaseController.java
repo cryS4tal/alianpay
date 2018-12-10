@@ -35,7 +35,7 @@ public class UserBaseController {
 
     @PostMapping
     public void register(@RequestBody UserBase userBase) {
-        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone", "businessLicense");
+        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone", "businessLicense", "state");
         if (userBase.mchId != authSession.getAuthId()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
