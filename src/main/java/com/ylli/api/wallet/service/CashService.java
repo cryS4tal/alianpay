@@ -15,8 +15,8 @@ import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.CashLogDetail;
+import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -70,30 +70,21 @@ public class CashService {
 
     /**
      * 后续接入api...
-     *
-     * @param userId
-     * @param money
-     * @param password
      */
     @Transactional
-    public void cash(Long userId, Integer money, String password) {
-        Password accountPassword = passwordMapper.selectByPrimaryKey(userId);
-        if (Strings.isNullOrEmpty(password) || !BCrypt.checkpw(password, accountPassword.password)) {
+    public void cash(CashReq req) {
+
+        Password password = passwordMapper.selectByPrimaryKey(req.mchId);
+        if (Strings.isNullOrEmpty(req.password) || !BCrypt.checkpw(req.password, password.password)) {
             throw new AwesomeException(Config.ERROR_VERIFY);
         }
-        UserSettlement settlement = settlementMapper.selectByUserId(userId);
-        if (settlement == null) {
-            throw new AwesomeException(Config.ERROR_SETTLEMENT_EMPTY);
-        }
-        if (settlement.chargeType == null || settlement.chargeRate == null) {
-            throw new AwesomeException(Config.ERROR_SETTLEMENT_CHARGE_EMPTY);
-        }
         //金额计算.
-        Wallet wallet = walletService.getOwnWallet(userId);
-
-        if (money + 200 > wallet.recharge) {
+        Wallet wallet = walletService.getOwnWallet(req.mchId);
+        if (req.money + 200 > wallet.recharge) {
             throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - 200) / 100.0))));
         }
+
+
         //记录日志
         CashLog log = new CashLog();
         //暂时code记录用户id；msg = 金额
@@ -107,6 +98,7 @@ public class CashService {
 
         //去wallet  recharge 可用余额。  更新相应的  recharge  total. （- 2 元手续费）
         //回头更新 cash_log 对应的提现请求  is_ok = true.
+
 
     }
 

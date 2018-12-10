@@ -1,18 +1,41 @@
 package com.ylli.api.wallet.service;
 
+import com.ylli.api.auth.mapper.AccountMapper;
+import com.ylli.api.auth.model.Account;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.yfbpay.mapper.YfbBillMapper;
 import com.ylli.api.yfbpay.model.YfbBill;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WalletService {
+
+    @Autowired
+    AccountMapper accountMapper;
+
+    @Autowired
+    WalletMapper walletMapper;
+
+    /**
+     * 1.0 版本数据纠正..
+     * 修正初版用户注册时未初始化钱包数据.
+     */
+    @PostConstruct
+    void init() {
+        List<Account> list = accountMapper.selectAll();
+        for (int i = 0; i < list.size(); i++) {
+            Wallet wallet = walletMapper.selectByPrimaryKey(list.get(i).id);
+            if (wallet == null) {
+                init(list.get(i).id);
+            }
+        }
+    }
 
     @Autowired
     WalletMapper walletMapper;
@@ -20,43 +43,8 @@ public class WalletService {
     @Autowired
     YfbBillMapper yfbBillMapper;
 
-    /**
-     * 获取用户钱包数据，默认初始化
-     *
-     * @param userId
-     * @return
-     */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Wallet getOwnWallet(Long userId) {
-        Wallet wallet = walletMapper.selectByPrimaryKey(userId);
-        //默认插入
-        if (wallet == null) {
-            Wallet w = new Wallet();
-            w.id = userId;
-            walletMapper.insertSelective(w);
-
-            return walletMapper.selectByPrimaryKey(userId);
-        }
-        return wallet;
-    }
-
-    @Transactional
-    public Wallet getWallet(Long userId) {
-        Wallet wallet = walletMapper.selectByPrimaryKey(userId);
-
-        //todo 默认插入钱包代码 记得删除。。。
-        //todo 修改新版本，创建用户时默认初始化钱包数据....  （如果有其他信息一并初始化。）
-
-        if (wallet == null) {
-            wallet = new Wallet();
-            wallet.id = userId;
-            wallet.total = 0;
-            wallet.bonus = 0;
-            wallet.recharge = 0;
-            walletMapper.insertSelective(wallet);
-            wallet = walletMapper.selectByPrimaryKey(userId);
-        }
-        return wallet;
+    public Wallet getOwnWallet(Long mchId) {
+        return walletMapper.selectByPrimaryKey(mchId);
     }
 
     @Transactional

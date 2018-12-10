@@ -32,3 +32,19 @@ CREATE TABLE t_wallet_log (
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );
+
+CREATE TABLE t_cash_log (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  mch_id BIGINT COMMENT '用户id',
+  money INTEGER COMMENT '交易金额',
+  open_bank VARCHAR(64) COMMENT '开户行',
+  sub_bank VARCHAR(128) COMMENT '开户支行',
+  bankcard_number VARCHAR(128) COMMENT '银行卡号',
+
+
+
+
+  password VARCHAR(128) COMMENT '密码',
+  create_time DATETIME NOT NULL DEFAULT now(),
+  modify_time DATETIME NOT NULL DEFAULT now()
+);

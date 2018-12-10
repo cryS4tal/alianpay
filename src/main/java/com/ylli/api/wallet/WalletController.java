@@ -31,15 +31,14 @@ public class WalletController {
      * 用户获取自己
      * 管理员获取所有
      *
-     * @param userId
      * @return
      */
     @GetMapping
-    public Object getWallet(@AwesomeParam Long userId) {
-        if (userId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_WALLET)) {
+    public Object getWallet(@AwesomeParam Long mchId) {
+        if (mchId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_WALLET)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return walletService.getWallet(userId);
+        return walletService.getOwnWallet(mchId);
     }
 
 }

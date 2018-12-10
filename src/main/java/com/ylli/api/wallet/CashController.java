@@ -38,13 +38,13 @@ public class CashController {
     @PostMapping
     public void cash(@RequestBody CashReq req) {
         ServiceUtil.checkNotEmpty(req);
-        if (authSession.getAuthId() != req.userId) {
+        if (authSession.getAuthId() != req.mchId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         if (req.money > 20 * 10000 * 100 || req.money < 1000 * 100) {
             throw new AwesomeException(Config.ERROR_CHARGE_MONEY);
         }
-        cashService.cash(req.userId, req.money, req.password);
+        cashService.cash(req);
     }
 
     /**
