@@ -37,7 +37,7 @@ public class CashController {
 
     @PostMapping
     public void cash(@RequestBody CashReq req) {
-        ServiceUtil.checkNotEmpty(req);
+        ServiceUtil.checkNotEmptyIgnore(req, true, "identityCard", "reservedPhone");
         if (authSession.getAuthId() != req.mchId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }

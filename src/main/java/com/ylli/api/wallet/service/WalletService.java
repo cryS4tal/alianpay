@@ -1,41 +1,17 @@
 package com.ylli.api.wallet.service;
 
-import com.ylli.api.auth.mapper.AccountMapper;
-import com.ylli.api.auth.model.Account;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.yfbpay.mapper.YfbBillMapper;
 import com.ylli.api.yfbpay.model.YfbBill;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WalletService {
-
-    @Autowired
-    AccountMapper accountMapper;
-
-    @Autowired
-    WalletMapper walletMapper;
-
-    /**
-     * 1.0 版本数据纠正..
-     * 修正初版用户注册时未初始化钱包数据.
-     */
-    @PostConstruct
-    void init() {
-        List<Account> list = accountMapper.selectAll();
-        for (int i = 0; i < list.size(); i++) {
-            Wallet wallet = walletMapper.selectByPrimaryKey(list.get(i).id);
-            if (wallet == null) {
-                init(list.get(i).id);
-            }
-        }
-    }
 
     @Autowired
     WalletMapper walletMapper;

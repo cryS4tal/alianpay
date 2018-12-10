@@ -9,6 +9,10 @@ import javax.persistence.Table;
 @Table(name = "t_cash_log")
 public class CashLog {
 
+    public static final Integer NEW = 0;
+    public static final Integer FINISH = 1;
+    public static final Integer FAILED = 2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
@@ -26,7 +30,7 @@ public class CashLog {
     public String identityCard;
     public String reservedPhone;
 
-    public Boolean isOk;
+    public Integer state;
 
     public Timestamp createTime;
 

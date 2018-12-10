@@ -6,6 +6,7 @@ CREATE TABLE t_wallet (
   COMMENT '=t_account.id',
   total INTEGER  DEFAULT 0 COMMENT '总金额',
   recharge INTEGER  DEFAULT 0 COMMENT '交易金额',
+  pending INTEGER  DEFAULT 0 COMMENT '待处理金额',
   bonus INTEGER  DEFAULT 0 COMMENT '分润金额',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
@@ -40,11 +41,10 @@ CREATE TABLE t_cash_log (
   open_bank VARCHAR(64) COMMENT '开户行',
   sub_bank VARCHAR(128) COMMENT '开户支行',
   bankcard_number VARCHAR(128) COMMENT '银行卡号',
-
-
-
-
-  password VARCHAR(128) COMMENT '密码',
+  name VARCHAR(64) COMMENT '姓名',
+  identity_card VARCHAR(32) COMMENT '身份证',
+  reserved_phone VARCHAR(32) COMMENT '预留手机号',
+  state INTEGER COMMENT '是否到账:0-待处理，1-成功，2-失败',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );

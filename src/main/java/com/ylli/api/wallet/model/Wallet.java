@@ -16,6 +16,9 @@ public class Wallet {
     //交易（充值）金额      计算公式：交易金额 = 订单金额 - 手续费      手续费 = 订单金额 * 费率百分比
     public Integer recharge;
 
+    //待处理金额（提现申请）
+    public Integer pending;
+
     //分润金额
     public Integer bonus;
 

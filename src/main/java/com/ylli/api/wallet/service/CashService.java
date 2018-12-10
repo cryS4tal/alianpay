@@ -9,7 +9,6 @@ import com.ylli.api.auth.model.Password;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.user.mapper.UserSettlementMapper;
-import com.ylli.api.user.model.UserSettlement;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
@@ -17,7 +16,6 @@ import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.CashLogDetail;
 import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +62,7 @@ public class CashService {
     public CashLogDetail detailConvert(CashLog cashLog) {
         CashLogDetail detail = new CashLogDetail();
         modelMapper.map(cashLog, detail);
-        detail.phone = Optional.ofNullable(phoneAuthMapper.selectByPrimaryKey(cashLog.userId).phone).orElse(null);
+        //detail.phone = Optional.ofNullable(phoneAuthMapper.selectByPrimaryKey(cashLog.userId).phone).orElse(null);
         return detail;
     }
 
@@ -78,28 +76,32 @@ public class CashService {
         if (Strings.isNullOrEmpty(req.password) || !BCrypt.checkpw(req.password, password.password)) {
             throw new AwesomeException(Config.ERROR_VERIFY);
         }
-        //金额计算.
+        // 金额计算.
+        // v1.0 加入限制，存在待处理的体现申请，金额进入钱包待处理部分
         Wallet wallet = walletService.getOwnWallet(req.mchId);
+
+        /*CashLog cashLog = new CashLog();
+        cashLog.mchId = req.mchId;
+        cashLog.state = CashLog.NEW;
+        List<CashLog> logs = cashLogMapper.select(cashLog);
+        int pending = 0;
+        for (int i = 0; i < logs.size(); i++) {
+            pending = pending + logs.get(i).money;
+        }*/
+
         if (req.money + 200 > wallet.recharge) {
             throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - 200) / 100.0))));
         }
 
-
         //记录日志
         CashLog log = new CashLog();
-        //暂时code记录用户id；msg = 金额
-        log.userId = userId;
-        log.money = money;
-        log.isOk = false;
+        modelMapper.map(req, log);
+        log.state = CashLog.NEW;
         cashLogMapper.insertSelective(log);
 
-        //接收到用户提现请求之后。。
-        //先去 cash_log... 获得需要提现的总金额。
-
-        //去wallet  recharge 可用余额。  更新相应的  recharge  total. （- 2 元手续费）
-        //回头更新 cash_log 对应的提现请求  is_ok = true.
-
-
+        wallet.recharge = wallet.recharge - req.money;
+        wallet.pending = wallet.pending + req.money;
+        walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
     @Transactional
@@ -108,18 +110,18 @@ public class CashService {
         if (cashLog == null) {
             throw new AwesomeException(Config.ERROR_REQUEST_NOT_FOUND);
         }
-        if (cashLog.isOk) {
+        /*if (cashLog.isOk) {
             throw new AwesomeException(Config.ERROR_CASH_HANDLED);
-        }
-        Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
+        }*/
+        /*Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
         if (wallet.recharge < cashLog.money + 200) {
             throw new AwesomeException(com.ylli.api.user.Config.ERROR_CHARGE_REQUEST);
-        }
-        cashLog.isOk = true;
+        }*/
+        //cashLog.isOk = true;
         cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-        wallet.recharge = wallet.recharge - cashLog.money - 200;
-        wallet.total = wallet.recharge + wallet.bonus;
-        walletMapper.updateByPrimaryKeySelective(wallet);
+        //wallet.recharge = wallet.recharge - cashLog.money - 200;
+        //wallet.total = wallet.recharge + wallet.bonus;
+        //walletMapper.updateByPrimaryKeySelective(wallet);
     }
 }

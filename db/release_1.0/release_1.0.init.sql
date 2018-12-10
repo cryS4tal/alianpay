@@ -46,3 +46,19 @@ CREATE TABLE t_user_app (
   modify_time DATETIME NOT NULL DEFAULT now(),
   UNIQUE KEY `u_mch_app` (`mch_id`,`app_id`)
 );
+
+ALTER TABLE `t_wallet`
+ADD COLUMN `pending`  INTEGER DEFAULT 0 AFTER `recharge`;
+
+/* 删除历史数据，只对提现成功的进行保留 */
+DELETE FROM t_cash_log WHERE is_ok = 0;
+
+ALTER TABLE `t_cash_log`
+CHANGE COLUMN `user_id` `mch_id`  bigint NULL DEFAULT NULL AFTER `id`,
+CHANGE COLUMN `is_ok` `state`  integer NULL DEFAULT 0 COMMENT '是否到账:0-待处理，1-成功，2-失败' AFTER `money`,
+ADD COLUMN `open_bank`  varchar(64) NULL COMMENT '开户行' AFTER `money`,
+ADD COLUMN `sub_bank`  varchar(128) NULL COMMENT '开户支行' AFTER `open_bank`,
+ADD COLUMN `bankcard_number`  varchar(128) NULL COMMENT '银行卡号' AFTER `sub_bank`,
+ADD COLUMN `name`  varchar(64) NULL COMMENT '姓名' AFTER `bankcard_number`,
+ADD COLUMN `identity_card`  varchar(32) NULL COMMENT '身份证' AFTER `name`,
+ADD COLUMN `reserved_phone`  varchar(32) NULL COMMENT '预留手机号' AFTER `identity_card`;
