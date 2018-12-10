@@ -4,21 +4,17 @@ import java.sql.Timestamp;
 
 public class UserAppDetail {
 
-    public Long id;
+    public Long mchId;
 
-    public Long userId;
+    public String mchName;
 
-    public String nickname;
-
-    public String appId;
+    //appId 对应 商户应用id，userAppId
+    public Long appId;
 
     public String appName;
 
     //应用状态：true = 启用
-    public Boolean status;
+    public Integer rate;
 
     public Timestamp createTime;
-
-    public Timestamp modifyTime;
-
 }

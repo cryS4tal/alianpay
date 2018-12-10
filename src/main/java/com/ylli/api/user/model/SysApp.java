@@ -6,19 +6,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "t_user_app")
-public class UserApp {
+@Table(name = "t_sys_app")
+public class SysApp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    public Long mchId;
+    public String appName;
 
-    public String appId;
+    //统一费率
+    public Integer rate;
 
     //应用状态：true = 启用
-    public Integer rate;
+    public Boolean status;
 
     public Timestamp createTime;
 

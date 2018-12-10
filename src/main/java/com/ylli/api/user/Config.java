@@ -25,9 +25,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             3, "应用不存在");
 
-    public static final ErrorCode ERROR_APP_IN_USERD
+    public static final ErrorCode ERROR_PERMISSION_LESS
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            4, "应用正在使用中");
+            4, "商户和应用不匹配，不可删除他人应用");
 
     public static final ErrorCode ERROR_ILLEGAL_PHONE
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
@@ -64,7 +64,7 @@ public class Config {
          */
         public static final long MANAGE_USER_CHARGE = BASE + 1;
 
-        public static final long MANAGE_USER_APP = BASE + 2;
+        public static final long MANAGE_APP = BASE + 2;
 
         //审核用户（代付）
         public static final long MANAGE_USER_BASE = BASE + 3;

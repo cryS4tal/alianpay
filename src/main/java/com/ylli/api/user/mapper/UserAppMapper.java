@@ -7,8 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import tk.mybatis.mapper.common.Mapper;
 
 public interface UserAppMapper extends Mapper<UserApp> {
-    List<UserApp> selectApps(@Param("user_id") Long userId);
 
-    @Select("SELECT * FROM t_user_app WHERE app_id = ${app_id}")
-    UserApp selectByAppId(@Param("app_id") String appId);
+    @Select("SELECT * FROM t_user_app WHERE mch_id = ${mch_id}")
+    List<UserApp> selectAppsByMchId(@Param("mch_id") Long mchId);
 }
