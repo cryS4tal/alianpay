@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-@ConditionalOnProperty("pay.jobs.enable")
-@EnableAsync
+//@ConditionalOnProperty("pay.jobs.enable")
+//@EnableAsync
 public class AliPayJobs {
     @Autowired
     AliPayService aliPayService;
 
-    @Scheduled(cron = "0/1 * * * * ?")
+    /*@Scheduled(cron = "0/1 * * * * ?")
     public void autoOrderQuery() {
         aliPayService.autoSendNotify();
-    }
+    }*/
 }

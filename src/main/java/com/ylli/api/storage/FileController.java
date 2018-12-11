@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/files")
-@Auth
+
 public class FileController {
     @Autowired
     StorageService storageService;
@@ -43,6 +43,7 @@ public class FileController {
     }
 
     @PostMapping
+    @Auth
     Object addFile(@RequestParam(value = "upload_file") MultipartFile file) throws AwesomeException {
         return storageService.store(authSession.getAuthId(), file);
     }

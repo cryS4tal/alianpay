@@ -9,7 +9,7 @@ public class Config {
     /**
      * 模块编号
      */
-    public static final int MODEL_CODE = 10;
+    public static final int MODEL_CODE = 12;
     /**
      * 错误定义
      */
@@ -21,14 +21,4 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             2, "服务连通失败");
 
-    /**
-     * 权限
-     */
-    public static class SysPermission {
-        private static final long BASE = MODEL_CODE * 10000 + PermissionModel.TYPE_SYSTEM * 1000;
-        /**
-         * 管理角色与权限
-         */
-        //public static final long MANAGE_USER_CHARGE = BASE + 1;
-    }
 }

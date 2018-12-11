@@ -1,4 +1,4 @@
-package com.ylli.api.xfpay;
+package com.ylli.api.wzpay;
 
 import com.ylli.api.auth.model.PermissionModel;
 import com.ylli.api.base.exception.ErrorCode;
@@ -9,7 +9,7 @@ public class Config {
     /**
      * 模块编号
      */
-    public static final int MODEL_CODE = 11;
+    public static final int MODEL_CODE = 10;
     /**
      * 错误定义
      */
@@ -17,12 +17,8 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             1, "权限不足");
 
-    public static final ErrorCode ERROR_ORDERNO_NOT_EMPTY
+    public static final ErrorCode ERROR_INVALID_PARAM
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            2, "订单号不能为空");
-
-    public static final ErrorCode ERROR_ORDER_NOT_FOUND
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            3, "订单号不存在");
+            2, "无效的参数。%s");
 
 }

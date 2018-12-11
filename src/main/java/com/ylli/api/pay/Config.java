@@ -17,9 +17,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             1, "权限不足");
 
-    public static final ErrorCode ERROR_WALLET_ERROR
+    public static final ErrorCode ERROR_CHANNEL_NOT_FOUND
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
-            2, "钱包数据丢失");
+            2, "通道不存在");
 
 
     /**

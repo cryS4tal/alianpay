@@ -3,7 +3,6 @@ package com.ylli.api.pay.util;
 import com.google.common.base.Strings;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,9 @@ public class SerializeUtil {
     public static final String YFB_PAY = "B";
 
 
+    /**
+     * 自动维护了一个自增序列，暂时没用到，先保留
+     */
     @PostConstruct
     void init() {
         String serialValue = redisTemplate.opsForValue().get(SERIAL_KEY);
@@ -45,28 +47,17 @@ public class SerializeUtil {
         return redisTemplate.opsForValue().increment(SERIAL_KEY, 1);
     }
 
-    /**
-     * 商户号：yyyyMMdd + userType + serialValue
-     */
-    public String getCode(Integer type) {
 
-        String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
-        StringBuffer sb = new StringBuffer(dateStr);
-
-        return sb.append(type).append(StringUtils.leftPad(String.valueOf(getValue()), 6, "0")).toString();
-    }
-
-    //todo 对于商户订单是否需要不同支付通道对应不同表？
     /**
      * 商户订单号：yyyyMMddHHmmss + 支付通道标识 + leftPad(userId,7,0) + leftPad(billId,8,0)
      *
      * @return
      */
-    public String generateOrderNo(String channel,Long userId, Long billId) {
+    public String generateOrderNo(String code, Long userId, Long billId) {
 
         return new StringBuffer()
-                .append(new SimpleDateFormat("yyyyMMddHHmmss").format(java.sql.Date.from(Instant.now())))
-                .append(channel)
+                .append(new SimpleDateFormat("yyyyMMdd").format(java.sql.Date.from(Instant.now())))
+                .append(code)
                 .append(StringUtils.leftPad(String.valueOf(userId), 7, "0"))
                 .append(StringUtils.leftPad(String.valueOf(billId), 8, "0"))
                 .toString();

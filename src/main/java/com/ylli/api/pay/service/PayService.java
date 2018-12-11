@@ -5,8 +5,11 @@ import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.model.SysChannel;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.user.service.UserKeyService;
+import com.ylli.api.wzpay.service.WzClient;
+import com.ylli.api.wzpay.service.WzService;
 import com.ylli.api.yfbpay.model.YfbBill;
 import com.ylli.api.yfbpay.service.YfbService;
 import java.text.SimpleDateFormat;
@@ -28,6 +31,12 @@ public class PayService {
 
     @Autowired
     UserKeyService userKeyService;
+
+    @Autowired
+    ChannelService channelService;
+
+    @Autowired
+    WzService wzService;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -67,8 +76,9 @@ public class PayService {
             return new Response("A001", "签名校验失败", baseOrder);
         }
 
-        //加入系统通道管理
-        if (true) {
+        SysChannel channel = channelService.getCurrentChannel();
+
+        if (channel.code.equals("YFB")) {
             //易付宝支付
             //参数前置校验
             if (!payTypes.contains(baseOrder.payType)) {
@@ -100,9 +110,13 @@ public class PayService {
             str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
             str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
             return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
-        } else if (true) {
-            //快易支付..
-            //其他支付...
+        } else if (channel.code.equals("WZ")) {
+
+
+
+            wzService.createOrder(baseOrder.money,baseOrder.reserve,baseOrder.redirectUrl);
+
+
 
         } else {
             //
