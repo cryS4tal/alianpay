@@ -56,14 +56,14 @@ public class AppController {
     }
 
 
-    @PostMapping
+    @PostMapping("/mch/app")
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
     public Object setUserRate(@RequestBody Apps apps) {
         return appService.setUserRate(apps);
     }
 
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/mch/app/{id}")
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
     public Object removeApp(@PathVariable long id,
                             @AwesomeParam Long mchId) {
