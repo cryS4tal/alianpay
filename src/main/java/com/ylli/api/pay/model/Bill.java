@@ -64,7 +64,7 @@ public class Bill {
     public Timestamp tradeTime;
 
     //手续费
-    public Double payCharge;
+    public Integer payCharge;
 
     public Timestamp createTime;
 

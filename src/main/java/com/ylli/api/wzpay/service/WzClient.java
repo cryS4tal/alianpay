@@ -1,5 +1,6 @@
 package com.ylli.api.wzpay.service;
 
+import com.google.gson.Gson;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.wzpay.model.WzQueryRes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +74,8 @@ public class WzClient {
                 .queryParam("sign", generateSign(sysOrderId))
                 .build().encode().toUriString();
         try {
-            WzQueryRes result = restTemplate.getForObject(requestUrl, WzQueryRes.class);
-            return result;
+            String result = restTemplate.getForObject(requestUrl, String.class);
+            return new Gson().fromJson(result, WzQueryRes.class);
         } catch (Exception ex) {
             ex.getMessage();
         }

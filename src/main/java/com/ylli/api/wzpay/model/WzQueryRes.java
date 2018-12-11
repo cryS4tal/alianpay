@@ -5,5 +5,5 @@ public class WzQueryRes {
 
     public String msg;
 
-    public WzQueryData data;
+    //public WzQueryData data;
 }

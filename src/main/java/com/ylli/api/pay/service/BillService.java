@@ -8,11 +8,15 @@ import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
+import com.ylli.api.user.service.AppService;
+import com.ylli.api.wallet.service.WalletService;
 import com.ylli.api.wzpay.model.WzQueryRes;
 import com.ylli.api.wzpay.service.WzClient;
 import com.ylli.api.yfbpay.model.YfbBill;
 import com.ylli.api.yfbpay.service.YfbService;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +34,12 @@ public class BillService {
 
     @Autowired
     WzClient wzClient;
+
+    @Autowired
+    WalletService walletService;
+
+    @Autowired
+    AppService appService;
 
     /**
      * todo 目前账单系统是分离的。第一版先直接查询易付宝账单.
@@ -106,14 +116,6 @@ public class BillService {
     }
 
 
-    public Integer getMaxCash(Long userId) {
-        //暂时走易付宝
-        Integer max = yfbService.getMaxCash(userId);
-        if (max == null) {
-            return 0;
-        }
-        return max;
-    }
 
     public boolean mchOrderExist(String mchOrderId) {
         Bill bill = new Bill();
@@ -127,22 +129,42 @@ public class BillService {
         return billMapper.selectOne(bill);
     }
 
-    public Bill orderQuery(String code,String sysOrderId) throws Exception {
+    /**
+     *
+     */
+    public Bill orderQuery(String sysOrderId) throws Exception {
+        Bill bill = new Bill();
+        bill.sysOrderId = sysOrderId;
+        bill = billMapper.selectOne(bill);
 
-        if (code.equals("WZ")) {
+        //todo 根据订单通道类型  bill.channelId 去主动请求不同的订单查询client.
+        if (true) {
+            System.out.println("wzClinet");
+
             WzQueryRes res = wzClient.orderQuery(sysOrderId);
-
-
             if (res.code.equals("success")) {
+                if (bill.status != Bill.FINISH) {
+                    bill.status = Bill.FINISH;
+                    bill.tradeTime = Timestamp.from(Instant.now());
+                    bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                    billMapper.updateByPrimaryKeySelective(bill);
 
+                    //钱包金额变动。
+                    walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                }
             } else if (res.code.equals("fail")) {
-
+                if (bill.status == Bill.NEW) {
+                    bill.status = Bill.FAIL;
+                    billMapper.updateByPrimaryKeySelective(bill);
+                }
             }
+            return bill;
 
+        } else {
+            System.out.println("进入易付宝查询");
 
-        } else if (code.equals("YFB")) {
-         //todo tfb_bill to bill
+            return null;
         }
-        return null;
+
     }
 }

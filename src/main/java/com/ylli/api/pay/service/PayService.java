@@ -67,7 +67,6 @@ public class PayService {
             return new Response("A003", "非法的请求参数", baseOrder);
         }
 
-
         //sign 前置校验
         String secretKey = userKeyService.getKeyById(baseOrder.mchId);
         if (secretKey == null) {
@@ -119,6 +118,10 @@ public class PayService {
                 return new Response("A005", "订单号重复", baseOrder);
             }
 
+            //金额限制，低于10元 && 费率低于 1% 存在金额精度丢失。（按分计）
+            if (baseOrder.money < Ali_Min) {
+                return new Response("A007", "交易金额限制：当前最低交易金额10元", baseOrder);
+            }
             if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
                 //兼容网众支付  商户跳转地址必填
                 baseOrder.redirectUrl = "http://www.baidu.com";
@@ -185,7 +188,8 @@ public class PayService {
         if (sign.equals(orderQuery.sign.toUpperCase())) {
             /**
              * 账单没有合并.
-             * 账单合并之后移除....
+             * 账单合并之后移除.... channel
+             * todo
              */
             SysChannel channel = channelService.getCurrentChannel();
             if (channel.code.equals("YFB")) {
@@ -219,11 +223,11 @@ public class PayService {
                 if (bill == null) {
                     return new OrderQueryRes("A006", "订单不存在");
                 }
-                if (bill.status == YfbBill.FINISH || bill.status == YfbBill.FAIL) {
+                if (bill.status == Bill.FINISH || bill.status == Bill.FAIL) {
 
                 } else {
                     //主动请求网众服务，获取当前订单信息
-                    bill = billService.orderQuery(channel.code, bill.sysOrderId);
+                    bill = billService.orderQuery(bill.sysOrderId);
                 }
                 //直接返回订单信息
                 OrderQueryRes res = new OrderQueryRes();

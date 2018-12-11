@@ -49,24 +49,11 @@ public class AppService {
 
 
     @Transactional
-    public List<UserAppDetail> removeApp(long id, Long mchId) {
-
-        UserApp userApp = userAppMapper.selectByPrimaryKey(id);
-        if (userApp == null) {
-            throw new AwesomeException(Config.ERROR_APP_NOT_FOUND);
-        }
-        if (userApp.mchId != mchId) {
-            throw new AwesomeException(Config.ERROR_PERMISSION_LESS);
-        }
-
+    public void removeApp(Long appId, Long mchId) {
+        UserApp userApp = new UserApp();
+        userApp.appId = appId;
+        userApp.mchId = mchId;
         userAppMapper.delete(userApp);
-        List<UserApp> list = userAppMapper.selectAppsByMchId(mchId);
-        List<UserAppDetail> details = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-
-            details.add(convert(list.get(i)));
-        }
-        return details;
     }
 
     public DataList<SysApp> getSysApp(String appName, Boolean status, int offset, int limit) {
@@ -96,7 +83,7 @@ public class AppService {
         List<UserAppDetail> list = new ArrayList<>();
         for (int i = 0; i < apps.apps.size(); i++) {
             UserApp userApp = apps.apps.get(i);
-            ServiceUtil.checkNotEmptyIgnore(apps.apps.get(i),true);
+            ServiceUtil.checkNotEmptyIgnore(apps.apps.get(i), true);
             if (sysAppMapper.selectByPrimaryKey(userApp.appId) == null) {
                 throw new AwesomeException(Config.ERROR_APP_NOT_FOUND);
             }
@@ -165,5 +152,39 @@ public class AppService {
         } else {
             return 0l;
         }
+    }
+
+    public Object getMchApp(Long mchId) {
+        List<SysApp> list = sysAppMapper.selectAll();
+
+        List<UserAppDetail> details = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            details.add(doSome(list.get(i), mchId));
+        }
+        String mchName = userBaseMapper.selectByMchId(mchId).mchName;
+        details.stream().forEach(i ->{
+            i.mchId = mchId;
+            i.mchName = mchName;
+        });
+        return details;
+    }
+
+    public UserAppDetail doSome(SysApp sysApp, Long mchId) {
+        UserAppDetail detail = new UserAppDetail();
+        UserApp userApp = new UserApp();
+        userApp.mchId = mchId;
+        userApp.appId = sysApp.id;
+        userApp = userAppMapper.selectOne(userApp);
+        if (userApp == null) {
+            detail.appId = sysApp.id;
+            detail.appName = sysApp.appName;
+            detail.rate = sysApp.rate;
+
+        } else {
+            detail.rate = userApp.rate;
+            detail.appId = userApp.appId;
+            detail.appName = sysApp.appName;
+        }
+        return detail;
     }
 }

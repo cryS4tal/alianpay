@@ -246,7 +246,7 @@ public class YfbService {
                 bill.msg = ovalue;
 
                 UserSettlement settlement = userSettlementMapper.selectByUserId(bill.userId);
-                if (settlement != null) {
+                if (settlement != null && bill.status != YfbBill.FINISH) {
                     walletService.addBonus(bill.userId, bill.id, settlement.chargeRate);
                 }
                 yfbBillMapper.updateByPrimaryKeySelective(bill);

@@ -5,6 +5,7 @@ import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
+import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.user.model.Apps;
 import com.ylli.api.user.model.SysApp;
@@ -12,7 +13,6 @@ import com.ylli.api.user.service.AppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,12 +62,19 @@ public class AppController {
         return appService.setUserRate(apps);
     }
 
-
-    @DeleteMapping("/mch/app/{id}")
+    @DeleteMapping("/mch/app")
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
-    public Object removeApp(@PathVariable long id,
-                            @AwesomeParam Long mchId) {
-        return appService.removeApp(id, mchId);
+    public void removeApp(@AwesomeParam Long appId,
+                          @AwesomeParam Long mchId) {
+        appService.removeApp(appId, mchId);
+    }
+
+    @GetMapping("/mch/app")
+    public Object getMchApp(@AwesomeParam Long mchId) {
+        if (mchId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_APP)) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        return appService.getMchApp(mchId);
     }
 
 }
