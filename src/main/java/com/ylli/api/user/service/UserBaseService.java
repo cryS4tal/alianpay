@@ -89,6 +89,8 @@ public class UserBaseService {
         if (base == null) {
             base = init(userBase.mchId, userBase.linkPhone);
         }
+        //fix use modelMapper cause not update data
+        userBase.id  = base.id;
         modelMapper.map(userBase, base);
         userBaseMapper.updateByPrimaryKeySelective(base);
         return userBaseMapper.selectByPrimaryKey(userBase);
