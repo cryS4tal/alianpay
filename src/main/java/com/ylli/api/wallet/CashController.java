@@ -1,5 +1,6 @@
 package com.ylli.api.wallet;
 
+import com.ylli.api.auth.service.PermissionService;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
@@ -26,12 +27,17 @@ public class CashController {
     @Autowired
     AuthSession authSession;
 
+    @Autowired
+    PermissionService permissionService;
+
     @GetMapping("/list")
-    @Auth(@Permission(Config.SysPermission.MANAGE_USER_CASH))
     public Object cashList(@AwesomeParam(required = false) Long mchId,
                            @AwesomeParam(required = false) String phone,
                            @AwesomeParam(defaultValue = "0") int offset,
                            @AwesomeParam(defaultValue = "20") int limit) {
+        if (mchId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_CASH)) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
         return cashService.cashList(mchId, phone, offset, limit);
     }
 
@@ -47,6 +53,10 @@ public class CashController {
         cashService.cash(req);
     }
 
+
+
+
+    // v1.0版本删除
     /**
      * 临时方法。满足手动提现成功.
      */

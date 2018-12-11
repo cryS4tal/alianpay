@@ -13,10 +13,8 @@ import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.CashLog;
-import com.ylli.api.wallet.model.CashLogDetail;
 import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -51,19 +49,12 @@ public class CashService {
 
         PageHelper.offsetPage(offset, limit);
         Page<CashLog> page = (Page<CashLog>) cashLogMapper.cashList(mchId, phone);
-        DataList<CashLogDetail> dataList = new DataList<>();
+        DataList<CashLog> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();
         dataList.totalCount = page.getTotal();
-        dataList.dataList = page.stream().map(item -> detailConvert(item)).collect(Collectors.toList());
+        dataList.dataList = page;
         return dataList;
-    }
-
-    public CashLogDetail detailConvert(CashLog cashLog) {
-        CashLogDetail detail = new CashLogDetail();
-        modelMapper.map(cashLog, detail);
-        //detail.phone = Optional.ofNullable(phoneAuthMapper.selectByPrimaryKey(cashLog.userId).phone).orElse(null);
-        return detail;
     }
 
     /**

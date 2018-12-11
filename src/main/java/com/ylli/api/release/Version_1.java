@@ -2,7 +2,11 @@ package com.ylli.api.release;
 
 import com.ylli.api.auth.mapper.AccountMapper;
 import com.ylli.api.auth.model.Account;
+import com.ylli.api.user.mapper.UserSettlementMapper;
+import com.ylli.api.user.model.UserSettlement;
+import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
+import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.util.List;
@@ -25,10 +29,16 @@ public class Version_1 {
     @Autowired
     WalletService walletService;
 
+    @Autowired
+    CashLogMapper cashLogMapper;
+
+    @Autowired
+    UserSettlementMapper userSettlementMapper;
 
     @PostConstruct
     void init() {
         fixWallet();
+        fullCashWithWallet();
     }
 
     /**
@@ -52,7 +62,16 @@ public class Version_1 {
      * todo settlement 保留？记录用户每次提现的账户信息
      */
     void fullCashWithWallet() {
-
+        List<CashLog> logs = cashLogMapper.selectAll();
+        logs.stream().forEach(item -> {
+            UserSettlement settlement = userSettlementMapper.selectByUserId(item.mchId);
+            item.bankcardNumber = settlement.bankcardNumber;
+            item.identityCard = settlement.identityCard;
+            item.name = settlement.name;
+            item.reservedPhone = settlement.reservedPhone;
+            item.openBank = settlement.openBank;
+            item.subBank = settlement.subBank;
+            cashLogMapper.updateByPrimaryKeySelective(item);
+        });
     }
-
 }

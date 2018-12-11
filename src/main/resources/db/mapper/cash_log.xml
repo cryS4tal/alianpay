@@ -3,14 +3,15 @@
 <mapper namespace="com.ylli.api.wallet.mapper.CashLogMapper">
     <resultMap id="cashMap" type="com.ylli.api.wallet.model.CashLog"/>
     <select id="cashList" resultMap="cashMap" >
-        SELECT t_cash_log.* FROM t_cash_log LEFT JOIN t_phone_auth ON t_cash_log.user_id = t_phone_auth.id
+        SELECT t_cash_log.* FROM t_cash_log LEFT JOIN t_phone_auth ON t_cash_log.mch_id = t_phone_auth.id
         <where>
             <if test="mch_id != null">
-                user_id = ${mch_id}
+                mch_id = ${mch_id}
             </if>
             <if test="phone != null">
                 phone = #{phone}
             </if>
         </where>
+        ORDER BY create_time DESC
     </select>
 </mapper>
