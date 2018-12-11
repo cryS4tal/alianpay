@@ -3,6 +3,7 @@ package com.ylli.api.pay.util;
 import com.google.common.base.Strings;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Date;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,6 @@ public class SerializeUtil {
     //易付宝
     public static final String YFB_PAY = "B";
 
-
-    /**
-     * 自动维护了一个自增序列，暂时没用到，先保留
-     */
     @PostConstruct
     void init() {
         String serialValue = redisTemplate.opsForValue().get(SERIAL_KEY);
@@ -47,18 +44,29 @@ public class SerializeUtil {
         return redisTemplate.opsForValue().increment(SERIAL_KEY, 1);
     }
 
+    /**
+     * 订单号生成。
+     * v1.0 开始测试使用
+     * @return
+     */
+    public String generateSysOrderId() {
+
+        String dateStr = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        StringBuffer sb = new StringBuffer(dateStr);
+        return sb.append(StringUtils.leftPad(String.valueOf(getValue()), 8, "0")).toString();
+    }
 
     /**
-     * 商户订单号：yyyyMMddHHmmss + 支付通道标识 + leftPad(userId,7,0) + leftPad(billId,8,0)
+     * 商户订单号：yyyyMMddHHmmss + 支付通道标识 + leftPad(mchId,7,0) + leftPad(billId,8,0)
      *
      * @return
      */
-    public String generateOrderNo(String code, Long userId, Long billId) {
+    public String generateOrderNo(String code, Long mchId, Long billId) {
 
         return new StringBuffer()
                 .append(new SimpleDateFormat("yyyyMMdd").format(java.sql.Date.from(Instant.now())))
                 .append(code)
-                .append(StringUtils.leftPad(String.valueOf(userId), 7, "0"))
+                .append(StringUtils.leftPad(String.valueOf(mchId), 7, "0"))
                 .append(StringUtils.leftPad(String.valueOf(billId), 8, "0"))
                 .toString();
     }

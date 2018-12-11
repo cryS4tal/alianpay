@@ -16,3 +16,8 @@ CREATE TABLE t_sys_app (
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );
+
+INSERT INTO `t_sys_app` VALUES ('1', '支付宝H5', '300', '1', '2018-12-11 17:17:32', '2018-12-11 17:17:32');
+INSERT INTO `t_sys_app` VALUES ('2', '微信H5', '300', '1', '2018-12-11 17:17:59', '2018-12-11 17:17:59');
+INSERT INTO `t_sys_app` VALUES ('3', '支付宝扫码', '300', '1', '2018-12-11 17:18:29', '2018-12-11 17:18:29');
+INSERT INTO `t_sys_app` VALUES ('4', '微信扫码', '300', '1', '2018-12-11 17:18:41', '2018-12-11 17:18:41');

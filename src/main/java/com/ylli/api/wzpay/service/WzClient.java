@@ -1,10 +1,9 @@
 package com.ylli.api.wzpay.service;
 
-import com.google.common.base.Strings;
-import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.wzpay.Config;
+import com.ylli.api.wzpay.model.WzQueryRes;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -12,9 +11,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class WzClient {
 
-    public String spid = "8047";
+    @Value("${pay.wz.notify}")
+    public String notifyUrl;
 
-    public String secret = "9d0d30c49a8d446aa2";
+    @Value("${pay.wz.id}")
+    public String spid;
+
+    @Value("${pay.wz.secret}")
+    public String secret;
 
     @Autowired
     RestTemplate restTemplate;
@@ -26,34 +30,13 @@ public class WzClient {
      * @param uid         用户ID
      * @param spsuc       返回商户页面
      * @param productname 商品名称
-     * @param notifyurl   <p>
      *                    banktype    银行卡类型:1，借记卡；2，信用卡
      *                    ordertype     支付类型（1、支付宝/2、微信；3、网银支付；4、QQ支付； 5、快捷支付；6、京东钱包；7、银联钱包；8、聚合支付）
      *                    interfacetype 接口类型（1：扫码； 3：App；4：WAP；5：服务窗；6：直连）
      *                    sign
      *                    暂时只支持 支付宝H5 ordertype=1 interfacetype=4
-     *                    </>
      */
-    public void createWzOrder(String orderid, String mz, String spzdy, String uid, String spsuc, String productname, String notifyurl) throws Exception {
-
-        if (Strings.isNullOrEmpty(orderid)) {
-            throw new AwesomeException(Config.ERROR_INVALID_PARAM.format("订单号不能为空"));
-        }
-        if (Strings.isNullOrEmpty(mz)) {
-            throw new AwesomeException(Config.ERROR_INVALID_PARAM.format("金额不能为空"));
-        }
-        if (Strings.isNullOrEmpty(uid)) {
-            throw new AwesomeException(Config.ERROR_INVALID_PARAM.format("用户id不能为空"));
-        }
-        if (Strings.isNullOrEmpty(spsuc)) {
-            throw new AwesomeException(Config.ERROR_INVALID_PARAM.format("spsuc前端跳转地址不能为空"));
-        }
-        if (Strings.isNullOrEmpty(productname)) {
-            throw new AwesomeException(Config.ERROR_INVALID_PARAM.format("商品名称不能为空"));
-        }
-        if (Strings.isNullOrEmpty(notifyurl)) {
-            throw new AwesomeException(Config.ERROR_INVALID_PARAM.format("回调地址不能为空"));
-        }
+    public String createWzOrder(String orderid, String mz, String spzdy, String uid, String spsuc, String productname) throws Exception {
 
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
                 "http://nfo.cdwzwl.com/createorder/index")
@@ -67,25 +50,40 @@ public class WzClient {
                 .queryParam("interfacetype", 4)
                 .queryParam("productname", productname)
                 .queryParam("sign", generateSign(orderid, mz, spsuc))
-                .queryParam("notifyurl", notifyurl)
+                .queryParam("notifyurl", notifyUrl)
                 .queryParam("banktype", 1)
                 .build()
-                //.encode()
                 .toUriString();
-        /*try {
-            restTemplate.getForObject(requestUrl, Object.class);
-        } catch (Exception ex) {
-            ex.getMessage();
-        }*/
-        System.out.println(requestUrl);
+        return requestUrl;
     }
 
     public String generateSign(String orderid, String mz, String spsuc) throws Exception {
         StringBuffer sb = new StringBuffer();
         sb.append(spid).append(orderid).append(secret).append(mz).append(spsuc).append(1).append(4);
-        String test = sb.toString();
+        return SignUtil.MD5(sb.toString());
+    }
 
-        String md5 = SignUtil.MD5(sb.toString());
+
+    public WzQueryRes orderQuery(String sysOrderId) throws Exception {
+
+        String requestUrl = UriComponentsBuilder.fromHttpUrl(
+                "http://nfc.cdwzwl.com/QueryOrder/Index")
+                .queryParam("spid", spid)
+                .queryParam("orderid", sysOrderId)
+                .queryParam("sign", generateSign(sysOrderId))
+                .build().encode().toUriString();
+        try {
+            WzQueryRes result = restTemplate.getForObject(requestUrl, WzQueryRes.class);
+            return result;
+        } catch (Exception ex) {
+            ex.getMessage();
+        }
+        return null;
+    }
+
+    public String generateSign(String orderid) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        sb.append(spid).append(orderid).append(secret);
         return SignUtil.MD5(sb.toString());
     }
 }

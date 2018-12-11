@@ -103,3 +103,8 @@ ADD UNIQUE INDEX `u_sys_order_id` (`sys_order_id`) ,
 ADD UNIQUE INDEX `u_mch_order_id` (`mch_order_id`) ,
 ADD UNIQUE INDEX `u_super_order_id` (`super_order_id`) ,
 ADD INDEX `n_mch_id` (`mch_id`) ;
+
+INSERT INTO `t_sys_app` VALUES ('1', '支付宝H5', '300', '1', '2018-12-11 17:17:32', '2018-12-11 17:17:32');
+INSERT INTO `t_sys_app` VALUES ('2', '微信H5', '300', '1', '2018-12-11 17:17:59', '2018-12-11 17:17:59');
+INSERT INTO `t_sys_app` VALUES ('3', '支付宝扫码', '300', '1', '2018-12-11 17:18:29', '2018-12-11 17:18:29');
+INSERT INTO `t_sys_app` VALUES ('4', '微信扫码', '300', '1', '2018-12-11 17:18:41', '2018-12-11 17:18:41');

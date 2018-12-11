@@ -9,12 +9,12 @@ import javax.persistence.Table;
 @Table(name = "t_bill")
 public class Bill {
 
-    /*public static final Integer NEW = 1;
+    public static final Integer NEW = 1;
     //请求处理中..
     public static final Integer ING = 2;
     public static final Integer FINISH = 3;
     public static final Integer FAIL = 4;
-    public static final Integer AUTO_CLOSE = 9;*/
+    public static final Integer AUTO_CLOSE = 9;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

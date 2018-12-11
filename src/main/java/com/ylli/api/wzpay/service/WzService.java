@@ -1,7 +1,11 @@
 package com.ylli.api.wzpay.service;
 
+import com.ylli.api.pay.mapper.BillMapper;
+import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.user.service.AppService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,18 +18,44 @@ public class WzService {
     @Autowired
     SerializeUtil serializeUtil;
 
+    @Autowired
+    BillMapper billMapper;
+
+    @Autowired
+    AppService appService;
+
+    @Value("${pay.wz.notify}")
+    public String notify;
+
+    @Value("${pay.wz.id}")
+    public String spid;
+
+    @Value("${pay.wz.secret}")
+    public String secret;
+
     @Transactional
-    public void createOrder(Integer money, String reserve, String redirectUrl) throws Exception {
+    public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
+        Bill bill = new Bill();
+        bill.mchId = mchId;
+        bill.sysOrderId = serializeUtil.generateSysOrderId();
+        bill.mchOrderId = mchOrderId;
+        bill.channelId = channelId;
+        // todo 应用模块 关联.
+        bill.appId = appService.getAppId(payType, tradeType);
 
-        String orderid = serializeUtil.generateOrderNo("wz", 1002L, 5L);
+        bill.money = money;
+        bill.status = Bill.NEW;
+        bill.reserve = reserve;
+        bill.notifyUrl = notifyUrl;
+        bill.redirectUrl = redirectUrl;
+        bill.payType = payType;
+        bill.tradeType = tradeType;
+        billMapper.insertSelective(bill);
+
         String mz = String.format("%.2f", (money / 100.0));
-        wzClient.createWzOrder(orderid, mz, reserve, "1002", redirectUrl, "测试支付", "http://47.99.180.135:8088/pay/wz/notify");
-
+        //商品名称 = 商户号
+        return wzClient.createWzOrder(bill.sysOrderId, mz, reserve, mchId.toString(), redirectUrl, mchId.toString());
     }
 
-    /*public static void main(String[] args) {
-        Integer money = 100;
-        String a =
-        System.out.println(a);
-    }*/
+
 }

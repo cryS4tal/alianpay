@@ -2,13 +2,13 @@ package com.ylli.api.pay.service;
 
 import com.google.common.base.Strings;
 import com.ylli.api.pay.model.BaseOrder;
+import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.model.SysChannel;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.user.service.UserKeyService;
-import com.ylli.api.wzpay.service.WzClient;
 import com.ylli.api.wzpay.service.WzService;
 import com.ylli.api.yfbpay.model.YfbBill;
 import com.ylli.api.yfbpay.service.YfbService;
@@ -24,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PayService {
 
-    //todo 管理员后台加入通道管理，选择不同通道
-
     @Autowired
     YfbService yfbService;
 
@@ -37,6 +35,9 @@ public class PayService {
 
     @Autowired
     WzService wzService;
+
+    @Autowired
+    BillService billService;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -72,21 +73,20 @@ public class PayService {
         if (secretKey == null) {
             return new Response("A002", "请先上传商户私钥", null);
         }
+        if (!payTypes.contains(baseOrder.payType)) {
+            return new Response("A004", "不支持的支付类型", baseOrder);
+        }
+        if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
+            return new Response("A008", "不支持的支付方式", baseOrder);
+        }
         if (isSignValid(baseOrder, secretKey)) {
             return new Response("A001", "签名校验失败", baseOrder);
         }
-
         SysChannel channel = channelService.getCurrentChannel();
 
         if (channel.code.equals("YFB")) {
             //易付宝支付
             //参数前置校验
-            if (!payTypes.contains(baseOrder.payType)) {
-                return new Response("A004", "不支持的支付类型", baseOrder);
-            }
-            if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
-                return new Response("A008", "不支持的支付方式", baseOrder);
-            }
             if (yfbService.exist(baseOrder.mchOrderId)) {
                 return new Response("A005", "订单号重复", baseOrder);
             }
@@ -111,19 +111,31 @@ public class PayService {
             str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
             return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
         } else if (channel.code.equals("WZ")) {
+            //暂时只支持支付宝H5
+            if (!ALI.equals(baseOrder.payType) || !WAP.equals(baseOrder.tradeType)) {
+                return new Response("A098", "临时限制：系统暂时只支持支付宝H5（payType=alipay，tradeType=wap）", baseOrder);
+            }
+            if (billService.mchOrderExist(baseOrder.mchOrderId)) {
+                return new Response("A005", "订单号重复", baseOrder);
+            }
 
+            if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
+                //兼容网众支付  商户跳转地址必填
+                baseOrder.redirectUrl = "http://www.baidu.com";
+            }
 
+            String str = wzService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-            wzService.createOrder(baseOrder.money,baseOrder.reserve,baseOrder.redirectUrl);
-
-
+            System.out.println(str);
+            return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
 
         } else {
             //
 
             return new Response("A099", "下单失败，暂无可用通道", null);
         }
-        return null;
+        //return null;
     }
 
     public static List<Integer> Wx_Allow = new ArrayList<Integer>() {
@@ -171,31 +183,66 @@ public class PayService {
         Map<String, String> map = SignUtil.objectToMap(orderQuery);
         String sign = SignUtil.generateSignature(map, key);
         if (sign.equals(orderQuery.sign.toUpperCase())) {
-            YfbBill bill = yfbService.selectByMchOrderId(orderQuery.mchOrderId);
-            if (bill == null) {
-                return new OrderQueryRes("A006", "订单不存在");
-            }
-            if (bill.status == YfbBill.FINISH || bill.status == YfbBill.FAIL) {
+            /**
+             * 账单没有合并.
+             * 账单合并之后移除....
+             */
+            SysChannel channel = channelService.getCurrentChannel();
+            if (channel.code.equals("YFB")) {
+                YfbBill bill = yfbService.selectByMchOrderId(orderQuery.mchOrderId);
+                if (bill == null) {
+                    return new OrderQueryRes("A006", "订单不存在");
+                }
+                if (bill.status == YfbBill.FINISH || bill.status == YfbBill.FAIL) {
 
+                } else {
+                    //主动请求易付宝服务，获取当前订单信息
+                    bill = yfbService.orderQuery(bill.orderNo);
+                }
+                //直接返回订单信息
+                OrderQueryRes res = new OrderQueryRes();
+                res.code = "A000";
+                res.message = "成功";
+                res.money = bill.amount;
+                res.mchOrderId = bill.subNo;
+                res.sysOrderId = bill.orderNo;
+                res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
+                if (bill.tradeTime != null) {
+                    res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
+                }
+
+                Map<String, String> map1 = SignUtil.objectToMap(res);
+                res.sign = SignUtil.generateSignature(map1, key);
+                return res;
+            } else if (channel.code.equals("WZ")) {
+                Bill bill = billService.selectByMchOrderId(orderQuery.mchOrderId);
+                if (bill == null) {
+                    return new OrderQueryRes("A006", "订单不存在");
+                }
+                if (bill.status == YfbBill.FINISH || bill.status == YfbBill.FAIL) {
+
+                } else {
+                    //主动请求网众服务，获取当前订单信息
+                    bill = billService.orderQuery(channel.code, bill.sysOrderId);
+                }
+                //直接返回订单信息
+                OrderQueryRes res = new OrderQueryRes();
+                res.code = "A000";
+                res.message = "成功";
+                res.money = bill.money;
+                res.mchOrderId = bill.mchOrderId;
+                res.sysOrderId = bill.sysOrderId;
+                res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
+                if (bill.tradeTime != null) {
+                    res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
+                }
+
+                Map<String, String> map1 = SignUtil.objectToMap(res);
+                res.sign = SignUtil.generateSignature(map1, key);
+                return res;
             } else {
-                //主动请求易付宝服务，获取当前订单信息
-                bill = yfbService.orderQuery(bill.orderNo);
+                return null;
             }
-            //直接返回订单信息
-            OrderQueryRes res = new OrderQueryRes();
-            res.code = "A000";
-            res.message = "成功";
-            res.money = bill.amount;
-            res.mchOrderId = bill.subNo;
-            res.sysOrderId = bill.orderNo;
-            res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
-            if (bill.tradeTime != null) {
-                res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
-            }
-
-            Map<String, String> map1 = SignUtil.objectToMap(res);
-            res.sign = SignUtil.generateSignature(map1, key);
-            return res;
         }
         return new OrderQueryRes("A001", "签名校验失败");
     }

@@ -4,8 +4,12 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.model.base.DataList;
+import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
+import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
+import com.ylli.api.wzpay.model.WzQueryRes;
+import com.ylli.api.wzpay.service.WzClient;
 import com.ylli.api.yfbpay.model.YfbBill;
 import com.ylli.api.yfbpay.service.YfbService;
 import java.text.SimpleDateFormat;
@@ -20,6 +24,12 @@ public class BillService {
 
     @Autowired
     YfbService yfbService;
+
+    @Autowired
+    BillMapper billMapper;
+
+    @Autowired
+    WzClient wzClient;
 
     /**
      * todo 目前账单系统是分离的。第一版先直接查询易付宝账单.
@@ -92,7 +102,7 @@ public class BillService {
                 .toString()
                 .replace(PayService.ALI, "支付宝")
                 .replace(PayService.WX, "微信")
-                .replace(PayService.NATIVE,"");
+                .replace(PayService.NATIVE, "");
     }
 
 
@@ -103,5 +113,36 @@ public class BillService {
             return 0;
         }
         return max;
+    }
+
+    public boolean mchOrderExist(String mchOrderId) {
+        Bill bill = new Bill();
+        bill.mchOrderId = mchOrderId;
+        return billMapper.selectOne(bill) != null;
+    }
+
+    public Bill selectByMchOrderId(String mchOrderId) {
+        Bill bill = new Bill();
+        bill.mchOrderId = mchOrderId;
+        return billMapper.selectOne(bill);
+    }
+
+    public Bill orderQuery(String code,String sysOrderId) throws Exception {
+
+        if (code.equals("WZ")) {
+            WzQueryRes res = wzClient.orderQuery(sysOrderId);
+
+
+            if (res.code.equals("success")) {
+
+            } else if (res.code.equals("fail")) {
+
+            }
+
+
+        } else if (code.equals("YFB")) {
+         //todo tfb_bill to bill
+        }
+        return null;
     }
 }

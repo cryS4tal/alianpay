@@ -17,7 +17,6 @@ public class UserApp {
 
     public Long appId;
 
-    //应用状态：true = 启用
     public Integer rate;
 
     public Timestamp createTime;
