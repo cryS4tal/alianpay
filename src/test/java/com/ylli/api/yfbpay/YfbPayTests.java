@@ -19,13 +19,13 @@ public class YfbPayTests {
     @Autowired
     YfbClient client;
 
-    @Test
+    /*@Test
     public void createOrder() throws Exception {
         //client.order("992", "1.00", "20181128test20", "http://47.99.180.135:8080/pay/yfb/notify", "", "", "");
 
         //client.sendNotify();
         String string = client.orderQuery("20181128test20");
         System.out.println(string);
-    }
+    }*/
 
 }

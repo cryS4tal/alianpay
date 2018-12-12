@@ -70,7 +70,7 @@ public class Bill {
 
     public Timestamp modifyTime;
 
-    /*public static String statusToString(int status) {
+    public static String statusToString(int status) {
         if (status == NEW) {
             return "新订单";
         } else if (status == ING) {
@@ -84,5 +84,5 @@ public class Bill {
         } else {
             return "状态异常";
         }
-    }*/
+    }
 }

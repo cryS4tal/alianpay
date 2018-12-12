@@ -37,7 +37,7 @@ public class BillController {
      */
 
     @GetMapping
-    public Object getBills(@AwesomeParam(required = false) Long userId,
+    public Object getBills(@AwesomeParam(required = false) Long mchId,
                            @AwesomeParam(required = false) Integer status,
                            @AwesomeParam(required = false) String mchOrderId,
                            @AwesomeParam(required = false) String sysOrderId,
@@ -48,10 +48,10 @@ public class BillController {
                            @AwesomeParam(required = false) AwesomeDateTime endTime,
                            @AwesomeParam(defaultValue = "0") int offset,
                            @AwesomeParam(defaultValue = "20") int limit) {
-        if (userId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
+        if (mchId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return billService.getBills(userId, status,
+        return billService.getBills(mchId, status,
                 Strings.isNullOrEmpty(mchOrderId) ? null : mchOrderId,
                 Strings.isNullOrEmpty(sysOrderId) ? null : sysOrderId,
                 Strings.isNullOrEmpty(payType) ? null : payType,
@@ -62,9 +62,9 @@ public class BillController {
     }
 
     @GetMapping("/today")
-    public Object getTodayDetail(@AwesomeParam(required = false) Long userId) {
+    public Object getTodayDetail(@AwesomeParam(required = false) Long mchId) {
         do {
-            if (userId != null && authSession.getAuthId() == userId) {
+            if (mchId != null && authSession.getAuthId() == mchId) {
                 break;
             }
             if (permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
@@ -72,7 +72,7 @@ public class BillController {
             }
             permissionService.permissionDeny();
         } while (false);
-        return billService.getTodayDetail(userId);
+        return billService.getTodayDetail(mchId);
     }
 
 }

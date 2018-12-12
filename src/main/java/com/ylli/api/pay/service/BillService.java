@@ -13,6 +13,7 @@ import com.ylli.api.wallet.service.WalletService;
 import com.ylli.api.wzpay.model.WzQueryRes;
 import com.ylli.api.wzpay.service.WzClient;
 import com.ylli.api.yfbpay.model.YfbBill;
+import com.ylli.api.yfbpay.service.YfbClient;
 import com.ylli.api.yfbpay.service.YfbService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -20,6 +21,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,15 +38,21 @@ public class BillService {
     WzClient wzClient;
 
     @Autowired
+    YfbClient yfbClient;
+
+    @Autowired
     WalletService walletService;
 
     @Autowired
     AppService appService;
 
+    @Autowired
+    BillService billService;
+
     /**
      * todo 目前账单系统是分离的。第一版先直接查询易付宝账单.
      *
-     * @param userId
+     * @param mchId
      * @param status
      * @param mchOrderId
      * @param sysOrderId
@@ -56,18 +64,18 @@ public class BillService {
      * @return
      */
 
-    public Object getBills(Long userId, Integer status, String mchOrderId, String sysOrderId, String payType,
+    public Object getBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
                            String tradeType, Date tradeTime, Date startTime, Date endTime, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
-        Page<YfbBill> page = (Page<YfbBill>) yfbService.getBills(userId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
+        Page<Bill> page = (Page<Bill>) billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
 
         DataList<BaseBill> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();
         dataList.totalCount = page.getTotal();
         List<BaseBill> list = new ArrayList();
-        for (YfbBill bill : page) {
+        for (Bill bill : page) {
             BaseBill object = convert(bill);
             list.add(object);
         }
@@ -76,20 +84,15 @@ public class BillService {
 
     }
 
-    private BaseBill convert(YfbBill bill) {
+    private BaseBill convert(Bill bill) {
         BaseBill baseBill = new BaseBill();
-        baseBill.mchId = bill.userId;
-        baseBill.mchOrderId = bill.subNo;
-        baseBill.sysOrderId = bill.orderNo;
-        baseBill.money = bill.amount;
-
-        //订单手续费 = bill.手续费 （之前时分润）
-        if (bill.bonusMoney != null) {
-            baseBill.mchCharge = bill.bonusMoney.intValue();
-        }
+        baseBill.mchId = bill.mchId;
+        baseBill.mchOrderId = bill.mchOrderId;
+        baseBill.sysOrderId = bill.sysOrderId;
+        baseBill.money = bill.money;
+        baseBill.mchCharge = bill.payCharge;
         baseBill.payType = typeToString(bill.payType, bill.tradeType);
-        //baseBill.state = bill.status == YfbBill.NEW ? "新订单" : bill.status == YfbBill.ING ? "进行中" : bill.status == YfbBill.FINISH ? "成功" : "失败";
-        baseBill.state = YfbBill.statusToString(bill.status);
+        baseBill.state = Bill.statusToString(bill.status);
         if (bill.tradeTime != null) {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
@@ -97,8 +100,11 @@ public class BillService {
         return baseBill;
     }
 
-    public Object getTodayDetail(Long userId) {
-        SumAndCount sumAndCount = yfbService.getTodayDetail(userId);
+    public Object getTodayDetail(Long mchId) {
+        SumAndCount sumAndCount = billMapper.getTodayDetail(mchId);
+        if (sumAndCount.total == null) {
+            sumAndCount.total = 0L;
+        }
         return sumAndCount;
     }
 
@@ -116,7 +122,6 @@ public class BillService {
     }
 
 
-
     public boolean mchOrderExist(String mchOrderId) {
         Bill bill = new Bill();
         bill.mchOrderId = mchOrderId;
@@ -132,13 +137,13 @@ public class BillService {
     /**
      *
      */
-    public Bill orderQuery(String sysOrderId) throws Exception {
+    public Bill orderQuery(String sysOrderId, String code) throws Exception {
         Bill bill = new Bill();
         bill.sysOrderId = sysOrderId;
         bill = billMapper.selectOne(bill);
 
-        //todo 根据订单通道类型  bill.channelId 去主动请求不同的订单查询client.
-        if (true) {
+        //todo  test 根据订单通道类型  bill.channelId 去主动请求不同的订单查询client.
+        if (code.equals("WZ")) {
             System.out.println("wzClinet");
 
             WzQueryRes res = wzClient.orderQuery(sysOrderId);
@@ -160,12 +165,46 @@ public class BillService {
             }
             return bill;
 
-        } else {
+        } else if (code.equals("YFB")) {
             System.out.println("进入易付宝查询");
 
+            String str = yfbClient.orderQuery(bill.sysOrderId);
+            //orderid=20181203040702B000100200000025&opstate=0&ovalue=100.00&sign=52aeb9d6083a43130f3050468a37e30c&msg=查询成功
+            str = StringUtils.substringAfter(str, "=");
+            String orderid = StringUtils.substringBefore(str, "&");
+
+            str = StringUtils.substringAfter(str, "=");
+            String opstate = StringUtils.substringBefore(str, "&");
+
+            str = StringUtils.substringAfter(str, "=");
+            String ovalue = StringUtils.substringBefore(str, "&");
+
+            str = StringUtils.substringAfter(str, "=");
+            String sign = StringUtils.substringBefore(str, "&");
+
+            boolean flag = yfbClient.signVerify(orderid, opstate, ovalue, sign);
+            if (flag) {
+                if (opstate.equals("0")) {
+                    if (bill.status != Bill.FINISH) {
+                        bill.status = YfbBill.FINISH;
+                        bill.msg = ovalue;
+                        bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                        bill.tradeTime = Timestamp.from(Instant.now());
+                        billMapper.updateByPrimaryKeySelective(bill);
+
+                        //钱包金额变动。
+                        walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                    }
+                }
+                //其他情况 暂时不做处理.
+
+
+            }
+            return bill;
+
+        } else {
             return null;
         }
-
     }
 
     public Bill selectBySysOrderId(String sysOrderId) {

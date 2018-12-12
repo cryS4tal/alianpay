@@ -1,25 +1,16 @@
 package com.ylli.api.wzpay.service;
 
 import com.google.gson.Gson;
-import com.ylli.api.pay.mapper.BillMapper;
-import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.wzpay.model.WzQueryRes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class WzClient {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(WzClient.class);
 
     @Value("${pay.wz.notify}")
     public String notifyUrl;
@@ -32,9 +23,6 @@ public class WzClient {
 
     @Autowired
     RestTemplate restTemplate;
-
-    @Autowired
-    BillMapper billMapper;
 
     /**
      * @param orderid     商户订单号
@@ -106,27 +94,7 @@ public class WzClient {
      * 异步通知下游商户
      * 可以加入 pay 模块。账单合并之后
      */
-    @Async
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String sendNotify(Long id, String notifyUrl, String params) {
-        LOGGER.info("send mch notify:" + id + " _______________ " + params);
-        String res = null;
-        try {
-            res = restTemplate.postForObject(notifyUrl, params, String.class);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-        }
-        LOGGER.info("received mch res:" + res);
 
-        if (res.toUpperCase().equals("SUCCESS")) {
-            Bill bill = billMapper.selectByPrimaryKey(id);
-            if (bill != null) {
-                bill.isSuccess = true;
-                billMapper.updateByPrimaryKeySelective(bill);
-            }
-        }
-        return res;
-    }
 
     /**
      * 代付请求
@@ -138,12 +106,12 @@ public class WzClient {
                 "http://nfo.cdwzwl.com/createorder/payorder")
                 .queryParam("account", "李玉龙")
                 .queryParam("card", "6217920274920375")
-                .queryParam("name", "上海浦东发展银行")
+                .queryParam("name", "浦发银行")
                 .queryParam("fullname", "上海浦东发展银行芜湖中江支行")
                 .queryParam("linked", "310362002505")
-                .queryParam("spid", spid)
+                .queryParam("spid", "8047_14")
                 .queryParam("order", sysOrderId)
-                .queryParam("type", 0)
+                .queryParam("type", 1)
                 .queryParam("money", "0.98")
                 .queryParam("cityid", "104")
                 .queryParam("idcard", "342501199310231774")
@@ -161,8 +129,30 @@ public class WzClient {
     }
 
     public String testSign(String sysOrderId) throws Exception {
-        StringBuffer sb = new StringBuffer().append("0.98").append("李玉龙").append("6217920274920375").append("上海浦东发展银行")
-                .append("上海浦东发展银行芜湖中江支行").append("310362002505").append(spid).append(sysOrderId).append(0).append(secret);
+        StringBuffer sb = new StringBuffer().append("0.98").append("李玉龙").append("6217920274920375").append("浦发银行")
+                .append("上海浦东发展银行芜湖中江支行").append("310362002505").append("8047_14").append(sysOrderId).append(1).append(secret);
+        return SignUtil.MD5(sb.toString()).toLowerCase();
+    }
+
+    public String cashRes(String sysOrderId) throws Exception {
+        String requestUrl = UriComponentsBuilder.fromHttpUrl(
+                "http://nfc.cdwzwl.com/queryorder/df_query")
+                .queryParam("spid", spid)
+                .queryParam("sporder", sysOrderId)
+                .queryParam("sign", testSign1(sysOrderId))
+                .build().toUriString();
+        try {
+            String result = restTemplate.getForObject(requestUrl, String.class);
+
+            return result;
+        } catch (Exception ex) {
+            ex.getMessage();
+        }
+        return null;
+    }
+
+    public String testSign1(String sysOrderId) throws Exception {
+        StringBuffer sb = new StringBuffer().append("8047").append(sysOrderId).append(secret);
         return SignUtil.MD5(sb.toString());
     }
 }

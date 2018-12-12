@@ -2,6 +2,7 @@ package com.ylli.api.wzpay.service;
 
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
+import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
@@ -23,6 +24,9 @@ public class WzService {
 
     @Autowired
     WzClient wzClient;
+
+    @Autowired
+    PayClient payClient;
 
     @Autowired
     SerializeUtil serializeUtil;
@@ -104,7 +108,7 @@ public class WzService {
                     bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
                     bill.reserve);
 
-            wzClient.sendNotify(bill.id, bill.notifyUrl, params);
+            payClient.sendNotify(bill.id, bill.notifyUrl, params);
 
             if (bill.isSuccess != null && bill.isSuccess) {
                 return "ok";

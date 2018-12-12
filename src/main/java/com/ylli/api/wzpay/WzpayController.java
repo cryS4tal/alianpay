@@ -33,4 +33,9 @@ public class WzpayController {
     public String dotest() throws Exception {
         return wzClient.cash("2018121202593000000001");
     }
+
+    @GetMapping("/test1")
+    public String dotest1() throws Exception {
+        return wzClient.cashRes("2018121202593000000001");
+    }
 }

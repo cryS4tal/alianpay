@@ -67,7 +67,6 @@ public class PayService {
 
     /**
      * 中央调度server. 根据情况选择不同通道
-     * 支付系统商户号为用户id. 代付系统系统生成string 商户号
      *
      * @param baseOrder
      * @return
@@ -96,12 +95,13 @@ public class PayService {
         }
         SysChannel channel = channelService.getCurrentChannel();
 
+        if (billService.mchOrderExist(baseOrder.mchOrderId)) {
+            return new Response("A005", "订单号重复", baseOrder);
+        }
+
         if (channel.code.equals("YFB")) {
             //易付宝支付
-            //参数前置校验
-            if (yfbService.exist(baseOrder.mchOrderId)) {
-                return new Response("A005", "订单号重复", baseOrder);
-            }
+
             //订单金额校验.
             if (baseOrder.payType.equals(ALI)) {
                 //10-9999
@@ -114,7 +114,7 @@ public class PayService {
                     return new Response("A007", "交易金额限制：微信 20，30，50，100，200，300，500 元", baseOrder);
                 }
             }
-            String str = yfbService.createOrder(baseOrder.mchId, baseOrder.payType, baseOrder.tradeType, baseOrder.money,
+            String str = yfbService.createOrder(baseOrder.mchId, channel.id, baseOrder.payType, baseOrder.tradeType, baseOrder.money,
                     baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
             //return str;
             str = str.replace("/pay/alipay/scanpay.aspx", "http://api.qianyipay.com/pay/alipay/scanpay.aspx");
@@ -126,9 +126,6 @@ public class PayService {
             //暂时只支持支付宝H5
             if (!ALI.equals(baseOrder.payType) || !WAP.equals(baseOrder.tradeType)) {
                 return new Response("A098", "临时限制：系统暂时只支持支付宝H5（payType=alipay，tradeType=wap）", baseOrder);
-            }
-            if (billService.mchOrderExist(baseOrder.mchOrderId)) {
-                return new Response("A005", "订单号重复", baseOrder);
             }
 
             //金额限制，低于10元 && 费率低于 1% 存在金额精度丢失。（按分计）
@@ -143,7 +140,6 @@ public class PayService {
             String str = wzService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-            //System.out.println(str);
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
 
         } else {
@@ -151,7 +147,6 @@ public class PayService {
 
             return new Response("A099", "下单失败，暂无可用通道", null);
         }
-        //return null;
     }
 
     public static List<Integer> Wx_Allow = new ArrayList<Integer>() {
@@ -200,67 +195,33 @@ public class PayService {
         Map<String, String> map = SignUtil.objectToMap(orderQuery);
         String sign = SignUtil.generateSignature(map, key);
         if (sign.equals(orderQuery.sign.toUpperCase())) {
-            /**
-             * 账单没有合并.
-             * 账单合并之后移除.... channel
-             * todo
-             */
+
             SysChannel channel = channelService.getCurrentChannel();
-            if (channel.code.equals("YFB")) {
-                YfbBill bill = yfbService.selectByMchOrderId(orderQuery.mchOrderId);
-                if (bill == null) {
-                    return new OrderQueryRes("A006", "订单不存在");
-                }
-                if (bill.status == YfbBill.FINISH || bill.status == YfbBill.FAIL) {
 
-                } else {
-                    //主动请求易付宝服务，获取当前订单信息
-                    bill = yfbService.orderQuery(bill.orderNo);
-                }
-                //直接返回订单信息
-                OrderQueryRes res = new OrderQueryRes();
-                res.code = "A000";
-                res.message = "成功";
-                res.money = bill.amount;
-                res.mchOrderId = bill.subNo;
-                res.sysOrderId = bill.orderNo;
-                res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
-                if (bill.tradeTime != null) {
-                    res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
-                }
-
-                Map<String, String> map1 = SignUtil.objectToMap(res);
-                res.sign = SignUtil.generateSignature(map1, key);
-                return res;
-            } else if (channel.code.equals("WZ")) {
-                Bill bill = billService.selectByMchOrderId(orderQuery.mchOrderId);
-                if (bill == null) {
-                    return new OrderQueryRes("A006", "订单不存在");
-                }
-                if (bill.status == Bill.FINISH || bill.status == Bill.FAIL) {
-
-                } else {
-                    //主动请求网众服务，获取当前订单信息
-                    bill = billService.orderQuery(bill.sysOrderId);
-                }
-                //直接返回订单信息
-                OrderQueryRes res = new OrderQueryRes();
-                res.code = "A000";
-                res.message = "成功";
-                res.money = bill.money;
-                res.mchOrderId = bill.mchOrderId;
-                res.sysOrderId = bill.sysOrderId;
-                res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
-                if (bill.tradeTime != null) {
-                    res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
-                }
-
-                Map<String, String> map1 = SignUtil.objectToMap(res);
-                res.sign = SignUtil.generateSignature(map1, key);
-                return res;
-            } else {
-                return null;
+            Bill bill = billService.selectByMchOrderId(orderQuery.mchOrderId);
+            if (bill == null) {
+                return new OrderQueryRes("A006", "订单不存在");
             }
+            if (bill.status == Bill.FINISH || bill.status == Bill.FAIL) {
+
+            } else {
+                bill = billService.orderQuery(bill.sysOrderId, channel.code);
+            }
+            //直接返回订单信息
+            OrderQueryRes res = new OrderQueryRes();
+            res.code = "A000";
+            res.message = "成功";
+            res.money = bill.money;
+            res.mchOrderId = bill.mchOrderId;
+            res.sysOrderId = bill.sysOrderId;
+            res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
+            if (bill.tradeTime != null) {
+                res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
+            }
+
+            Map<String, String> map1 = SignUtil.objectToMap(res);
+            res.sign = SignUtil.generateSignature(map1, key);
+            return res;
         }
         return new OrderQueryRes("A001", "签名校验失败");
     }

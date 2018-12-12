@@ -1,16 +1,11 @@
 package com.ylli.api.yfbpay.service;
 
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.yfbpay.mapper.YfbBillMapper;
-import com.ylli.api.yfbpay.model.YfbBill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -29,8 +24,6 @@ public class YfbClient {
     @Autowired
     RestTemplate restTemplate;
 
-    @Autowired
-    YfbBillMapper yfbBillMapper;
 
     @Value("${yfb.notify.url}")
     public String notifyUrl;// = "http://47.99.180.135:8080/pay/yfb/notify";
@@ -90,35 +83,6 @@ public class YfbClient {
                 .append("&ovalue=").append(ovalue)
                 .append(secret);
         return SignUtil.MD5(sb.toString(), "GB2312").toLowerCase().equals(sign.toLowerCase());
-    }
-
-
-    /**
-     * 向第三方发送回调通知
-     *
-     * @return
-     */
-    @Async
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String sendNotify(Long billId, String url, String params) {
-
-        LOGGER.info("商户异步通知，billId：" + billId + "notifyUrl：" + url + "params：" + params);
-        String res = null;
-        try {
-            res = restTemplate.postForObject(url, params, String.class);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-        }
-        LOGGER.info("商户回传信息：" + res);
-
-        if (res.toUpperCase().equals("SUCCESS")) {
-            YfbBill bill = yfbBillMapper.selectByPrimaryKey(billId);
-            if (bill != null) {
-                bill.isSuccess = true;
-                yfbBillMapper.updateByPrimaryKeySelective(bill);
-            }
-        }
-        return res;
     }
 
     public String orderQuery(String orderid) throws Exception {

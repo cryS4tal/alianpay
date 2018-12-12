@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ylli.api.yfbpay.mapper.YfbBillMapper">
-    <resultMap id="billMap" type="com.ylli.api.yfbpay.model.YfbBill"/>
+<mapper namespace="com.ylli.api.pay.mapper.BillMapper">
+    <resultMap id="billMap" type="com.ylli.api.pay.model.Bill"/>
 
     <select id="getBills" resultMap="billMap">
         SELECT
         *
-        FROM t_yfb_bill
+        FROM t_bill
         <where>
-            <if test="user_id != null">
-                user_id = ${user_id}
+            <if test="mch_id != null">
+                mch_id = ${mch_id}
             </if>
             <if test="status != null">
                 AND status = ${status}
             </if>
             <if test="mch_order_id != null">
-                AND sub_no = #{mch_order_id}
+                AND mch_order_id = #{mch_order_id}
             </if>
             <if test="sys_order_id != null">
-                AND order_no = #{sys_order_id}
+                AND sys_order_id = #{sys_order_id}
             </if>
             <if test="pay_type != null">
                 AND pay_type = #{pay_type}
