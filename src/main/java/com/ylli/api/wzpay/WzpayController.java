@@ -1,6 +1,7 @@
 package com.ylli.api.wzpay;
 
 import com.ylli.api.base.annotation.AwesomeParam;
+import com.ylli.api.wzpay.service.WzClient;
 import com.ylli.api.wzpay.service.WzService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,9 @@ public class WzpayController {
     @Autowired
     WzService wzService;
 
+    @Autowired
+    WzClient wzClient;
+
     @GetMapping("/notify")
     public String payNotify(@AwesomeParam Long spid,
                             @AwesomeParam String md5,
@@ -23,5 +27,10 @@ public class WzpayController {
                             @AwesomeParam String zdy,
                             @AwesomeParam Long spuid) throws Exception {
         return wzService.payNotify(spid, md5, oid, sporder, mz, zdy, spuid);
+    }
+
+    @GetMapping("/test")
+    public String dotest() throws Exception {
+        return wzClient.cash("2018121202593000000001");
     }
 }

@@ -8,6 +8,9 @@ public class Response {
 
     public String sign;
 
+    //返回data类型。
+    public String type;
+
     //具体待定义.
     public Object data;
 
@@ -23,6 +26,14 @@ public class Response {
     }
 
     public Response() {
+    }
+
+    public Response(String code, String message, String sign, String type, Object data) {
+        this.code = code;
+        this.message = message;
+        this.sign = sign;
+        this.type = type;
+        this.data = data;
     }
 
     public Response(String code, String message, String sign, Object data) {

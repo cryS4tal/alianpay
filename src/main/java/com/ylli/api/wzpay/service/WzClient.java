@@ -76,7 +76,9 @@ public class WzClient {
         return SignUtil.MD5(sb.toString());
     }
 
-
+    /**
+     * 订单查询
+     */
     public WzQueryRes orderQuery(String sysOrderId) throws Exception {
 
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
@@ -100,10 +102,14 @@ public class WzClient {
         return SignUtil.MD5(sb.toString());
     }
 
+    /**
+     * 异步通知下游商户
+     * 可以加入 pay 模块。账单合并之后
+     */
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String sendNotify(Long id, String notifyUrl, String params) {
-        LOGGER.info("send mch notify:"+ id + " _______________ " + params);
+        LOGGER.info("send mch notify:" + id + " _______________ " + params);
         String res = null;
         try {
             res = restTemplate.postForObject(notifyUrl, params, String.class);
@@ -120,5 +126,43 @@ public class WzClient {
             }
         }
         return res;
+    }
+
+    /**
+     * 代付请求
+     *
+     * @return
+     */
+    public String cash(String sysOrderId) throws Exception {
+        String requestUrl = UriComponentsBuilder.fromHttpUrl(
+                "http://nfo.cdwzwl.com/createorder/payorder")
+                .queryParam("account", "李玉龙")
+                .queryParam("card", "6217920274920375")
+                .queryParam("name", "上海浦东发展银行")
+                .queryParam("fullname", "上海浦东发展银行芜湖中江支行")
+                .queryParam("linked", "310362002505")
+                .queryParam("spid", spid)
+                .queryParam("order", sysOrderId)
+                .queryParam("type", 0)
+                .queryParam("money", "0.98")
+                .queryParam("cityid", "104")
+                .queryParam("idcard", "342501199310231774")
+                .queryParam("mobile", "15755378327")
+                .queryParam("sign", testSign(sysOrderId))
+                .build().toUriString();
+        try {
+            String result = restTemplate.getForObject(requestUrl, String.class);
+
+            return result;
+        } catch (Exception ex) {
+            ex.getMessage();
+        }
+        return null;
+    }
+
+    public String testSign(String sysOrderId) throws Exception {
+        StringBuffer sb = new StringBuffer().append("0.98").append("李玉龙").append("6217920274920375").append("上海浦东发展银行")
+                .append("上海浦东发展银行芜湖中江支行").append("310362002505").append(spid).append(sysOrderId).append(0).append(secret);
+        return SignUtil.MD5(sb.toString());
     }
 }

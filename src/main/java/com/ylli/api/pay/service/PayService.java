@@ -121,7 +121,7 @@ public class PayService {
             str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
             str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
             str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
-            return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
+            return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
         } else if (channel.code.equals("WZ")) {
             //暂时只支持支付宝H5
             if (!ALI.equals(baseOrder.payType) || !WAP.equals(baseOrder.tradeType)) {
@@ -143,8 +143,8 @@ public class PayService {
             String str = wzService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-            System.out.println(str);
-            return new Response("A000", "成功", successSign("A000", "成功", str, secretKey), str);
+            //System.out.println(str);
+            return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
 
         } else {
             //
@@ -186,8 +186,9 @@ public class PayService {
         return !SignUtil.generateSignature(map, secretKey).equals(order.sign.toUpperCase());
     }
 
-    public String successSign(String code, String message, Object data, String key) throws Exception {
+    public String successSign(String code, String message, String type, Object data, String key) throws Exception {
         Response response = new Response(code, message, data);
+        response.type = type;
         Map<String, String> map = SignUtil.objectToMap(response);
         return SignUtil.generateSignature(map, key);
     }
