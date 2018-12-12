@@ -61,6 +61,7 @@ public class LoginService {
                 //.merge("user_info", userInfoService.getUserInfo(account.id))
                 //.merge("apps", userAppService.getApp(account.id))
                 .merge("audit_state", userBaseService.getState(account.id))
+                .merge("base", userBaseService.getBase(account.id))
                 .create();
         return map;
     }

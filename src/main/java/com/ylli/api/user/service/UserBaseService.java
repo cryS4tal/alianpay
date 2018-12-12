@@ -72,6 +72,13 @@ public class UserBaseService {
         return Optional.ofNullable(userBase).map(base -> base.state).orElse(UserBase.NEW);
     }
 
+    public UserBase getBase(Long id) {
+        UserBase userBase = new UserBase();
+        userBase.mchId = id;
+        userBase = userBaseMapper.selectOne(userBase);
+        return userBase;
+    }
+
     public DataList<UserBase> getBase(Long mchId, Integer state, String mchName, String name, String phone, String businessLicense, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
         Page<UserBase> page = (Page<UserBase>) userBaseMapper.getBase(mchId, state, mchName, name, phone, businessLicense);
