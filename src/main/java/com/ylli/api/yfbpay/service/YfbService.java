@@ -276,32 +276,8 @@ public class YfbService {
         return sumAndCount;
     }
 
-    public Integer getMaxCash(Long userId) {
-        Integer max = yfbBillMapper.getMaxCash(userId);
-        return max;
-    }
-
     @Transactional
     public void closeExpiredBill() {
         yfbBillMapper.closeExpiredBill();
-    }
-
-    public String notifyTest(String mchOrderId) throws Exception {
-        YfbBill bill = new YfbBill();
-        bill.subNo = mchOrderId;
-        bill = yfbBillMapper.selectOne(bill);
-        if (bill == null) {
-            return "订单不存在";
-        }
-        String params = generateRes(
-                bill.amount.toString(),
-                bill.subNo,
-                bill.orderNo,
-                bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I",
-                bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
-                bill.memo);
-
-        //yfbClient.sendNotify(bill.id, bill.notifyUrl, params);
-        return params;
     }
 }

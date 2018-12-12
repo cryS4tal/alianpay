@@ -17,5 +17,7 @@ public class UserAppDetail {
     //应用状态：true = 启用
     public Integer rate;
 
+    public Boolean isDefault;
+
     public Timestamp createTime;
 }

@@ -41,9 +41,4 @@ public class YfbController {
         return yfbService.payNotify(orderid, opstate, ovalue, sign, sysorderid, systime, attach, msg);
     }
 
-    @GetMapping("/notify/test")
-    public String notifyTest(@AwesomeParam String mchOrderId) throws Exception {
-        return yfbService.notifyTest(mchOrderId);
-    }
-
 }

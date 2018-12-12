@@ -1,6 +1,7 @@
 package com.ylli.api.pay.service;
 
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.OrderQueryReq;
@@ -8,14 +9,24 @@ import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.model.SysChannel;
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.user.model.UserKey;
 import com.ylli.api.user.service.UserKeyService;
 import com.ylli.api.wzpay.service.WzService;
+import com.ylli.api.yfbpay.model.NotifyRes;
 import com.ylli.api.yfbpay.model.YfbBill;
 import com.ylli.api.yfbpay.service.YfbService;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PayService {
+
+    private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PayService.class);
 
     @Autowired
     YfbService yfbService;
@@ -249,5 +262,75 @@ public class PayService {
             }
         }
         return new OrderQueryRes("A001", "签名校验失败");
+    }
+
+    /**
+     * 金额
+     * 子系统订单干号
+     * 我们系统订单号
+     * 状态
+     * 交易时间
+     * sign
+     * 保留域
+     */
+    public String generateRes(String money, String mchOrderId, String sysOrderId, String status, String tradeTime, String reserve) throws Exception {
+        NotifyRes res = new NotifyRes();
+        res.money = money;
+        res.mchOrderId = mchOrderId;
+        res.sysOrderId = sysOrderId;
+        res.status = status;
+        res.tradeTime = tradeTime;
+        res.reserve = reserve;
+        Bill bill = billService.selectBySysOrderId(sysOrderId);
+        UserKey key = userKeyService.getKeyByUserId(bill.mchId);
+
+        Map<String, String> map = SignUtil.objectToMap(res);
+        res.sign = SignUtil.generateSignature(map, key.secretKey);
+        return new Gson().toJson(res);
+    }
+
+    public void paynotify(HttpServletRequest request, HttpServletResponse response) {
+        InputStream inputStream;
+        OutputStream outputStream = null;
+        try {
+            //读取参数
+            StringBuffer sb = new StringBuffer();
+            inputStream = request.getInputStream();
+            String s;
+            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            while ((s = in.readLine()) != null) {
+                sb.append(s);
+            }
+            in.close();
+            inputStream.close();
+            outputStream = response.getOutputStream();
+            LOGGER.info("进入模拟商户回调：\n");
+            LOGGER.info(sb.toString());
+            //System.out.println(sb.toString());
+            if (sb.length() == 0) {
+                outputStream.write("empty".getBytes("UTF-8"));
+                return;
+            }
+            //verify sign
+            //boolean flag = signVerify(sb.toString(), key);
+            boolean flag = true;
+            if (flag) {
+                //业务处理
+                LOGGER.info("商户业务处理...");
+
+                outputStream.write("success".getBytes("UTF-8"));
+            } else {
+                outputStream.write("sign error".getBytes("UTF-8"));
+            }
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage());
+        } finally {
+            try {
+                outputStream.flush();
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

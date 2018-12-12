@@ -167,4 +167,10 @@ public class BillService {
         }
 
     }
+
+    public Bill selectBySysOrderId(String sysOrderId) {
+        Bill bill = new Bill();
+        bill.sysOrderId = sysOrderId;
+        return billMapper.selectOne(bill);
+    }
 }

@@ -179,11 +179,12 @@ public class AppService {
             detail.appId = sysApp.id;
             detail.appName = sysApp.appName;
             detail.rate = sysApp.rate;
-
+            detail.isDefault = true;
         } else {
             detail.rate = userApp.rate;
             detail.appId = userApp.appId;
             detail.appName = sysApp.appName;
+            detail.isDefault = false;
         }
         return detail;
     }

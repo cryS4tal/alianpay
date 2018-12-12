@@ -3,7 +3,6 @@ package com.ylli.api.wallet.service;
 import com.ylli.api.user.model.UserChargeInfo;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
-import com.ylli.api.wallet.model.WalletLog;
 import com.ylli.api.yfbpay.mapper.YfbBillMapper;
 import com.ylli.api.yfbpay.model.YfbBill;
 import java.util.List;
@@ -114,7 +113,7 @@ public class WalletService {
     }
 
     @Transactional
-    public void incr(Long mchId,int money) {
+    public void incr(Long mchId, int money) {
         Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
         wallet.recharge = wallet.recharge + money;
         wallet.total = wallet.recharge + wallet.pending + wallet.bonus;

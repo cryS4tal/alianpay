@@ -4,6 +4,8 @@ import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.service.PayService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,5 +41,15 @@ public class PayController {
 
         return payService.orderQuery(orderQuery);
     }
+
+
+    /**
+     * 用于模拟商户系统支付回调
+     */
+    @PostMapping("/notify/test")
+    public void payNotify(HttpServletRequest request, HttpServletResponse response) {
+        payService.paynotify(request, response);
+    }
+
 
 }
