@@ -137,9 +137,9 @@ public class CashService {
         }
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
         if (success == null || success) {
-            if (wallet.recharge < cashLog.money + 300) {
+            /*if (wallet.recharge < cashLog.money + 300) {
                 throw new AwesomeException(com.ylli.api.user.Config.ERROR_CHARGE_REQUEST);
-            }
+            }*/
             cashLog.state = CashLog.FINISH;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
