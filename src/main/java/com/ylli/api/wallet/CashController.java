@@ -47,7 +47,7 @@ public class CashController {
         if (authSession.getAuthId() != req.mchId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        if (req.money > 20 * 10000 * 100 || req.money < 1000 * 100) {
+        if (req.money > 5 * 10000 * 100 || req.money < 10 * 100) {
             throw new AwesomeException(Config.ERROR_CHARGE_MONEY);
         }
         cashService.cash(req);

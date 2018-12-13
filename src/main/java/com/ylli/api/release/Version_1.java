@@ -47,9 +47,9 @@ public class Version_1 {
 
     @PostConstruct
     void init() {
-        fixWallet();
-        fullCashWithWallet();
-        fixBill();
+        //fixWallet();
+        //fullCashWithWallet();
+        //fixBill();
     }
 
     /**
