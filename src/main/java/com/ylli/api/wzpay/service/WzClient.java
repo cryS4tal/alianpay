@@ -185,12 +185,6 @@ public class WzClient {
         return SignUtil.MD5(sb.toString()).toLowerCase();
     }
 
-    public String testSign(String sysOrderId) throws Exception {
-        StringBuffer sb = new StringBuffer().append("0.98").append("李玉龙").append("6217920274920375").append("浦发银行")
-                .append("上海浦东发展银行芜湖中江支行").append("310362002505").append("8047_14").append(sysOrderId).append(1).append(secret);
-        return SignUtil.MD5(sb.toString()).toLowerCase();
-    }
-
     public String cashRes(String sysOrderId) throws Exception {
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
                 "http://nfc.cdwzwl.com/queryorder/df_query")
@@ -198,14 +192,15 @@ public class WzClient {
                 .queryParam("sporder", sysOrderId)
                 .queryParam("sign", testSign1(sysOrderId))
                 .build().toUriString();
+        String result = null;
         try {
-            String result = restTemplate.getForObject(requestUrl, String.class);
+            result = restTemplate.getForObject(requestUrl, String.class);
 
             return result;
         } catch (Exception ex) {
             ex.getMessage();
         }
-        return null;
+        return result;
     }
 
     public String testSign1(String sysOrderId) throws Exception {

@@ -72,7 +72,7 @@ public class Bill {
 
     public static String statusToString(int status) {
         if (status == NEW) {
-            return "新订单";
+            return "未支付";
         } else if (status == ING) {
             return "交易进行中";
         } else if (status == FINISH) {

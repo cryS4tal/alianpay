@@ -25,9 +25,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             3, "密码错误");
 
-    public static final ErrorCode ERROR_SETTLEMENT_CHARGE_EMPTY
+    public static final ErrorCode ERROR_REQUEST_FAIL
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            4, "请联系管理员设置您的费率");
+            4, "提现失败：%s");
 
     public static final ErrorCode ERROR_SETTLEMENT_EMPTY
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,

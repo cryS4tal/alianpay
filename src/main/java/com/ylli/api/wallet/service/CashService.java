@@ -3,20 +3,22 @@ package com.ylli.api.wallet.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import com.ylli.api.auth.mapper.PasswordMapper;
-import com.ylli.api.auth.mapper.PhoneAuthMapper;
 import com.ylli.api.auth.model.Password;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.model.SysChannel;
 import com.ylli.api.pay.service.ChannelService;
-import com.ylli.api.user.mapper.UserSettlementMapper;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
+import com.ylli.api.wallet.mapper.WzCashLogMapper;
 import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
+import com.ylli.api.wallet.model.WzCashLog;
+import com.ylli.api.wallet.model.WzRes;
 import com.ylli.api.wzpay.service.WzClient;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +36,6 @@ public class CashService {
     PasswordMapper passwordMapper;
 
     @Autowired
-    UserSettlementMapper settlementMapper;
-
-    @Autowired
     WalletService walletService;
 
     @Autowired
@@ -52,7 +51,7 @@ public class CashService {
     ChannelService channelService;
 
     @Autowired
-    PhoneAuthMapper phoneAuthMapper;
+    WzCashLogMapper wzCashLogMapper;
 
     public Object cashList(Long mchId, String phone, int offset, int limit) {
 
@@ -101,6 +100,14 @@ public class CashService {
             try {
                 String str = wzClient.cash(log.name, log.bankcardNumber, log.openBank, log.subBank, "309394005125"
                         , String.format("%.2f", (log.money / 100.0)), "104", log.identityCard, log.reservedPhone, log.id.toString());
+                WzRes res = new Gson().fromJson(str, WzRes.class);
+                if (!res.code.equals("200")) {
+                    throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(res.msg));
+                } else {
+                    WzCashLog wzCashLog = new WzCashLog();
+                    wzCashLog.logId = log.id;
+                    wzCashLogMapper.insertSelective(wzCashLog);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

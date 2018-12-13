@@ -106,7 +106,7 @@ public class PayService {
             if (baseOrder.payType.equals(ALI)) {
                 //10-9999
                 if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
-                    return new Response("A007", "交易金额限制：支付宝 10 -9999 元", baseOrder);
+                    return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
                 }
             } else if (baseOrder.payType.equals(WX)) {
                 //20 30 50 100 200 300 500
@@ -130,7 +130,7 @@ public class PayService {
 
             //金额限制，低于10元 && 费率低于 1% 存在金额精度丢失。（按分计）
             if (baseOrder.money < Ali_Min) {
-                return new Response("A007", "交易金额限制：当前最低交易金额10元", baseOrder);
+                return new Response("A007", "交易金额限制：当前最低交易金额100元", baseOrder);
             }
             if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
                 //兼容网众支付  商户跳转地址必填
