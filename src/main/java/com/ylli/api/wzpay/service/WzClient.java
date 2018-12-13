@@ -204,7 +204,7 @@ public class WzClient {
     }
 
     public String testSign1(String sysOrderId) throws Exception {
-        StringBuffer sb = new StringBuffer().append(spid_cash).append(sysOrderId).append(secret);
+        StringBuffer sb = new StringBuffer().append(spid).append(sysOrderId).append(secret);
         return SignUtil.MD5(sb.toString());
     }
 }
