@@ -29,10 +29,31 @@ public class WzpayController {
         return wzService.payNotify(spid, md5, oid, sporder, mz, zdy, spuid);
     }
 
+    /**
+     * 测试api
+     */
     @GetMapping("/test")
     public String dotest() throws Exception {
-        return wzClient.cash("2018121202593000000001");
+        return wzClient.cash("2018121209305200000003");
     }
+
+    /**
+     * 自己组装参数 向网众发起提现请求。
+     */
+    @GetMapping("/cash")
+    public String sendCash(@AwesomeParam String account,
+                           @AwesomeParam String card,
+                           @AwesomeParam String name,
+                           @AwesomeParam String fullname,
+                           @AwesomeParam String linked,
+                           @AwesomeParam String money,
+                           @AwesomeParam String cityid,
+                           @AwesomeParam String idcard,
+                           @AwesomeParam String mobile,
+                           @AwesomeParam String sysOrderId) throws Exception {
+        return wzClient.cash(account, card, name, fullname, linked, money, cityid, idcard, mobile, sysOrderId);
+    }
+
 
     @GetMapping("/test1")
     public String dotest1() throws Exception {

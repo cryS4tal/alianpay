@@ -53,21 +53,18 @@ public class CashController {
         cashService.cash(req);
     }
 
-
-
-
-    // v1.0版本删除
     /**
      * 临时方法。满足手动提现成功.
      */
     static class Suc {
         public Long cashLogId;
+        public Boolean success;
     }
 
     @PostMapping("/success")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CASH))
     public void success(@RequestBody Suc suc) {
-        cashService.success(suc.cashLogId);
+        cashService.success(suc.cashLogId, suc.success);
     }
 
 }

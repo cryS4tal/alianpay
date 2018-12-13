@@ -8,6 +8,8 @@ import com.ylli.api.auth.mapper.PhoneAuthMapper;
 import com.ylli.api.auth.model.Password;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
+import com.ylli.api.pay.model.SysChannel;
+import com.ylli.api.pay.service.ChannelService;
 import com.ylli.api.user.mapper.UserSettlementMapper;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
@@ -15,6 +17,7 @@ import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
+import com.ylli.api.wzpay.service.WzClient;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -41,6 +44,12 @@ public class CashService {
 
     @Autowired
     ModelMapper modelMapper;
+
+    @Autowired
+    WzClient wzClient;
+
+    @Autowired
+    ChannelService channelService;
 
     @Autowired
     PhoneAuthMapper phoneAuthMapper;
@@ -71,15 +80,6 @@ public class CashService {
         // v1.0 加入限制，存在待处理的体现申请，金额进入钱包待处理部分
         Wallet wallet = walletService.getOwnWallet(req.mchId);
 
-        /*CashLog cashLog = new CashLog();
-        cashLog.mchId = req.mchId;
-        cashLog.state = CashLog.NEW;
-        List<CashLog> logs = cashLogMapper.select(cashLog);
-        int pending = 0;
-        for (int i = 0; i < logs.size(); i++) {
-            pending = pending + logs.get(i).money;
-        }*/
-
         if (req.money + 200 > wallet.recharge) {
             throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - 200) / 100.0))));
         }
@@ -90,29 +90,51 @@ public class CashService {
         log.state = CashLog.NEW;
         cashLogMapper.insertSelective(log);
 
-        wallet.recharge = wallet.recharge - req.money;
-        wallet.pending = wallet.pending + req.money;
+        wallet.recharge = wallet.recharge - req.money - 200;
+        wallet.pending = wallet.pending + req.money + 200;
         walletMapper.updateByPrimaryKeySelective(wallet);
+
+        SysChannel channel = channelService.getCurrentChannel();
+        if (channel.code.equals("WZ")) {
+            //自动发起提现请求；
+
+            try {
+                String str = wzClient.cash(log.name, log.bankcardNumber, log.openBank, log.subBank, "309394005125"
+                        , String.format("%.2f", (log.money / 100.0)), "104", log.identityCard, log.reservedPhone, log.id.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
     @Transactional
-    public void success(Long cashLogId) {
+    public void success(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
         if (cashLog == null) {
             throw new AwesomeException(Config.ERROR_REQUEST_NOT_FOUND);
         }
-        /*if (cashLog.isOk) {
-            throw new AwesomeException(Config.ERROR_CASH_HANDLED);
-        }*/
-        /*Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.userId);
-        if (wallet.recharge < cashLog.money + 200) {
-            throw new AwesomeException(com.ylli.api.user.Config.ERROR_CHARGE_REQUEST);
-        }*/
-        //cashLog.isOk = true;
-        cashLogMapper.updateByPrimaryKeySelective(cashLog);
+        if (cashLog.state == CashLog.FINISH || cashLog.state == CashLog.FAILED) {
+            throw new AwesomeException(Config.ERROR_CASH_HANDLED.format(CashLog.stateFormat(cashLog.state)));
+        }
+        Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
+        if (success == null || success) {
+            if (wallet.recharge < cashLog.money + 200) {
+                throw new AwesomeException(com.ylli.api.user.Config.ERROR_CHARGE_REQUEST);
+            }
+            cashLog.state = CashLog.FINISH;
+            cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-        //wallet.recharge = wallet.recharge - cashLog.money - 200;
-        //wallet.total = wallet.recharge + wallet.bonus;
-        //walletMapper.updateByPrimaryKeySelective(wallet);
+            wallet.pending = wallet.pending - cashLog.money - 200;
+            wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
+            walletMapper.updateByPrimaryKeySelective(wallet);
+        } else {
+            cashLog.state = CashLog.FAILED;
+            cashLogMapper.updateByPrimaryKeySelective(cashLog);
+
+            wallet.pending = wallet.pending - cashLog.money - 200;
+            wallet.recharge = wallet.recharge + cashLog.money + 200;
+            walletMapper.updateByPrimaryKeySelective(wallet);
+        }
     }
 }

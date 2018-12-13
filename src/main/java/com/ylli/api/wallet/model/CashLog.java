@@ -35,4 +35,16 @@ public class CashLog {
     public Timestamp createTime;
 
     public Timestamp modifyTime;
+
+    public static String stateFormat(Integer state) {
+        if (state == CashLog.NEW) {
+            return "待处理";
+        } else if (state == CashLog.FINISH) {
+            return "成功";
+        } else if (state == CashLog.FAILED) {
+            return "失败";
+        } else {
+            return "异常";
+        }
+    }
 }

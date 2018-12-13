@@ -21,6 +21,9 @@ public class WzClient {
     @Value("${pay.wz.secret}")
     public String secret;
 
+    @Value("${pay.wz.df.id}")
+    public String spid_cash;
+
     @Autowired
     RestTemplate restTemplate;
 
@@ -91,32 +94,38 @@ public class WzClient {
     }
 
     /**
-     * 异步通知下游商户
-     * 可以加入 pay 模块。账单合并之后
-     */
-
-
-    /**
      * 代付请求
      *
      * @return
      */
     public String cash(String sysOrderId) throws Exception {
+        String account = "李玉龙";
+        String card = "6217920274920375";
+        String name = "浦发银行";
+        String fullname = "上海浦东发展银行芜湖中江支行";
+        //随便
+        String linked = "310362002554";
+        String money = "2.01";
+        //随便
+        String cityid = "52";
+        String idcard = "";
+        String mobile = "";
+
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
                 "http://nfo.cdwzwl.com/createorder/payorder")
-                .queryParam("account", "李玉龙")
-                .queryParam("card", "6217920274920375")
-                .queryParam("name", "浦发银行")
-                .queryParam("fullname", "上海浦东发展银行芜湖中江支行")
-                .queryParam("linked", "310362002505")
-                .queryParam("spid", "8047_14")
+                .queryParam("account", account)
+                .queryParam("card", card)
+                .queryParam("name", name)
+                .queryParam("fullname", fullname)
+                .queryParam("linked", linked)
+                .queryParam("spid", spid_cash)
                 .queryParam("order", sysOrderId)
                 .queryParam("type", 1)
-                .queryParam("money", "0.98")
-                .queryParam("cityid", "104")
-                .queryParam("idcard", "342501199310231774")
-                .queryParam("mobile", "15755378327")
-                .queryParam("sign", testSign(sysOrderId))
+                .queryParam("money", money)
+                .queryParam("cityid", cityid)
+                .queryParam("idcard", idcard)
+                .queryParam("mobile", mobile)
+                .queryParam("sign", generateSign(money, account, card, name, fullname, linked, sysOrderId))
                 .build().toUriString();
         try {
             String result = restTemplate.getForObject(requestUrl, String.class);
@@ -126,6 +135,54 @@ public class WzClient {
             ex.getMessage();
         }
         return null;
+    }
+
+    /**
+     * @param account
+     * @param card
+     * @param name
+     * @param fullname
+     * @param linked
+     * @param money
+     * @param cityid
+     * @param idcard
+     * @param mobile
+     * @param sysOrderId 系统生成唯一订单号
+     * @return
+     * @throws Exception
+     */
+    public String cash(String account, String card, String name, String fullname, String linked, String money,
+                       String cityid, String idcard, String mobile, String sysOrderId) throws Exception {
+        String requestUrl = UriComponentsBuilder.fromHttpUrl(
+                "http://nfo.cdwzwl.com/createorder/payorder")
+                .queryParam("account", account)
+                .queryParam("card", card)
+                .queryParam("name", name)
+                .queryParam("fullname", fullname)
+                .queryParam("linked", linked)
+                .queryParam("spid", spid_cash)
+                .queryParam("order", sysOrderId)
+                .queryParam("type", 1)
+                .queryParam("money", money)
+                .queryParam("cityid", cityid)
+                .queryParam("idcard", idcard)
+                .queryParam("mobile", mobile)
+                .queryParam("sign", generateSign(money, account, card, name, fullname, linked, sysOrderId))
+                .build().toUriString();
+        try {
+            String result = restTemplate.getForObject(requestUrl, String.class);
+
+            return result;
+        } catch (Exception ex) {
+            ex.getMessage();
+        }
+        return null;
+    }
+
+    public String generateSign(String money, String account, String card, String name, String fullname, String linked, String sysOrderId) throws Exception {
+        StringBuffer sb = new StringBuffer().append(money).append(account).append(card).append(name)
+                .append(fullname).append(linked).append(spid_cash).append(sysOrderId).append(1).append(secret);
+        return SignUtil.MD5(sb.toString()).toLowerCase();
     }
 
     public String testSign(String sysOrderId) throws Exception {
@@ -152,7 +209,7 @@ public class WzClient {
     }
 
     public String testSign1(String sysOrderId) throws Exception {
-        StringBuffer sb = new StringBuffer().append("8047").append(sysOrderId).append(secret);
+        StringBuffer sb = new StringBuffer().append(spid_cash).append(sysOrderId).append(secret);
         return SignUtil.MD5(sb.toString());
     }
 }
