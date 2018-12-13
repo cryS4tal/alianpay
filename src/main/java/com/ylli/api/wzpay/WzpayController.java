@@ -56,7 +56,7 @@ public class WzpayController {
 
 
     @GetMapping("/test1")
-    public String dotest1() throws Exception {
-        return wzClient.cashRes("2018121202593000000001");
+    public String dotest1(@AwesomeParam String id) throws Exception {
+        return wzClient.cashRes(id);
     }
 }

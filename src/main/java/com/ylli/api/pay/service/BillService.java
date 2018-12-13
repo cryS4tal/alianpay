@@ -8,6 +8,7 @@ import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
+import com.ylli.api.user.mapper.UserBaseMapper;
 import com.ylli.api.user.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
 import com.ylli.api.wzpay.model.WzQueryRes;
@@ -21,6 +22,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,9 @@ public class BillService {
 
     @Autowired
     BillService billService;
+
+    @Autowired
+    UserBaseMapper userBaseMapper;
 
     /**
      * todo 目前账单系统是分离的。第一版先直接查询易付宝账单.
@@ -87,6 +92,7 @@ public class BillService {
     private BaseBill convert(Bill bill) {
         BaseBill baseBill = new BaseBill();
         baseBill.mchId = bill.mchId;
+        baseBill.mchName = Optional.ofNullable(userBaseMapper.selectByMchId(bill.mchId)).map(i -> i.mchName).orElse(null);
         baseBill.mchOrderId = bill.mchOrderId;
         baseBill.sysOrderId = bill.sysOrderId;
         baseBill.money = bill.money;

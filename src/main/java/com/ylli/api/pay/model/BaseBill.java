@@ -15,6 +15,9 @@ public class BaseBill {
     //商户号
     public Long mchId;
 
+    //商户名
+    public String mchName;
+
     //商户订单号
     public String mchOrderId;
 
