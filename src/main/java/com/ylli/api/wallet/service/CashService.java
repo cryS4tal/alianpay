@@ -10,6 +10,8 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.model.SysChannel;
 import com.ylli.api.pay.service.ChannelService;
+import com.ylli.api.user.mapper.UserBaseMapper;
+import com.ylli.api.user.model.UserBase;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
@@ -48,6 +50,9 @@ public class CashService {
     WzClient wzClient;
 
     @Autowired
+    UserBaseMapper userBaseMapper;
+
+    @Autowired
     ChannelService channelService;
 
     @Autowired
@@ -57,6 +62,12 @@ public class CashService {
 
         PageHelper.offsetPage(offset, limit);
         Page<CashLog> page = (Page<CashLog>) cashLogMapper.cashList(mchId, phone);
+        page.stream().forEach(item -> {
+            UserBase base = userBaseMapper.selectByMchId(item.mchId);
+            if (base != null) {
+                item.mchName = base.mchName;
+            }
+        });
         DataList<CashLog> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();

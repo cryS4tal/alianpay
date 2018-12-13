@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Table(name = "t_cash_log")
 public class CashLog {
@@ -17,6 +18,8 @@ public class CashLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
+    @Transient
+    public String mchName;
     public Long mchId;
     public Integer money;
 
