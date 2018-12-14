@@ -1,7 +1,7 @@
 package com.ylli.api.pay.util;
 
 import com.google.common.base.CaseFormat;
-import com.ylli.api.alipay.service.AliPayService;
+import com.ylli.api.third.pay.service.KyPayService;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -24,7 +24,7 @@ import org.w3c.dom.NodeList;
  */
 @SuppressWarnings("all")
 public class SignUtil {
-    private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AliPayService.class);
+    private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(KyPayService.class);
 
     /**
      * 签名处理

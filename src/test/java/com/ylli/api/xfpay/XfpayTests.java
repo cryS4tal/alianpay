@@ -1,6 +1,6 @@
 package com.ylli.api.xfpay;
 
-import com.ylli.api.xfpay.service.XfClient;
+import com.ylli.api.third.pay.service.XfClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

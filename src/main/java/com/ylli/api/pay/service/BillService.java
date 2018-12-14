@@ -8,14 +8,14 @@ import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
+import com.ylli.api.third.pay.model.WzQueryRes;
+import com.ylli.api.third.pay.model.YfbBill;
+import com.ylli.api.third.pay.service.WzClient;
+import com.ylli.api.third.pay.service.YfbClient;
+import com.ylli.api.third.pay.service.YfbService;
 import com.ylli.api.user.mapper.UserBaseMapper;
 import com.ylli.api.user.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
-import com.ylli.api.wzpay.model.WzQueryRes;
-import com.ylli.api.wzpay.service.WzClient;
-import com.ylli.api.yfbpay.model.YfbBill;
-import com.ylli.api.yfbpay.service.YfbClient;
-import com.ylli.api.yfbpay.service.YfbService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -26,6 +26,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BillService {
@@ -216,5 +217,14 @@ public class BillService {
         Bill bill = new Bill();
         bill.sysOrderId = sysOrderId;
         return billMapper.selectOne(bill);
+    }
+
+    /**
+     * 自动关闭创建时间（time_zone=0.00）+ 10h < now()的订单。
+     * 超时2小时关闭
+     */
+    @Transactional
+    public void autoClose() {
+        billMapper.autoClose();
     }
 }

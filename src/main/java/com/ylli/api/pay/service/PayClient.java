@@ -2,7 +2,7 @@ package com.ylli.api.pay.service;
 
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
-import com.ylli.api.wzpay.service.WzClient;
+import com.ylli.api.third.pay.service.WzClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

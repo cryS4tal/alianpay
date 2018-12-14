@@ -9,7 +9,7 @@ public class Config {
     /**
      * 模块编号
      */
-    public static final int MODEL_CODE = 4;
+    public static final int MODEL_CODE = 3;
     /**
      * 错误定义
      */
@@ -72,10 +72,6 @@ public class Config {
     public static final ErrorCode ERROR_PERMISSION_DENY
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             15, "权限不足");
-
-    public static final ErrorCode ERROR_USER_NOT_EMPTY
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            16, "用户不能为null");
 
 
     /**

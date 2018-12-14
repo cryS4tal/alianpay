@@ -1,8 +1,7 @@
 package com.ylli.api.yfbpay;
 
-import com.ylli.api.yfbpay.service.YfbClient;
+import com.ylli.api.third.pay.service.YfbClient;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

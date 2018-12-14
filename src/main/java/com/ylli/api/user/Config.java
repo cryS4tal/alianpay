@@ -9,7 +9,7 @@ public class Config {
     /**
      * 模块编号
      */
-    public static final int MODEL_CODE = 5;
+    public static final int MODEL_CODE = 9;
     /**
      * 错误定义
      */
@@ -25,33 +25,21 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             3, "应用不存在");
 
-    public static final ErrorCode ERROR_PERMISSION_LESS
-            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            4, "商户和应用不匹配，不可删除他人应用");
-
     public static final ErrorCode ERROR_ILLEGAL_PHONE
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            5, "请输入正确的联系方式.");
+            4, "请输入正确的联系方式.");
 
     public static final ErrorCode ERROR_AUDIT_PASS
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            6, "审核已通过，如需修改信息请联系客服.");
-
-    public static final ErrorCode ERROR_AUDIT_ING
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            7, "信息待审核");
+            5, "审核已通过，如需修改信息请联系客服.");
 
     public static final ErrorCode ERROR_SETTLEMENT_EMPTY
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            8, "请先设置结算信息.");
+            6, "请先设置结算信息.");
 
     public static final ErrorCode ERROR_CHARGE_TYPE
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            9, "不支持的结算类型");
-
-    public static final ErrorCode ERROR_CHARGE_REQUEST
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            10, "用户余额不足。");
+            7, "不支持的结算类型");
 
 
     /**

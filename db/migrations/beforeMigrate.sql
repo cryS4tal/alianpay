@@ -40,7 +40,7 @@ DELIMITER ;
  * auth
  */
 -- 初始化
-SELECT _init(4);
+SELECT _init(3);
 
 -- 默认超级管理员Id
 SET @account_super_id = 1;
@@ -78,7 +78,7 @@ SET @role_dept_manager = 1001;
  * user
  */
 -- 初始化
-SELECT _init(5);
+SELECT _init(9);
 -- 系统权限
 -- 管理商户提现费率
 SET @pm_sys.manage_user_charge = @pm_sys_base + 1;
@@ -90,13 +90,13 @@ SET @pm_sys.manage_user_account = @pm_sys_base + 4;
  * pay
  */
 -- 初始化
-SELECT _init(9);
+SELECT _init(4);
 -- 系统权限
 -- 管理商户账单
 SET @pm_sys.manage_user_bill = @pm_sys_base + 1;
 
 /**
- * pay
+ * wallet
  */
 -- 初始化
 SELECT _init(8);

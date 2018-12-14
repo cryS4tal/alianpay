@@ -1,9 +1,9 @@
 package com.ylli.api.alipay;
 
 import com.google.gson.Gson;
-import com.ylli.api.alipay.model.OrderQueryResponse;
-import com.ylli.api.alipay.model.OrderResponse;
-import com.ylli.api.alipay.service.AliPayClient;
+import com.ylli.api.third.pay.model.OrderQueryResponse;
+import com.ylli.api.third.pay.model.OrderResponse;
+import com.ylli.api.third.pay.service.KyPayClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AlipayTests {
 
     @Autowired
-    AliPayClient aliPayClient;
+    KyPayClient aliPayClient;
 
     @Test
     public void createOrder() {

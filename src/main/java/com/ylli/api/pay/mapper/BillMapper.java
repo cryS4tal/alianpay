@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import tk.mybatis.mapper.common.Mapper;
 
 public interface BillMapper extends Mapper<Bill> {
@@ -22,4 +23,7 @@ public interface BillMapper extends Mapper<Bill> {
 
     @Select("SELECT SUM(money) as total,COUNT(*) as count FROM t_bill WHERE mch_id = ${mch_id} AND status = 3 AND DAYOFYEAR(NOW()) = DAYOFYEAR(trade_time)")
     SumAndCount getTodayDetail(@Param("mch_id") Long mchId);
+
+    @Update("UPDATE t_bill SET status = 9 WHERE status = 1 AND DATE_ADD(create_time,INTERVAL 9 HOUR) < NOW()")
+    Integer autoClose();
 }

@@ -1,4 +1,4 @@
-package com.ylli.api.pay;
+package com.ylli.api.sys;
 
 import com.ylli.api.auth.model.PermissionModel;
 import com.ylli.api.base.exception.ErrorCode;
@@ -9,14 +9,11 @@ public class Config {
     /**
      * 模块编号
      */
-    public static final int MODEL_CODE = 4;
-    /**
-     * 错误定义
-     */
-    public static final ErrorCode ERROR_PERMISSION_DENY
-            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
-            1, "权限不足");
+    public static final int MODEL_CODE = 7;
 
+    public static final ErrorCode ERROR_CHANNEL_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            2, "通道不存在");
 
     /**
      * 权限

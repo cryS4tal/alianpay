@@ -11,7 +11,7 @@ public class Config {
     /**
      * 模块编号
      */
-    public static final int MODEL_CODE = 7;
+    public static final int MODEL_CODE = 5;
 
     /**
      * 错误定义
