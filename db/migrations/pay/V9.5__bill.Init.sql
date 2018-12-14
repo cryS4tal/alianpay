@@ -29,3 +29,6 @@ ADD UNIQUE INDEX `u_sys_order_id` (`sys_order_id`) ,
 ADD UNIQUE INDEX `u_mch_order_id` (`mch_order_id`) ,
 ADD UNIQUE INDEX `u_super_order_id` (`super_order_id`) ,
 ADD INDEX `n_mch_id` (`mch_id`) ;
+
+ALTER TABLE `t_bill`
+ADD INDEX `n_status` (`status`) ;

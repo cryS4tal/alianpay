@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ylli.api.pay.mapper.BillMapper">
     <resultMap id="billMap" type="com.ylli.api.pay.model.Bill"/>
+    <resultMap id="dataMap" type="com.ylli.api.sys.model.Data"/>
 
     <select id="getBills" resultMap="billMap">
         SELECT
@@ -34,6 +35,78 @@
             </if>
         </where>
         ORDER BY create_time DESC
+    </select>
+
+    <select id="getHourlyData" resultMap="dataMap">
+        SELECT
+        SUM(money) as sum,
+        COUNT(*) as count,
+        status as `status`,
+        EXTRACT(
+        HOUR
+        FROM
+        DATE_ADD(create_time, INTERVAL 8 HOUR)
+        ) as `hour`
+        FROM
+        t_bill
+        <where>
+            DATE_ADD(
+            create_time,
+            INTERVAL 8 HOUR
+            ) > CURDATE()
+            <if test="mch_id != null">
+                AND mch_id = ${mch_id}
+            </if>
+            GROUP BY
+            status,
+            EXTRACT(
+            HOUR
+            FROM
+            DATE_ADD(create_time, INTERVAL 8 HOUR)
+            )
+        </where>
+    </select>
+
+    <select id="getDayData" resultMap="dataMap">
+        SELECT
+        SUM(money) AS sum,
+        COUNT(*) AS count,
+        `status`
+        FROM
+        t_bill
+        <where>
+            DATE_ADD(create_time, INTERVAL 8 HOUR) > CURDATE()
+            <if test="mch_id != null">
+                AND mch_id = ${mch_id}
+            </if>
+            GROUP BY `status`
+        </where>
+    </select>
+
+    <select id="selectTotalMoney" resultType="java.lang.Long">
+        SELECT
+        SUM(money)
+        FROM
+        t_bill
+        <where>
+            `status` = 3
+            <if test="mch_id != null">
+                AND mch_id = ${mch_id}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectChargeMoney" resultType="java.lang.Long">
+        SELECT
+        SUM(pay_charge)
+        FROM
+        t_bill
+        <where>
+            `status` = 3
+            <if test="mch_id != null">
+                AND mch_id = ${mch_id}
+            </if>
+        </where>
     </select>
 
 </mapper>

@@ -9,4 +9,6 @@ public interface CashLogMapper extends Mapper<CashLog> {
 
     List<CashLog> cashList(@Param("mch_id") Long mchId,
                            @Param("phone") String phone);
+
+    Long selectCashMoney(@Param("mch_id") Long mchId);
 }

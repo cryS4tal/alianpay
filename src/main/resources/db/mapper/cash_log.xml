@@ -14,4 +14,14 @@
         </where>
         ORDER BY create_time DESC
     </select>
+
+    <select id="selectCashMoney" resultType="java.lang.Long" >
+        SELECT sum(money) FROM t_cash_log
+        <where>
+            state = 1
+            <if test="mch_id != null">
+                AND mch_id = ${mch_id}
+            </if>
+        </where>
+    </select>
 </mapper>

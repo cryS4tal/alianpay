@@ -11,6 +11,10 @@ public class Config {
      */
     public static final int MODEL_CODE = 7;
 
+    public static final ErrorCode ERROR_PERMISSION_DENY
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            1, "权限不足");
+
     public static final ErrorCode ERROR_CHANNEL_NOT_FOUND
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             2, "通道不存在");
@@ -23,6 +27,6 @@ public class Config {
         /**
          * 管理角色与权限
          */
-        public static final long MANAGE_USER_BILL = BASE + 1;
+        public static final long MANAGE_STATS = BASE + 1;
     }
 }

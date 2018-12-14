@@ -104,3 +104,12 @@ SELECT _init(8);
 -- 管理商户账单
 SET @pm_sys.manage_user_wallet = @pm_sys_base + 1;
 SET @pm_sys.manage_user_cash = @pm_sys_base + 2;
+
+/**
+ * sys
+ */
+-- 初始化
+SELECT _init(7);
+-- 系统权限
+-- 统计
+SET @pm_sys.manage_stats = @pm_sys_base + 1;
