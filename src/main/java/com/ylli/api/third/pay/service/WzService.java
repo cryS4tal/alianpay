@@ -2,13 +2,12 @@ package com.ylli.api.third.pay.service;
 
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
+import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
-import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.user.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
-import com.ylli.api.third.pay.model.YfbBill;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -29,7 +28,7 @@ public class WzService {
     PayClient payClient;
 
     @Autowired
-    SerializeUtil serializeUtil;
+    BillService billService;
 
     @Autowired
     BillMapper billMapper;
@@ -51,22 +50,7 @@ public class WzService {
 
     @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
-        Bill bill = new Bill();
-        bill.mchId = mchId;
-        bill.sysOrderId = serializeUtil.generateSysOrderId();
-        bill.mchOrderId = mchOrderId;
-        bill.channelId = channelId;
-        // todo 应用模块 关联.
-        bill.appId = appService.getAppId(payType, tradeType);
-
-        bill.money = money;
-        bill.status = Bill.NEW;
-        bill.reserve = reserve;
-        bill.notifyUrl = notifyUrl;
-        bill.redirectUrl = redirectUrl;
-        bill.payType = payType;
-        bill.tradeType = tradeType;
-        billMapper.insertSelective(bill);
+        Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
         String mz = String.format("%.2f", (money / 100.0));
         //商品名称 = 商户号
@@ -86,7 +70,7 @@ public class WzService {
             if (bill == null) {
                 return "order not found";
             }
-            if (bill.status != Bill.FINISH){
+            if (bill.status != Bill.FINISH) {
                 bill.status = Bill.FINISH;
                 bill.tradeTime = Timestamp.from(Instant.now());
                 bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
@@ -104,7 +88,7 @@ public class WzService {
                     bill.money.toString(),
                     bill.mchOrderId,
                     bill.sysOrderId,
-                    bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I",
+                    bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
                     bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
                     bill.reserve);
 

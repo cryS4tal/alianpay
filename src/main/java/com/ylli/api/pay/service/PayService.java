@@ -11,7 +11,7 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.NotifyRes;
-import com.ylli.api.third.pay.model.YfbBill;
+import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
 import com.ylli.api.user.model.UserKey;
@@ -49,6 +49,9 @@ public class PayService {
 
     @Autowired
     WzService wzService;
+
+    @Autowired
+    UnknownPayService unknownPayService;
 
     @Autowired
     BillService billService;
@@ -146,11 +149,24 @@ public class PayService {
 
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
 
-        } else if (channel.code.equals("123")) {
+        } else if (channel.code.equals("unknown")) {
             // ?? unknown 支付
+            //金额校验
+            if (baseOrder.money < 100) {
+                //if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
+                return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
+            }
+            //支付方式校验
+            if (!baseOrder.payType.equals(ALI) || baseOrder.tradeType.equals(APP)) {
+                return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+            }
+            if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
+                baseOrder.redirectUrl = "http://www.baidu.com";
+            }
+            String str = unknownPayService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-
-            return null;
+            return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
         } else {
             //
 
@@ -223,7 +239,7 @@ public class PayService {
             res.money = bill.money;
             res.mchOrderId = bill.mchOrderId;
             res.sysOrderId = bill.sysOrderId;
-            res.status = bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I";
+            res.status = bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I";
             if (bill.tradeTime != null) {
                 res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
             }

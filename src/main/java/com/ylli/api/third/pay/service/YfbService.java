@@ -4,15 +4,14 @@ import com.google.common.base.Strings;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
+import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
 import static com.ylli.api.pay.service.PayService.ALI;
 import static com.ylli.api.pay.service.PayService.NATIVE;
 import static com.ylli.api.pay.service.PayService.WAP;
 import static com.ylli.api.pay.service.PayService.WX;
-import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.third.pay.Config;
-import com.ylli.api.third.pay.model.YfbBill;
 import com.ylli.api.user.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
@@ -36,7 +35,7 @@ public class YfbService {
     YfbClient yfbClient;
 
     @Autowired
-    SerializeUtil serializeUtil;
+    BillService billService;
 
     @Autowired
     WalletService walletService;
@@ -60,23 +59,7 @@ public class YfbService {
             //支付方式. 默认扫码
             tradeType = NATIVE;
         }
-        Bill bill = new Bill();
-        bill.money = money;
-        bill.status = Bill.NEW;
-        bill.mchId = mchId;
-        bill.reserve = reserve;
-        bill.notifyUrl = notifyUrl;
-        bill.redirectUrl = redirectUrl;
-        bill.mchOrderId = mchOrderId;
-        bill.payType = payType;
-        bill.tradeType = tradeType;
-        bill.sysOrderId = serializeUtil.generateSysOrderId();
-
-        bill.channelId = channelId;
-        // todo 应用模块 关联.
-        bill.appId = appService.getAppId(payType, tradeType);
-
-        billMapper.insertSelective(bill);
+        Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
         String str = yfbClient.order(typeConvert(null, payType, tradeType), String.valueOf(((double) money / 100)), bill.sysOrderId, notifyUrl, redirectUrl, null, reserve);
         if (str.contains("error")) {
@@ -131,7 +114,7 @@ public class YfbService {
                     bill.superOrderId = sysorderid;
                     bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYY/MM/DD hh:mm:ss").parse(systime).getTime());
                     bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
-                    bill.status = YfbBill.FINISH;
+                    bill.status = Bill.FINISH;
                     //todo msg暂时先记录实际交易金额/元 两位小数
                     bill.msg = ovalue;
                     billMapper.updateByPrimaryKeySelective(bill);
@@ -143,7 +126,7 @@ public class YfbService {
             } else {
                 bill.superOrderId = sysorderid;
                 bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYY/MM/DD hh:mm:ss").parse(systime).getTime());
-                bill.status = YfbBill.FAIL;
+                bill.status = Bill.FAIL;
                 //todo msg暂时先记录实际交易金额/元 两位小数
                 bill.msg = ovalue;
                 //bill.msg = msg;
@@ -156,7 +139,7 @@ public class YfbService {
                     bill.money.toString(),
                     bill.mchOrderId,
                     bill.sysOrderId,
-                    bill.status == YfbBill.FINISH ? "S" : bill.status == YfbBill.FAIL ? "F" : "I",
+                    bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
                     bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
                     bill.reserve);
 

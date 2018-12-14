@@ -8,11 +8,10 @@ import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
+import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.third.pay.model.WzQueryRes;
-import com.ylli.api.third.pay.model.YfbBill;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
-import com.ylli.api.third.pay.service.YfbService;
 import com.ylli.api.user.mapper.UserBaseMapper;
 import com.ylli.api.user.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
@@ -32,9 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BillService {
 
     @Autowired
-    YfbService yfbService;
-
-    @Autowired
     BillMapper billMapper;
 
     @Autowired
@@ -50,7 +46,7 @@ public class BillService {
     AppService appService;
 
     @Autowired
-    BillService billService;
+    SerializeUtil serializeUtil;
 
     @Autowired
     UserBaseMapper userBaseMapper;
@@ -193,7 +189,7 @@ public class BillService {
             if (flag) {
                 if (opstate.equals("0")) {
                     if (bill.status != Bill.FINISH) {
-                        bill.status = YfbBill.FINISH;
+                        bill.status = Bill.FINISH;
                         bill.msg = ovalue;
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.tradeTime = Timestamp.from(Instant.now());
@@ -226,5 +222,26 @@ public class BillService {
     @Transactional
     public void autoClose() {
         billMapper.autoClose();
+    }
+
+    @Transactional
+    public Bill createBill(Long mchId, String mchOrderId, Long channelId, String payType, String tradeType, Integer money, String reserve, String notifyUrl, String redirectUrl) {
+        Bill bill = new Bill();
+        bill.mchId = mchId;
+        bill.sysOrderId = serializeUtil.generateSysOrderId();
+        bill.mchOrderId = mchOrderId;
+        bill.channelId = channelId;
+        // todo 应用模块 关联.
+        bill.appId = appService.getAppId(payType, tradeType);
+
+        bill.money = money;
+        bill.status = Bill.NEW;
+        bill.reserve = reserve;
+        bill.notifyUrl = notifyUrl;
+        bill.redirectUrl = redirectUrl;
+        bill.payType = payType;
+        bill.tradeType = tradeType;
+        billMapper.insertSelective(bill);
+        return bill;
     }
 }
