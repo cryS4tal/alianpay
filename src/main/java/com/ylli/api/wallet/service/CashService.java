@@ -10,6 +10,7 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
+import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.user.mapper.UserBaseMapper;
 import com.ylli.api.user.model.UserBase;
 import com.ylli.api.wallet.Config;
@@ -21,7 +22,6 @@ import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.model.WzCashLog;
 import com.ylli.api.wallet.model.WzRes;
-import com.ylli.api.third.pay.service.WzClient;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -104,7 +104,7 @@ public class CashService {
         wallet.pending = wallet.pending + req.money + 300;
         walletMapper.updateByPrimaryKeySelective(wallet);
 
-        SysChannel channel = channelService.getCurrentChannel();
+        SysChannel channel = channelService.getCurrentChannel(req.mchId);
         if (channel.code.equals("WZ")) {
             //自动发起提现请求；
 

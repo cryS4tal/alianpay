@@ -26,9 +26,30 @@ public class ChannelController {
         public Boolean isOpen;
     }
 
+    /**
+     * 开启关闭系统通道
+     *
+     * @param channel
+     */
     @PostMapping
     public void channelSwitch(@RequestBody Channel channel) {
         channelService.channelSwitch(channel.id, channel.isOpen);
     }
+
+    static class MchChannel {
+        public Long mchId;
+        public Long channelId;
+    }
+
+    /**
+     * 切换商户通道
+     *
+     * @param mchChannel
+     */
+    @PostMapping("/mch")
+    public void mchChannelSwitch(@RequestBody MchChannel mchChannel) {
+        channelService.mchChannelSwitch(mchChannel.mchId, mchChannel.channelId);
+    }
+
 
 }

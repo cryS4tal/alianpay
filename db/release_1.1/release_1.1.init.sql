@@ -59,3 +59,14 @@ INSERT INTO `t_permission` VALUES ('91004', '系统用户管理', '管理系统�
 
 /*  加入新通道 123支付中心 ，通道定义为unknown  */
 INSERT INTO `t_sys_channel` VALUES ('3', 'unknown', '123支付中心', '0', '2018-12-14 18:12:11', '2018-12-14 18:12:11');
+
+
+CREATE TABLE t_mch_channel (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  mch_id BIGINT COMMENT '商户id',
+  channel_id BIGINT COMMENT '通道id',
+  create_time DATETIME NOT NULL DEFAULT now(),
+  modify_time DATETIME NOT NULL DEFAULT now(),
+  UNIQUE KEY `u_mch_id` (`mch_id`)
+);
+

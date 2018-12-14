@@ -94,8 +94,11 @@ public class PayService {
         if (isSignValid(baseOrder, secretKey)) {
             return new Response("A001", "签名校验失败", baseOrder);
         }
-        SysChannel channel = channelService.getCurrentChannel();
-
+        SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
+        // v1.1 新增 通道关闭的话。不允许下单
+        if (channel.state == false) {
+            return new Response("A009", "当前通道关闭，请联系管理员切换通道");
+        }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
             return new Response("A005", "订单号重复", baseOrder);
         }
@@ -145,7 +148,6 @@ public class PayService {
 
         } else if (channel.code.equals("123")) {
             // ?? unknown 支付
-
 
 
             return null;
@@ -203,7 +205,7 @@ public class PayService {
         String sign = SignUtil.generateSignature(map, key);
         if (sign.equals(orderQuery.sign.toUpperCase())) {
 
-            SysChannel channel = channelService.getCurrentChannel();
+            SysChannel channel = channelService.getCurrentChannel(orderQuery.mchId);
 
             Bill bill = billService.selectByMchOrderId(orderQuery.mchOrderId);
             if (bill == null) {

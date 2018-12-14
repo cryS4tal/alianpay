@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  * 用于v1.0 版本更新纠正数据.
  */
 @Component
-public class Version_1 {
+public class Version_1_0 {
 
     @Autowired
     AccountMapper accountMapper;
