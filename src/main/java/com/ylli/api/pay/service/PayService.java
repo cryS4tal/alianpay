@@ -7,15 +7,15 @@ import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
-import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.user.model.UserKey;
-import com.ylli.api.user.service.UserKeyService;
-import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.model.YfbBill;
+import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
+import com.ylli.api.user.model.UserKey;
+import com.ylli.api.user.service.UserKeyService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -143,6 +143,12 @@ public class PayService {
 
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
 
+        } else if (channel.code.equals("123")) {
+            // ?? unknown 支付
+
+
+
+            return null;
         } else {
             //
 

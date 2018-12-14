@@ -38,8 +38,8 @@ public class StatsService {
 
         List<Data> list = billMapper.getDayData(mchId);
 
-        totalData.smoney = list.stream().filter(item -> item.status == Bill.FINISH).collect(Collectors.toList()).get(0).sum;
-        totalData.scount = list.stream().filter(item -> item.status == Bill.FINISH).collect(Collectors.toList()).get(0).count;
+        totalData.smoney = list.stream().filter(item -> item.status == Bill.FINISH).map(item -> item.sum).reduce(0L, (a, b) -> a + b);
+        totalData.scount = list.stream().filter(item -> item.status == Bill.FINISH).mapToInt(i -> i.count).sum();
 
         totalData.fmoney = list.stream()
                 .filter(item -> item.status == Bill.AUTO_CLOSE || item.status == Bill.FAIL)

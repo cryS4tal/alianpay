@@ -1,7 +1,6 @@
 package com.ylli.api.third.pay;
 
 import com.ylli.api.third.pay.service.KyPayService;
-import com.ylli.api.base.annotation.Auth;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/pay/ky")
-@Auth
 public class KyPayController {
 
     @Autowired
@@ -23,6 +21,7 @@ public class KyPayController {
 
     /**
      * 创建订单
+     *
      * @return
      */
     @PostMapping("/order")
@@ -32,6 +31,7 @@ public class KyPayController {
 
     /**
      * 查询订单
+     *
      * @return
      */
     @GetMapping("/order")
@@ -44,6 +44,6 @@ public class KyPayController {
      */
     @PostMapping("/order/notify")
     public void payNotify(HttpServletRequest request, HttpServletResponse response) {
-        kyPayService.payNotify(request,response);
+        kyPayService.payNotify(request, response);
     }
 }

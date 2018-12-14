@@ -103,7 +103,7 @@ public class BillService {
         if (bill.tradeTime != null) {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
-        baseBill.createTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.createTime);
+        baseBill.createTime = bill.createTime;
         return baseBill;
     }
 
