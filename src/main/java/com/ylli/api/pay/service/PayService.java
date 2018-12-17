@@ -152,8 +152,7 @@ public class PayService {
         } else if (channel.code.equals("unknown")) {
             // ?? unknown 支付
             //金额校验
-            if (baseOrder.money < 100) {
-                //if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
+            if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
                 return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
             }
             //支付方式校验

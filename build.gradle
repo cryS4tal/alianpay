@@ -65,7 +65,9 @@ dependencies {
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.47'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-
+    // dom4j
+    // https://mvnrepository.com/artifact/dom4j/dom4j
+    compile group: 'dom4j', name: 'dom4j', version: '1.6.1'
 }
 
 
