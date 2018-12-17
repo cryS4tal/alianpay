@@ -34,18 +34,18 @@ public class PingAnService {
         /**组装请求报文-start*/
         PingAnOrder order = new PingAnOrder();
         //required
-        order.orderNumber = "20181217A0001";
-        order.acctNo = "15000096544539";
+        order.orderNumber = "20181217ylli001";
+        order.acctNo = "15000090244196";
         order.busiType = "00000";
-        order.tranAmount = "100.00";
-        order.inAcctNo = "6217920274920375";
-        order.inAcctName = "李玉龙";
+        order.tranAmount = "1";
+        order.inAcctNo = "6226090000000048";
+        order.inAcctName = "张三";
         //not required
-        order.corpId = "";
+        order.corpId = "Q000201184";
         order.ccyCode = "RMB";
-        order.inAcctBankName = "";
+        order.inAcctBankName = "招商银行";
         order.inAcctBankNode = "";
-        order.mobile = "";
+        order.mobile = "18100000000";
         order.remark = "";
         order.inAcctProvinceName = "";
         order.inAcctCityName = "";
@@ -56,7 +56,7 @@ public class PingAnService {
 
         //LOGGER.info("平安单笔付款 KHKF03 请求xml：" + xml);
 
-        String reqXml = YQUtil.asemblyPackets("01001034300004540000", "KHKF03", xml);
+        String reqXml = YQUtil.asemblyPackets("01001034300004537000", "KHKF03", xml);
         /**组装请求报文-end*/
 
         String res = pingAnClient.orderTest(reqXml, url);

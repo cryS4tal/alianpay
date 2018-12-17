@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -24,14 +25,18 @@ public class PingAnClient {
 
     @PostConstruct
     private void initRestTemplate() {
-        /*HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-        httpRequestFactory.setConnectionRequestTimeout(6000);
-        httpRequestFactory.setConnectTimeout(6000);
-        httpRequestFactory.setReadTimeout(6000);
-
-        restTemplate = new RestTemplate(httpRequestFactory);
-        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());*/
         restTemplate = new RestTemplate();
+        setTimeout(restTemplate);
+    }
+
+    private void setTimeout(RestTemplate restTemplate) {
+        if (restTemplate.getRequestFactory() instanceof SimpleClientHttpRequestFactory) {
+            ((SimpleClientHttpRequestFactory) restTemplate.getRequestFactory()).setConnectTimeout(6 * 1000);
+            ((SimpleClientHttpRequestFactory) restTemplate.getRequestFactory()).setReadTimeout(6 * 1000);
+        } else if (restTemplate.getRequestFactory() instanceof HttpComponentsClientHttpRequestFactory) {
+            ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory()).setReadTimeout(6 * 1000);
+            ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory()).setConnectTimeout(6 * 1000);
+        }
     }
 
 
@@ -40,16 +45,15 @@ public class PingAnClient {
         MediaType type = MediaType.parseMediaType("text/xml; charset=UTF-8");
         headers.setContentType(type);
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
-        //headers.setAccept(Arrays.asList(MediaType.TEXT_XML));
-        //http.setRequestProperty("Content-Length", String.valueOf(packets.length));
-        //http.setRequestProperty("Connection", "close");
-        //http.setRequestProperty("User-Agent", "sdb client");
 
         ResponseEntity<String> response = null;
         try {
             response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<Object>(xmlStr, headers), String.class);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
+        }
+        if (response == null) {
+
         }
         String body = response.getBody();
         HttpStatus status = response.getStatusCode();
