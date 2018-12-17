@@ -3,9 +3,11 @@ package com.ylli.api.third.pay.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ylli.api.pingan.PingAnTest;
+import com.ylli.api.pingan.model.Packets;
 import com.ylli.api.pingan.model.XmlRequestUtil;
 import com.ylli.api.pingan.model.YQUtil;
 import com.ylli.api.third.pay.model.PingAnOrder;
+import com.ylli.api.third.pay.util.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +67,7 @@ public class PingAnService {
         String res = pingAnClient.orderTest(reqXml, url);
         System.out.println(res);
 
-        /*Packets packets = HttpUtils.sendPost(reqXml, url, globalSeq);
+        /*Packets packets = HttpUtils.sendPost(reqXml, url);
         if (null == packets) {
             LOGGER.warn("globalSeq[{}]平安银行代发交易请求返回报文为空", globalSeq);
             respDTO.setRespDTO(BankGatewayErrorCodeEnum.SEND_CHANNEL_EXCEPTION, globalSeq);
