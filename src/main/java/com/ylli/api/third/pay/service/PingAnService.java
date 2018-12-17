@@ -56,14 +56,9 @@ public class PingAnService {
 
         //LOGGER.info("平安单笔付款 KHKF03 请求xml：" + xml);
 
-        String reqXml = YQUtil.asemblyPackets("1002", "KHKF03", xml);
+        String reqXml = YQUtil.asemblyPackets("01001034300004540000", "KHKF03", xml);
         /**组装请求报文-end*/
 
-
-        //System.out.println(reqXml);
-        //System.out.println(reqXml.replace(xml,"").length());
-
-        /***处理返回结果-start*/
         String res = pingAnClient.orderTest(reqXml, url);
         System.out.println(res);
 
