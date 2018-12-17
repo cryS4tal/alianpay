@@ -17,7 +17,6 @@ public class PingAnTest {
 
     @Test
     public void createOrder() {
-        /*String s = client.agencyPayment();
-        System.out.println(s);*/
+        service.createPingAnOrder();
     }
 }

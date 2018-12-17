@@ -63,7 +63,7 @@ public class PingAnService {
 
         /***处理返回结果-start*/
         String res = pingAnClient.orderTest(reqXml, url);
-
+        System.out.println(res);
 
         /*Packets packets = HttpUtils.sendPost(reqXml, url, globalSeq);
         if (null == packets) {

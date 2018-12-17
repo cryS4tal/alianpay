@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PayConfig {
-    @Value("${remoteUrl}")
+    //@Value("${remoteUrl}")
     private String remoteUrl;
 
 

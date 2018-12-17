@@ -24,13 +24,14 @@ public class PingAnClient {
 
     @PostConstruct
     private void initRestTemplate() {
-        HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+        /*HttpComponentsClientHttpRequestFactory httpRequestFactory = new HttpComponentsClientHttpRequestFactory();
         httpRequestFactory.setConnectionRequestTimeout(6000);
         httpRequestFactory.setConnectTimeout(6000);
         httpRequestFactory.setReadTimeout(6000);
 
         restTemplate = new RestTemplate(httpRequestFactory);
-        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+        restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());*/
+        restTemplate = new RestTemplate();
     }
 
 
