@@ -24,18 +24,18 @@ public class PingAnTest {
     public void createOrder() {
         List<PingAnQY> qies = new ArrayList<PingAnQY>() {
             {
-                //add(new PingAnQY("15000090244196", "Q000201184", "01001034300004537000"));
-                //add(new PingAnQY("15000090253485", "Q000201199", "01001034300004538000"));
+                add(new PingAnQY("15000090244196", "Q000201184", "01001034300004537000"));
+                add(new PingAnQY("15000090253485", "Q000201199", "01001034300004538000"));
                 add(new PingAnQY("15000090253679", "Q000201200", "01001034300004539000"));
-                //add(new PingAnQY("15000090253776", "Q000201201", "01001034300004540000"));
-                //add(new PingAnQY("15000090253873", "Q000201202", "01001034300004541000"));
+                add(new PingAnQY("15000090253776", "Q000201201", "01001034300004540000"));
+                add(new PingAnQY("15000090253873", "Q000201202", "01001034300004541000"));
             }
         };
 
         List<PingAnGR> grs = new ArrayList<PingAnGR>() {
             {
                 add(new PingAnGR("6226090000000048", "张三", "招商银行", "18100000000"));
-                add(new PingAnGR("6226388000000095", "张三", "华夏银行", "18100000000"));
+                //add(new PingAnGR("6226388000000095", "张三", "华夏银行", "18100000000"));
                 /*add(new PingAnGR("5200831111111113", "全渠道", "农业银行", "13552535506"));
                 add(new PingAnGR("6226330151030000", "张小花", "华夏", "18100000005"));
                 add(new PingAnGR("6226388000000087", "张三", "华夏", "17500000000"));
@@ -51,7 +51,7 @@ public class PingAnTest {
             }
         };
 
-        int order = 5111;
+        int order = 5131;
 
         for (int i = 0; i < qies.size(); i++) {
             for (int j = 0; j < grs.size(); j++) {

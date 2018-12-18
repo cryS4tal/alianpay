@@ -82,44 +82,37 @@ public class PingAnService {
         String reqXml = YQUtil.asemblyPackets(qy.yqdm, "KHKF03", xml);
         /**组装请求报文-end*/
 
-        /*Packets packets = HttpUtils.sendPost(reqXml, url, orderNumber);
+        String res = pingAnClient.KHKF03(reqXml, url);
+        if (res == null) {
+            //todo
 
-        String returnXml = null;
-        try {
-            if (packets.getBody() != null) {
-                returnXml = new String(packets.getBody(), "UTF-8");
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+
         }
-        try {
-            Document document = DocumentHelper.parseText(returnXml);
-            String FrontLogNo = document.getRootElement().element("BussFlowNo").getText();
-        } catch (DocumentException e) {
-            LOGGER.error("globalSeq[{}]平安银行代发交易返回报文解析失败", e);
-        }*/
+        System.out.println(res);
 
-
-
-
-
-
-        ResponseEntity<String> res = pingAnClient.orderTest(reqXml, url);
-        if (res.getBody().contains("交易受理成功")) {
-            //System.out.println("订单号：" + orderNumber + "\n银企客户号：" + qy.acctNo + "\n卡号：" + gr.inAcctNo);
-            System.out.println("start__________________________________________________>");
+        if (res.contains("交易受理成功")) {
             //A001010201010010343000045390000000000134KHKF03123450220181218033745YQTEST20181218033745000000:交易受理成功                                                                                 000001            00000000000<?xml version="1.0" encoding="UTF-8" ?><Result><OrderNumber>5111</OrderNumber><BussFlowNo>8043431812186167923315</BussFlowNo></Result>
-            String body =res.getBody();
-
-
-            System.out.println("end____________________________________________________>");
+            String returnXml = StringUtils.substringAfter(res,"?>");
+            Document document = null;
+            try {
+                document = DocumentHelper.parseText(returnXml);
+            } catch (DocumentException e) {
+                e.printStackTrace();
+            }
+            String frontLogNo = document.getRootElement().element("BussFlowNo").getText();
+            String orderNo = document.getRootElement().element("OrderNumber").getText();
+            System.out.println(frontLogNo);
+            System.out.println(orderNo);
+        } else {
+            String msg = StringUtils.substringBefore(res.substring(94),"0").trim();
+            System.out.println(msg);
         }
         /***处理返回结果-end*/
 
     }
 
     public static void main(String[] args) {
-        String str = "A001010201010010343000045390000000000134KHKF03123450220181218033745YQTEST20181218033745000000:交易受理成功                                                                                 000001            00000000000<?xml version=\"1.0\" encoding=\"UTF-8\" ?><Result><OrderNumber>5111</OrderNumber><BussFlowNo>8043431812186167923315</BussFlowNo></Result>\n";
+        /*String str = "A001010201010010343000045390000000000134KHKF03123450220181218033745YQTEST20181218033745000000:交易受理成功                                                                                 000001            00000000000<?xml version=\"1.0\" encoding=\"UTF-8\" ?><Result><OrderNumber>5111</OrderNumber><BussFlowNo>8043431812186167923315</BussFlowNo></Result>\n";
         String xml = StringUtils.substringAfter(str,"?>");
         Document document = null;
         try {
@@ -128,6 +121,17 @@ public class PingAnService {
             e.printStackTrace();
         }
         String FrontLogNo = document.getRootElement().element("BussFlowNo").getText();
-        System.out.println(FrontLogNo);
+        System.out.println(FrontLogNo);*/
+
+        /*String str1 = "A001010201010010343000045370000000000000KHKF03123450220181218064757YQTEST20181218064757BIB006";
+        String str2 = "A001010201010010343000045380000000000000KHKF03123450220181218065033YQTEST201812180650335223  ";
+        String str3 = "A001010201010010343000045390000000000134KHKF03123450220181218065051YQTEST20181218065051000000";
+        String str4 = "A001010201010010343000045400000000000134KHKF03123450220181218065108YQTEST20181218065108000000";
+        String str5 = "A001010201010010343000045410000000000000KHKF03123450220181218065125YQTEST201812180651255223  ";
+        System.out.println(str1.length());
+        System.out.println(str2.length());
+        System.out.println(str3.length());
+        System.out.println(str4.length());
+        System.out.println(str5.length());*/
     }
 }
