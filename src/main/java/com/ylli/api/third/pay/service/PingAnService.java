@@ -3,17 +3,24 @@ package com.ylli.api.third.pay.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ylli.api.pingan.PingAnTest;
+import com.ylli.api.pingan.model.BankGatewayErrorCodeEnum;
 import com.ylli.api.pingan.model.HttpUtils;
 import com.ylli.api.pingan.model.Packets;
+import com.ylli.api.pingan.model.TradeStatusEnum;
 import com.ylli.api.pingan.model.XmlRequestUtil;
 import com.ylli.api.pingan.model.YQUtil;
 import com.ylli.api.third.pay.model.PingAnGR;
 import com.ylli.api.third.pay.model.PingAnOrder;
 import com.ylli.api.third.pay.model.PingAnQY;
 import java.io.UnsupportedEncodingException;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -75,40 +82,52 @@ public class PingAnService {
         String reqXml = YQUtil.asemblyPackets(qy.yqdm, "KHKF03", xml);
         /**组装请求报文-end*/
 
-        Packets packets = HttpUtils.sendPost(reqXml, url, orderNumber);
+        /*Packets packets = HttpUtils.sendPost(reqXml, url, orderNumber);
 
-        String channleRespCode = null;
-        String channleRespDesc = null;
         String returnXml = null;
-        String returnHeadXml = null;
         try {
-            returnHeadXml = new String(packets.getHead(), "UTF-8");
-            channleRespCode = new String(packets.getHead(), 87, 6, "UTF-8");
-            channleRespDesc = new String(packets.getHead(), 94, 99, "UTF-8");
-
-            System.out.println(returnHeadXml);
-            System.out.println(channleRespCode);
-            System.out.println(channleRespDesc);
+            if (packets.getBody() != null) {
+                returnXml = new String(packets.getBody(), "UTF-8");
+            }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
-
-        /*ResponseEntity<String> res = pingAnClient.orderTest(reqXml, url);
-        if (res.getBody().contains("交易受理成功")) {
-            System.out.println("订单号：" + orderNumber + "\n银企客户号：" + qy.acctNo + "\n卡号：" + gr.inAcctNo);
-            System.out.println("start__________________________________________________>");
-            System.out.println(res.getBody());
-            System.out.println(res.getStatusCode());
-            System.out.println("end____________________________________________________>");
+        try {
+            Document document = DocumentHelper.parseText(returnXml);
+            String FrontLogNo = document.getRootElement().element("BussFlowNo").getText();
+        } catch (DocumentException e) {
+            LOGGER.error("globalSeq[{}]平安银行代发交易返回报文解析失败", e);
         }*/
+
+
+
+
+
+
+        ResponseEntity<String> res = pingAnClient.orderTest(reqXml, url);
+        if (res.getBody().contains("交易受理成功")) {
+            //System.out.println("订单号：" + orderNumber + "\n银企客户号：" + qy.acctNo + "\n卡号：" + gr.inAcctNo);
+            System.out.println("start__________________________________________________>");
+            //A001010201010010343000045390000000000134KHKF03123450220181218033745YQTEST20181218033745000000:交易受理成功                                                                                 000001            00000000000<?xml version="1.0" encoding="UTF-8" ?><Result><OrderNumber>5111</OrderNumber><BussFlowNo>8043431812186167923315</BussFlowNo></Result>
+            String body =res.getBody();
+
+
+            System.out.println("end____________________________________________________>");
+        }
         /***处理返回结果-end*/
 
     }
 
     public static void main(String[] args) {
-        String str = "A001010201010010343000045400000000000134KHKF03123450220181217142732YQTEST20181217142732000000:交易受理成功";
-        System.out.println(str.contains("交易受理成功"));
-
+        String str = "A001010201010010343000045390000000000134KHKF03123450220181218033745YQTEST20181218033745000000:交易受理成功                                                                                 000001            00000000000<?xml version=\"1.0\" encoding=\"UTF-8\" ?><Result><OrderNumber>5111</OrderNumber><BussFlowNo>8043431812186167923315</BussFlowNo></Result>\n";
+        String xml = StringUtils.substringAfter(str,"?>");
+        Document document = null;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        }
+        String FrontLogNo = document.getRootElement().element("BussFlowNo").getText();
+        System.out.println(FrontLogNo);
     }
 }

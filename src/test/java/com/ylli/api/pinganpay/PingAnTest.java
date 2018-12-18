@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Ignore
+//@Ignore
 public class PingAnTest {
 
     @Autowired
@@ -51,7 +51,7 @@ public class PingAnTest {
             }
         };
 
-        int order = 5041;
+        int order = 5111;
 
         for (int i = 0; i < qies.size(); i++) {
             for (int j = 0; j < grs.size(); j++) {
@@ -62,6 +62,5 @@ public class PingAnTest {
                 }
             }
         }
-
     }
 }
