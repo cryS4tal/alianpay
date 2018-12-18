@@ -3,11 +3,14 @@ package com.ylli.api.third.pay.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ylli.api.pingan.PingAnTest;
+import com.ylli.api.pingan.model.HttpUtils;
 import com.ylli.api.pingan.model.Packets;
 import com.ylli.api.pingan.model.XmlRequestUtil;
 import com.ylli.api.pingan.model.YQUtil;
+import com.ylli.api.third.pay.model.PingAnGR;
 import com.ylli.api.third.pay.model.PingAnOrder;
-import com.ylli.api.third.pay.util.HttpUtils;
+import com.ylli.api.third.pay.model.PingAnQY;
+import java.io.UnsupportedEncodingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,51 +27,56 @@ public class PingAnService {
     @Autowired
     PingAnClient pingAnClient;
 
+    //企业签约帐号
+    public String acctNo = "";
+    //单位代码
+    public String corpId = "Q000201184";
+    //银企代码
+    public String yqdm = "01001034300004537000";
+
+    //收款卡号
+    public String inAcctNo = "6226330151030000";
+    //收款户名
+    public String inAcctName = "张小花";
+    //收款方银行名称
+    public String inAcctBankName = "华夏";
+    //收款方手机号
+    public String mobile = "";
+
+
     /**
      * xml报文头
      */
     public final static String XML_HEAD = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 
-    public void createPingAnOrder() {
+    public void createPingAnOrder(String orderNumber, PingAnQY qy, PingAnGR gr) {
 
         /**组装请求报文-start*/
         PingAnOrder order = new PingAnOrder();
         //required
-        order.orderNumber = "20181217ylli001";
-        order.acctNo = "15000090244196";
+        order.orderNumber = orderNumber;
+        order.acctNo = qy.acctNo;
         order.busiType = "00000";
-        order.tranAmount = "1";
-        order.inAcctNo = "6226090000000048";
-        order.inAcctName = "张三";
+        order.tranAmount = "100";
+        order.inAcctNo = gr.inAcctNo;
+        order.inAcctName = gr.inAcctName;
         //not required
-        order.corpId = "Q000201184";
+        order.corpId = qy.corpId;
         order.ccyCode = "RMB";
-        order.inAcctBankName = "招商银行";
+        order.inAcctBankName = gr.inAcctBankName;
         order.inAcctBankNode = "";
-        order.mobile = "18100000000";
+        order.mobile = gr.mobile;
         order.remark = "";
         order.inAcctProvinceName = "";
         order.inAcctCityName = "";
 
         String xml = XML_HEAD + XmlRequestUtil.createXmlRequest((JSONObject) JSON.toJSON(order));
 
-        System.out.println("平安单笔付款 KHKF03 请求xml：" + xml);
-
-        //LOGGER.info("平安单笔付款 KHKF03 请求xml：" + xml);
-
-        String reqXml = YQUtil.asemblyPackets("01001034300004537000", "KHKF03", xml);
+        String reqXml = YQUtil.asemblyPackets(qy.yqdm, "KHKF03", xml);
         /**组装请求报文-end*/
 
-        String res = pingAnClient.orderTest(reqXml, url);
-        System.out.println(res);
+        Packets packets = HttpUtils.sendPost(reqXml, url, orderNumber);
 
-        /*Packets packets = HttpUtils.sendPost(reqXml, url);
-        if (null == packets) {
-            LOGGER.warn("globalSeq[{}]平安银行代发交易请求返回报文为空", globalSeq);
-            respDTO.setRespDTO(BankGatewayErrorCodeEnum.SEND_CHANNEL_EXCEPTION, globalSeq);
-            respDTO.setStatus(TradeStatusEnum.PROCESSING.getStatus());
-            return respDTO;
-        }
         String channleRespCode = null;
         String channleRespDesc = null;
         String returnXml = null;
@@ -77,45 +85,30 @@ public class PingAnService {
             returnHeadXml = new String(packets.getHead(), "UTF-8");
             channleRespCode = new String(packets.getHead(), 87, 6, "UTF-8");
             channleRespDesc = new String(packets.getHead(), 94, 99, "UTF-8");
-            if (packets.getBody() != null) {
-                returnXml = new String(packets.getBody(), "UTF-8");
-            }
+
+            System.out.println(returnHeadXml);
+            System.out.println(channleRespCode);
+            System.out.println(channleRespDesc);
         } catch (UnsupportedEncodingException e) {
-            LOGGER.warn("globalSeq[{}]平安银行代发报文解析异常", globalSeq);
-            respDTO.setRespDTO(BankGatewayErrorCodeEnum.SEND_CHANNEL_EXCEPTION, globalSeq);
-            respDTO.setStatus(TradeStatusEnum.PROCESSING.getStatus());
-            return respDTO;
+            e.printStackTrace();
         }
-        LOGGER.info("globalSeq[{}]平安银行代发交易请求响应报文头[{}]", globalSeq, returnHeadXml);
-        LOGGER.info("globalSeq[{}]平安银行代发交易请求响应报文[{}]", globalSeq, returnXml);
-        respDTO.setChannelRespCode(channleRespCode);
-        respDTO.setChannelRespDesc(channleRespDesc);
-        if (packets.getLen() == 0 || !"000000".equals(channleRespCode)) {
-            LOGGER.warn("globalSeq[{}]平安银行代发交易失败,返回码[{}]返回描述[{}]", globalSeq, channleRespCode, channleRespDesc);
-            respDTO.setStatus(TradeStatusEnum.PROCESSING.getStatus());//失败
-            return respDTO;
-        }
-        try {
-            Document document = DocumentHelper.parseText(returnXml);
-            String FrontLogNo = document.getRootElement().element("BussFlowNo").getText();
-            respDTO.setOutSerialNo(FrontLogNo);
-            respDTO.setStatus(TradeStatusEnum.PROCESSING.getStatus());
-            return respDTO;
-        } catch (DocumentException e) {
-            LOGGER.error("globalSeq[{}]平安银行代发交易返回报文解析失败", globalSeq, e);
-            respDTO.setRespDTO(BankGatewayErrorCodeEnum.RESULT_MESSAGE_EXCEPTION, globalSeq);
-            respDTO.setStatus(TradeStatusEnum.PROCESSING.getStatus());
-            return respDTO;
+
+
+        /*ResponseEntity<String> res = pingAnClient.orderTest(reqXml, url);
+        if (res.getBody().contains("交易受理成功")) {
+            System.out.println("订单号：" + orderNumber + "\n银企客户号：" + qy.acctNo + "\n卡号：" + gr.inAcctNo);
+            System.out.println("start__________________________________________________>");
+            System.out.println(res.getBody());
+            System.out.println(res.getStatusCode());
+            System.out.println("end____________________________________________________>");
         }*/
         /***处理返回结果-end*/
 
     }
 
-
     public static void main(String[] args) {
-        PingAnService service = new PingAnService();
-        service.createPingAnOrder();
-
+        String str = "A001010201010010343000045400000000000134KHKF03123450220181217142732YQTEST20181217142732000000:交易受理成功";
+        System.out.println(str.contains("交易受理成功"));
 
     }
 }

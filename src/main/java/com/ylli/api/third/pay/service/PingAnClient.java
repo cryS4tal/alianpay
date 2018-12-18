@@ -40,7 +40,7 @@ public class PingAnClient {
     }
 
 
-    public String orderTest(String xmlStr, String url) {
+    public ResponseEntity<String> orderTest(String xmlStr, String url) {
         HttpHeaders headers = new HttpHeaders();
         MediaType type = MediaType.parseMediaType("text/xml; charset=UTF-8");
         headers.setContentType(type);
@@ -55,11 +55,7 @@ public class PingAnClient {
         if (response == null) {
 
         }
-        String body = response.getBody();
-        HttpStatus status = response.getStatusCode();
-        if (status == HttpStatus.OK) {
-            System.out.println(status);
-        }
-        return response.getBody();
+
+        return response;
     }
 }
