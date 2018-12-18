@@ -24,11 +24,11 @@ public class PingAnTest {
     public void createOrder() {
         List<PingAnQY> qies = new ArrayList<PingAnQY>() {
             {
-                add(new PingAnQY("15000090244196", "Q000201184", "01001034300004537000"));
-                add(new PingAnQY("15000090253485", "Q000201199", "01001034300004538000"));
+                //add(new PingAnQY("15000090244196", "Q000201184", "01001034300004537000"));
+                //add(new PingAnQY("15000090253485", "Q000201199", "01001034300004538000"));
                 add(new PingAnQY("15000090253679", "Q000201200", "01001034300004539000"));
-                add(new PingAnQY("15000090253776", "Q000201201", "01001034300004540000"));
-                add(new PingAnQY("15000090253873", "Q000201202", "01001034300004541000"));
+                //add(new PingAnQY("15000090253776", "Q000201201", "01001034300004540000"));
+                //add(new PingAnQY("15000090253873", "Q000201202", "01001034300004541000"));
             }
         };
 
@@ -51,7 +51,7 @@ public class PingAnTest {
             }
         };
 
-        int order = 5131;
+        int order = 5161;
 
         for (int i = 0; i < qies.size(); i++) {
             for (int j = 0; j < grs.size(); j++) {
@@ -63,4 +63,11 @@ public class PingAnTest {
             }
         }
     }
+
+
+    @Test
+    public void orderQuery() {
+        service.payQuery();
+    }
+
 }

@@ -40,7 +40,7 @@ public class PingAnClient {
     }
 
 
-    public String KHKF03(String xmlStr, String url) {
+    public String post(String xmlStr, String url) {
         HttpHeaders headers = new HttpHeaders();
         MediaType type = MediaType.parseMediaType("text/xml; charset=UTF-8");
         headers.setContentType(type);
