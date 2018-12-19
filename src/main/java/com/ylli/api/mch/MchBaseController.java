@@ -9,8 +9,8 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.CheckPhone;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.mch.model.Audit;
-import com.ylli.api.mch.model.UserBase;
-import com.ylli.api.mch.service.UserBaseService;
+import com.ylli.api.mch.model.MchBase;
+import com.ylli.api.mch.service.MchBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Auth
 @RestController
 @RequestMapping("/user/base")
-public class UserBaseController {
+public class MchBaseController {
 
     @Autowired
-    UserBaseService userBaseService;
+    MchBaseService userBaseService;
 
     @Autowired
     AuthSession authSession;
@@ -34,7 +34,7 @@ public class UserBaseController {
     PermissionService permissionService;
 
     @PostMapping
-    public void register(@RequestBody UserBase userBase) {
+    public void register(@RequestBody MchBase userBase) {
         ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone", "businessLicense", "state");
         if (userBase.mchId != authSession.getAuthId()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
@@ -69,7 +69,7 @@ public class UserBaseController {
 
     @PutMapping
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
-    public Object update(@RequestBody UserBase userBase) {
+    public Object update(@RequestBody MchBase userBase) {
         if (!CheckPhone.isPhoneOrTel(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isPhoneOrTel(userBase.linkPhone))) {
             throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
         }

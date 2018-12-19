@@ -5,15 +5,15 @@ import com.github.pagehelper.PageHelper;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.mch.mapper.SysAppMapper;
-import com.ylli.api.mch.mapper.UserAppMapper;
+import com.ylli.api.mch.mapper.MchAppMapper;
 import com.ylli.api.mch.model.Apps;
 import com.ylli.api.mch.model.SysApp;
-import com.ylli.api.mch.model.UserAppDetail;
+import com.ylli.api.mch.model.MchAppDetail;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.mch.Config;
-import com.ylli.api.mch.mapper.UserBaseMapper;
-import com.ylli.api.mch.model.UserApp;
+import com.ylli.api.mch.mapper.MchBaseMapper;
+import com.ylli.api.mch.model.MchApp;
 import java.util.ArrayList;
 import java.util.List;
 import org.modelmapper.ModelMapper;
@@ -25,13 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AppService {
 
     @Autowired
-    UserAppMapper userAppMapper;
+    MchAppMapper mchAppMapper;
 
     @Autowired
     SysAppMapper sysAppMapper;
 
     @Autowired
-    UserBaseMapper userBaseMapper;
+    MchBaseMapper userBaseMapper;
 
     @Autowired
     ModelMapper modelMapper;
@@ -50,10 +50,10 @@ public class AppService {
 
     @Transactional
     public void removeApp(Long appId, Long mchId) {
-        UserApp userApp = new UserApp();
-        userApp.appId = appId;
-        userApp.mchId = mchId;
-        userAppMapper.delete(userApp);
+        MchApp mchApp = new MchApp();
+        mchApp.appId = appId;
+        mchApp.mchId = mchId;
+        mchAppMapper.delete(mchApp);
     }
 
     public DataList<SysApp> getSysApp(String appName, Boolean status, int offset, int limit) {
@@ -78,40 +78,40 @@ public class AppService {
         return sysAppMapper.selectAll();
     }
 
-    public List<UserAppDetail> setUserRate(Apps apps) {
+    public List<MchAppDetail> setUserRate(Apps apps) {
 
-        List<UserAppDetail> list = new ArrayList<>();
+        List<MchAppDetail> list = new ArrayList<>();
         for (int i = 0; i < apps.apps.size(); i++) {
-            UserApp userApp = apps.apps.get(i);
+            MchApp mchApp = apps.apps.get(i);
             ServiceUtil.checkNotEmptyIgnore(apps.apps.get(i), true);
-            if (sysAppMapper.selectByPrimaryKey(userApp.appId) == null) {
+            if (sysAppMapper.selectByPrimaryKey(mchApp.appId) == null) {
                 throw new AwesomeException(Config.ERROR_APP_NOT_FOUND);
             }
-            UserApp exist = new UserApp();
-            exist.appId = userApp.appId;
-            exist.mchId = userApp.mchId;
-            exist = userAppMapper.selectOne(exist);
+            MchApp exist = new MchApp();
+            exist.appId = mchApp.appId;
+            exist.mchId = mchApp.mchId;
+            exist = mchAppMapper.selectOne(exist);
             if (exist == null) {
-                userAppMapper.insertSelective(userApp);
+                mchAppMapper.insertSelective(mchApp);
             } else {
-                userApp.id = exist.id;
-                userAppMapper.updateByPrimaryKeySelective(userApp);
+                mchApp.id = exist.id;
+                mchAppMapper.updateByPrimaryKeySelective(mchApp);
             }
-            list.add(convert(userApp));
+            list.add(convert(mchApp));
         }
         return list;
     }
 
-    public UserAppDetail convert(UserApp userApp) {
-        UserAppDetail detail = new UserAppDetail();
+    public MchAppDetail convert(MchApp mchApp) {
+        MchAppDetail detail = new MchAppDetail();
 
-        detail.id = userApp.id;
-        detail.appId = userApp.appId;
-        detail.appName = sysAppMapper.selectByPrimaryKey(userApp.appId).appName;
-        detail.mchId = userApp.mchId;
-        detail.mchName = userBaseMapper.selectByMchId(userApp.mchId).mchName;
-        detail.rate = userApp.rate;
-        detail.createTime = userApp.createTime;
+        detail.id = mchApp.id;
+        detail.appId = mchApp.appId;
+        detail.appName = sysAppMapper.selectByPrimaryKey(mchApp.appId).appName;
+        detail.mchId = mchApp.mchId;
+        detail.mchName = userBaseMapper.selectByMchId(mchApp.mchId).mchName;
+        detail.rate = mchApp.rate;
+        detail.createTime = mchApp.createTime;
         return detail;
     }
 
@@ -121,14 +121,14 @@ public class AppService {
      * @return
      */
     public Integer getRate(Long mchId, Long appId) {
-        UserApp userApp = new UserApp();
-        userApp.mchId = mchId;
-        userApp.appId = appId;
-        userApp = userAppMapper.selectOne(userApp);
-        if (userApp == null) {
+        MchApp mchApp = new MchApp();
+        mchApp.mchId = mchId;
+        mchApp.appId = appId;
+        mchApp = mchAppMapper.selectOne(mchApp);
+        if (mchApp == null) {
             return sysAppMapper.selectByPrimaryKey(appId).rate;
         } else {
-            return userApp.rate;
+            return mchApp.rate;
         }
     }
 
@@ -157,7 +157,7 @@ public class AppService {
     public Object getMchApp(Long mchId) {
         List<SysApp> list = sysAppMapper.selectAll();
 
-        List<UserAppDetail> details = new ArrayList<>();
+        List<MchAppDetail> details = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             details.add(doSome(list.get(i), mchId));
         }
@@ -169,20 +169,20 @@ public class AppService {
         return details;
     }
 
-    public UserAppDetail doSome(SysApp sysApp, Long mchId) {
-        UserAppDetail detail = new UserAppDetail();
-        UserApp userApp = new UserApp();
-        userApp.mchId = mchId;
-        userApp.appId = sysApp.id;
-        userApp = userAppMapper.selectOne(userApp);
-        if (userApp == null) {
+    public MchAppDetail doSome(SysApp sysApp, Long mchId) {
+        MchAppDetail detail = new MchAppDetail();
+        MchApp mchApp = new MchApp();
+        mchApp.mchId = mchId;
+        mchApp.appId = sysApp.id;
+        mchApp = mchAppMapper.selectOne(mchApp);
+        if (mchApp == null) {
             detail.appId = sysApp.id;
             detail.appName = sysApp.appName;
             detail.rate = sysApp.rate;
             detail.isDefault = true;
         } else {
-            detail.rate = userApp.rate;
-            detail.appId = userApp.appId;
+            detail.rate = mchApp.rate;
+            detail.appId = mchApp.appId;
             detail.appName = sysApp.appName;
             detail.isDefault = false;
         }

@@ -3,5 +3,5 @@ package com.ylli.api.mch.model;
 import java.util.List;
 
 public class Apps {
-    public List<UserApp> apps;
+    public List<MchApp> apps;
 }

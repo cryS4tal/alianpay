@@ -8,8 +8,8 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.Config;
-import com.ylli.api.mch.service.UserBaseService;
-import com.ylli.api.mch.service.UserKeyService;
+import com.ylli.api.mch.service.MchBaseService;
+import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.wallet.service.WalletService;
 import com.ylli.api.third.pay.mapper.XfBillMapper;
 import com.ylli.api.third.pay.model.CreditPay;
@@ -50,10 +50,10 @@ public class XfPayService {
     XfBillMapper xfBillMapper;
 
     @Autowired
-    UserBaseService userBaseService;
+    MchBaseService userBaseService;
 
     @Autowired
-    UserKeyService userKeyService;
+    MchKeyService userKeyService;
 
     @Autowired
     SerializeUtil serializeUtil;

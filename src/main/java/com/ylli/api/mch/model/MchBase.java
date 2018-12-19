@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Table(name = "t_user_base")
-public class UserBase {
+public class MchBase {
 
     public static final Integer NEW = 0;
     public static final Integer PASS = 1;

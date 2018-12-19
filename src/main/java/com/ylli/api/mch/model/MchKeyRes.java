@@ -1,5 +1,5 @@
 package com.ylli.api.mch.model;
 
-public class UserKeyRes {
+public class MchKeyRes {
     public String key;
 }

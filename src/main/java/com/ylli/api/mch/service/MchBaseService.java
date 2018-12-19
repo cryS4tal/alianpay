@@ -5,8 +5,8 @@ import com.github.pagehelper.PageHelper;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.mch.Config;
-import com.ylli.api.mch.mapper.UserBaseMapper;
-import com.ylli.api.mch.model.UserBase;
+import com.ylli.api.mch.mapper.MchBaseMapper;
+import com.ylli.api.mch.model.MchBase;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
@@ -16,26 +16,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UserBaseService {
+public class MchBaseService {
 
     @Autowired
-    UserBaseMapper userBaseMapper;
+    MchBaseMapper userBaseMapper;
 
     @Autowired
     ModelMapper modelMapper;
 
     @Transactional
-    public void register(UserBase userBase) {
+    public void register(MchBase userBase) {
 
-        UserBase base = userBaseMapper.selectByMchId(userBase.mchId);
+        MchBase base = userBaseMapper.selectByMchId(userBase.mchId);
         if (base == null) {
             base = init(userBase.mchId, userBase.linkPhone);
         }
-        if (base.state == UserBase.PASS) {
+        if (base.state == MchBase.PASS) {
             throw new AwesomeException(Config.ERROR_AUDIT_PASS);
         }
         //强制转换.
-        userBase.state = UserBase.NEW;
+        userBase.state = MchBase.NEW;
         //fix use modelMapper cause not update data
         userBase.id  = base.id;
         modelMapper.map(userBase, base);
@@ -45,7 +45,7 @@ public class UserBaseService {
 
     @Transactional
     public Object audit(Long mchId, Integer state) {
-        UserBase userBase = userBaseMapper.selectByMchId(mchId);
+        MchBase userBase = userBaseMapper.selectByMchId(mchId);
         if (userBase == null) {
             throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
         }
@@ -56,33 +56,33 @@ public class UserBaseService {
     }
 
     @Transactional
-    public UserBase init(Long mchId, String phone) {
-        UserBase userBase = new UserBase();
+    public MchBase init(Long mchId, String phone) {
+        MchBase userBase = new MchBase();
         userBase.mchId = mchId;
         userBase.linkPhone = phone;
-        userBase.state = UserBase.NEW;
+        userBase.state = MchBase.NEW;
         userBaseMapper.insertSelective(userBase);
         return userBaseMapper.selectByPrimaryKey(userBase.id);
     }
 
     public Integer getState(Long id) {
-        UserBase userBase = new UserBase();
+        MchBase userBase = new MchBase();
         userBase.mchId = id;
         userBase = userBaseMapper.selectOne(userBase);
-        return Optional.ofNullable(userBase).map(base -> base.state).orElse(UserBase.NEW);
+        return Optional.ofNullable(userBase).map(base -> base.state).orElse(MchBase.NEW);
     }
 
-    public UserBase getBase(Long id) {
-        UserBase userBase = new UserBase();
+    public MchBase getBase(Long id) {
+        MchBase userBase = new MchBase();
         userBase.mchId = id;
         userBase = userBaseMapper.selectOne(userBase);
         return userBase;
     }
 
-    public DataList<UserBase> getBase(Long mchId, Integer state, String mchName, String name, String phone, String businessLicense, int offset, int limit) {
+    public DataList<MchBase> getBase(Long mchId, Integer state, String mchName, String name, String phone, String businessLicense, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
-        Page<UserBase> page = (Page<UserBase>) userBaseMapper.getBase(mchId, state, mchName, name, phone, businessLicense);
-        DataList<UserBase> dataList = new DataList<>();
+        Page<MchBase> page = (Page<MchBase>) userBaseMapper.getBase(mchId, state, mchName, name, phone, businessLicense);
+        DataList<MchBase> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();
         dataList.totalCount = page.getTotal();
@@ -91,8 +91,8 @@ public class UserBaseService {
     }
 
     @Transactional
-    public UserBase update(UserBase userBase) {
-        UserBase base = userBaseMapper.selectByMchId(userBase.mchId);
+    public MchBase update(MchBase userBase) {
+        MchBase base = userBaseMapper.selectByMchId(userBase.mchId);
         if (base == null) {
             base = init(userBase.mchId, userBase.linkPhone);
         }

@@ -2,7 +2,7 @@ package com.ylli.api.mch.model;
 
 import java.sql.Timestamp;
 
-public class UserAppDetail {
+public class MchAppDetail {
 
     public Long id;
 

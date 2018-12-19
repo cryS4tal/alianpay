@@ -5,7 +5,7 @@ import com.ylli.api.auth.model.Account;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.MergeUtil;
-import com.ylli.api.mch.service.UserBaseService;
+import com.ylli.api.mch.service.MchBaseService;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +30,7 @@ public class LoginService {
     AccountService accountService;
 
     @Autowired
-    UserBaseService userBaseService;
+    MchBaseService userBaseService;
 
     @Autowired
     MergeUtil mergeUtil;

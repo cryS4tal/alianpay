@@ -6,7 +6,7 @@ import com.ylli.api.auth.mapper.PhoneAuthMapper;
 import com.ylli.api.auth.model.PhoneAuth;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.Config;
-import com.ylli.api.mch.mapper.UserKeyMapper;
+import com.ylli.api.mch.mapper.MchKeyMapper;
 import com.ylli.api.mch.mapper.UserSettlementMapper;
 import com.ylli.api.mch.model.MchInfoDetail;
 import com.ylli.api.mch.model.UserSettlement;
@@ -19,14 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserManageService {
+public class MchManageService {
 
 
     @Autowired
     PhoneAuthMapper phoneAuthMapper;
 
     @Autowired
-    UserKeyMapper userKeyMapper;
+    MchKeyMapper userKeyMapper;
 
     @Autowired
     UserSettlementMapper userSettlementMapper;

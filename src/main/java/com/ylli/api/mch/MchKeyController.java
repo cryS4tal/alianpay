@@ -6,8 +6,8 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.mch.model.Key;
-import com.ylli.api.mch.service.UserKeyService;
-import com.ylli.api.mch.model.UserKeyRes;
+import com.ylli.api.mch.service.MchKeyService;
+import com.ylli.api.mch.model.MchKeyRes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,16 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/user/secret")
 @Auth
-public class UserKeyController {
+public class MchKeyController {
 
     @Autowired
-    UserKeyService userKeyService;
+    MchKeyService userKeyService;
 
     @Autowired
     AuthSession authSession;
 
     @PostMapping
-    public UserKeyRes saveKey(@RequestBody Key key) {
+    public MchKeyRes saveKey(@RequestBody Key key) {
         ServiceUtil.checkNotEmpty(key);
         if (authSession.getAuthId() != key.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
@@ -36,12 +36,12 @@ public class UserKeyController {
     }
 
     @PostMapping("/random")
-    public UserKeyRes randomKey() {
+    public MchKeyRes randomKey() {
         return userKeyService.randomKey();
     }
 
     @GetMapping
-    public UserKeyRes getKey(@AwesomeParam Long userId) {
+    public MchKeyRes getKey(@AwesomeParam Long userId) {
         if (authSession.getAuthId() != userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }

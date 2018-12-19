@@ -1,26 +1,26 @@
 package com.ylli.api.mch.service;
 
-import com.ylli.api.mch.mapper.UserKeyMapper;
-import com.ylli.api.mch.model.UserKey;
-import com.ylli.api.mch.model.UserKeyRes;
+import com.ylli.api.mch.mapper.MchKeyMapper;
+import com.ylli.api.mch.model.MchKey;
+import com.ylli.api.mch.model.MchKeyRes;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UserKeyService {
+public class MchKeyService {
 
     @Autowired
-    UserKeyMapper userKeyMapper;
+    MchKeyMapper userKeyMapper;
 
     @Transactional
-    public UserKeyRes saveKey(Long userId, String secretKey) {
-        UserKey userKey = new UserKey();
+    public MchKeyRes saveKey(Long userId, String secretKey) {
+        MchKey userKey = new MchKey();
         userKey.userId = userId;
         userKey = userKeyMapper.selectOne(userKey);
         if (userKey == null) {
-            userKey = new UserKey();
+            userKey = new MchKey();
             userKey.userId = userId;
             userKey.secretKey = secretKey;
             userKeyMapper.insertSelective(userKey);
@@ -28,13 +28,13 @@ public class UserKeyService {
             userKey.secretKey = secretKey;
             userKeyMapper.updateByPrimaryKeySelective(userKey);
         }
-        UserKeyRes res = new UserKeyRes();
+        MchKeyRes res = new MchKeyRes();
         res.key = userKeyMapper.getKeyById(userId);
         return res;
     }
 
-    public UserKey getKeyByUserId(Long userId) {
-        UserKey userKey = new UserKey();
+    public MchKey getKeyByUserId(Long userId) {
+        MchKey userKey = new MchKey();
         userKey.userId = userId;
         return userKeyMapper.selectOne(userKey);
     }
@@ -63,15 +63,15 @@ public class UserKeyService {
         return key;
     }
 
-    public UserKeyRes getKey(Long userId) {
+    public MchKeyRes getKey(Long userId) {
         String key = userKeyMapper.getKeyById(userId);
-        UserKeyRes res = new UserKeyRes();
+        MchKeyRes res = new MchKeyRes();
         res.key = key;
         return res;
     }
 
-    public UserKeyRes randomKey() {
-        UserKeyRes res = new UserKeyRes();
+    public MchKeyRes randomKey() {
+        MchKeyRes res = new MchKeyRes();
         res.key = UUID.randomUUID().toString().replaceAll("-", "");
         return res;
     }

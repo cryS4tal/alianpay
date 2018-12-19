@@ -7,7 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Table(name = "t_user_app")
-public class UserApp {
+public class MchApp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -15,7 +15,7 @@ import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
-import com.ylli.api.mch.mapper.UserBaseMapper;
+import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
 import java.math.BigDecimal;
@@ -53,7 +53,7 @@ public class BillService {
     SerializeUtil serializeUtil;
 
     @Autowired
-    UserBaseMapper userBaseMapper;
+    MchBaseMapper userBaseMapper;
 
     @Autowired
     PayService payService;
