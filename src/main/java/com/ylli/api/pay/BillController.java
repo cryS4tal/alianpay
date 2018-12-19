@@ -85,7 +85,7 @@ public class BillController {
      */
     @PostMapping("/reissue")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BILL))
-    public Object reissue(@AwesomeParam Long id) throws Exception {
-        return billService.reissue(id);
+    public Object reissue(@AwesomeParam String sysOrderId) throws Exception {
+        return billService.reissue(sysOrderId);
     }
 }

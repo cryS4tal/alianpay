@@ -253,8 +253,10 @@ public class BillService {
     }
 
     @Transactional
-    public Object reissue(Long id) throws Exception {
-        Bill bill = billMapper.selectByPrimaryKey(id);
+    public Object reissue(String sysOrderId) throws Exception {
+        Bill bill = new Bill();
+        bill.sysOrderId = sysOrderId;
+        bill = billMapper.selectOne(bill);
         if (bill == null) {
             throw new AwesomeException(Config.ERROR_BILL_NOT_FOUND);
         }
@@ -265,7 +267,7 @@ public class BillService {
             bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
 
             //不返回上游订单号.
-            bill.superOrderId = new StringBuffer().append("unknown").append(id).toString();
+            bill.superOrderId = new StringBuffer().append("unknown").append(bill.id).toString();
             bill.msg = (new BigDecimal(bill.money).divide(new BigDecimal(100))).toString();
             billMapper.updateByPrimaryKeySelective(bill);
 
