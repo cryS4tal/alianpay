@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 
 /**
  * 核心账单类.
- * todo 账单系统没有统一之前，先由其他账单转化
  */
 public class BaseBill {
 
@@ -29,9 +28,11 @@ public class BaseBill {
     //支付方式：支付宝/微信   +   tradeType  native  wap
     public String payType;
 
-    public String state;
+    public Integer state;
 
     public String tradeTime;
+
+    public String channel;
 
     //创建时间
     public Timestamp createTime;

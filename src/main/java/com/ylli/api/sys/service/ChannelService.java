@@ -6,6 +6,7 @@ import com.ylli.api.sys.mapper.MchChannelMapper;
 import com.ylli.api.sys.mapper.SysChannelMapper;
 import com.ylli.api.sys.model.MchChannel;
 import com.ylli.api.sys.model.SysChannel;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,5 +70,10 @@ public class ChannelService {
         mchChannel.channelId = channelId;
         mchChannelMapper.insertSelective(mchChannel);
         return mchChannel;
+    }
+
+    public String getChannelName(Long channelId) {
+        SysChannel sysChannel = sysChannelMapper.selectByPrimaryKey(channelId);
+        return Optional.ofNullable(sysChannel).map(i -> i.name).orElse(null);
     }
 }

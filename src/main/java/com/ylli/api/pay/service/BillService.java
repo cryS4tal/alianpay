@@ -11,6 +11,7 @@ import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
 import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
@@ -60,6 +61,9 @@ public class BillService {
     @Autowired
     PayClient payClient;
 
+    @Autowired
+    ChannelService channelService;
+
     /**
      * @param mchId
      * @param status
@@ -102,11 +106,12 @@ public class BillService {
         baseBill.money = bill.money;
         baseBill.mchCharge = bill.payCharge;
         baseBill.payType = typeToString(bill.payType, bill.tradeType);
-        baseBill.state = Bill.statusToString(bill.status);
+        baseBill.state = bill.status;
         if (bill.tradeTime != null) {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
         baseBill.createTime = bill.createTime;
+        baseBill.channel = channelService.getChannelName(bill.channelId);
         return baseBill;
     }
 
