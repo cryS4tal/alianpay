@@ -1,6 +1,6 @@
 package com.ylli.api.wallet.service;
 
-import com.ylli.api.user.model.UserChargeInfo;
+import com.ylli.api.mch.model.UserChargeInfo;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.third.pay.mapper.YfbBillMapper;

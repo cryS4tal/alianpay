@@ -2,7 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ylli.api.auth.mapper.AccountMapper">
     <resultMap id="accountMap" type="com.ylli.api.auth.model.Account"/>
-    <resultMap id="accountInfoMap" type="com.ylli.api.auth.model.AccountInfo"/>
 
     <select id="getAccounts" resultMap="accountMap">
         SELECT
@@ -15,56 +14,4 @@
             </if>
         </where>
     </select>
-
-    <select id="selectByTime" resultType="int">
-        SELECT
-        count(*)
-        FROM t_account
-        <where>
-            <if test="start != null">
-                create_time >= #{start}
-            </if>
-            <if test="end != null">
-                AND create_time &lt; #{end}
-            </if>
-        </where>
-    </select>
-
-    <select id="queryByCondition" resultMap="accountInfoMap">
-        SELECT
-        t_account.id,
-        t_account.avatar,
-        t_account.nickname,
-        t_account.state,
-        t_real_name_verify.`name`,
-        t_real_name_verify.card_id,
-        t_phone_auth.phone,
-        IF (t_iou_black.id IS NULL,FALSE,TRUE) AS is_black
-        FROM
-        t_account
-        LEFT JOIN t_real_name_verify ON t_account.id = t_real_name_verify.id
-        LEFT JOIN t_phone_auth ON t_account.id = t_phone_auth.id
-        LEFT JOIN t_iou_black ON t_account.id = t_iou_black.id
-        <where>
-            t_account.state = #{state}
-            <if test="id != null">
-                AND t_account.id = ${id}
-            </if>
-            <if test="nickname != null">
-                <bind name="nickname_ext" value="nickname + '%'"/>
-                AND t_account.nickname LIKE #{nickname_ext}
-            </if>
-            <if test="name != null">
-                <bind name="name_ext" value="name + '%'"/>
-                AND t_real_name_verify.name LIKE #{name_ext}
-            </if>
-            <if test="card_id != null">
-                AND t_real_name_verify.card_id = #{card_id}
-            </if>
-            <if test="phone != null">
-                AND t_phone_auth.phone = #{phone}
-            </if>
-        </where>
-    </select>
-
 </mapper>

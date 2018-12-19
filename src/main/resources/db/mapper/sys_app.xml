@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ylli.api.user.mapper.SysAppMapper">
-    <resultMap id="sysAppMap" type="com.ylli.api.user.model.SysApp"/>
+<mapper namespace="com.ylli.api.mch.mapper.SysAppMapper">
+    <resultMap id="sysAppMap" type="com.ylli.api.mch.model.SysApp"/>
 
     <select id="getSysApp" resultMap="sysAppMap">
         SELECT

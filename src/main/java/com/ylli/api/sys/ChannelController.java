@@ -1,8 +1,10 @@
 package com.ylli.api.sys;
 
 import com.ylli.api.base.annotation.Auth;
+import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.sys.service.ChannelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +38,12 @@ public class ChannelController {
         channelService.channelSwitch(channel.id, channel.isOpen);
     }
 
+    @GetMapping
+    public Object sysChannels(@AwesomeParam(defaultValue = "0") int offset,
+                              @AwesomeParam(defaultValue = "20") int limit) {
+        return channelService.sysChannels(offset, limit);
+    }
+
     static class MchChannel {
         public Long mchId;
         public Long channelId;
@@ -50,6 +58,5 @@ public class ChannelController {
     public void mchChannelSwitch(@RequestBody MchChannel mchChannel) {
         channelService.mchChannelSwitch(mchChannel.mchId, mchChannel.channelId);
     }
-
 
 }
