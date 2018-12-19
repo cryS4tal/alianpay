@@ -10,8 +10,17 @@ public class BillJobs {
     @Autowired
     BillService billService;
 
+    @Autowired
+    MessageService messageService;
+
     @Scheduled(cron = "0 0 * * * ?")
     public void autoClose() {
         billService.autoClose();
+    }
+
+
+    @Scheduled(cron = "0 0/5 * * * ?")
+    public void autoSendNotify() {
+        messageService.autoSendNotify();
     }
 }

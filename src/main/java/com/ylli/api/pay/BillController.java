@@ -4,12 +4,14 @@ import com.google.common.base.Strings;
 import com.ylli.api.auth.service.PermissionService;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
+import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.pay.service.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -75,4 +77,15 @@ public class BillController {
         return billService.getTodayDetail(mchId);
     }
 
+
+    /**
+     * 补单
+     *
+     * @return
+     */
+    @PostMapping("/reissue")
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_BILL))
+    public Object reissue(@AwesomeParam Long id) throws Exception {
+        return billService.reissue(id);
+    }
 }
