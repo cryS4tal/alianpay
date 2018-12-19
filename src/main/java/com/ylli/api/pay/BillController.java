@@ -12,6 +12,7 @@ import com.ylli.api.pay.service.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -77,6 +78,9 @@ public class BillController {
         return billService.getTodayDetail(mchId);
     }
 
+    static class Reissue {
+        public String sysOrderId;
+    }
 
     /**
      * 补单
@@ -85,7 +89,7 @@ public class BillController {
      */
     @PostMapping("/reissue")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BILL))
-    public Object reissue(@AwesomeParam String sysOrderId) throws Exception {
-        return billService.reissue(sysOrderId);
+    public Object reissue(@RequestBody Reissue reissue) throws Exception {
+        return billService.reissue(reissue.sysOrderId);
     }
 }
