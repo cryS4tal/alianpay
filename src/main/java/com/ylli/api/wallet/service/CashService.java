@@ -155,4 +155,35 @@ public class CashService {
             walletMapper.updateByPrimaryKeySelective(wallet);
         }
     }
+
+    public void successJobs(Long cashLogId, Boolean success) {
+        CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
+        if (cashLog == null) {
+            return;
+        }
+        if (cashLog.state == CashLog.FINISH || cashLog.state == CashLog.FAILED) {
+            //要求网众系统在250分钟之内更新提现状态 or 客服手动处理 否则置为失败处理，不在轮询状态。手动控制是否到账。
+            //删除wz_cash_log
+            WzCashLog log = new WzCashLog();
+            log.logId = cashLogId;
+            wzCashLogMapper.delete(log);
+            return;
+        }
+        Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
+        if (success == null || success) {
+            cashLog.state = CashLog.FINISH;
+            cashLogMapper.updateByPrimaryKeySelective(cashLog);
+
+            wallet.pending = wallet.pending - cashLog.money - 200;
+            wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
+            walletMapper.updateByPrimaryKeySelective(wallet);
+        } else {
+            cashLog.state = CashLog.FAILED;
+            cashLogMapper.updateByPrimaryKeySelective(cashLog);
+
+            wallet.pending = wallet.pending - cashLog.money - 200;
+            wallet.recharge = wallet.recharge + cashLog.money + 200;
+            walletMapper.updateByPrimaryKeySelective(wallet);
+        }
+    }
 }

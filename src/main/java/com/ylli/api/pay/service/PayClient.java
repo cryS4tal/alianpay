@@ -8,6 +8,7 @@ import com.ylli.api.third.pay.service.WzClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,6 +18,9 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class PayClient {
     private static Logger LOGGER = LoggerFactory.getLogger(WzClient.class);
+
+    @Value("${notify.limit}")
+    public Integer notifyLimit;
 
     @Autowired
     RestTemplate restTemplate;
@@ -61,7 +65,7 @@ public class PayClient {
             AsyncMessage message = new AsyncMessage();
             message.billId = id;
             message = asyncMessageMapper.selectOne(message);
-            if (message.failCount > 5) {
+            if (message.failCount > notifyLimit) {
                 asyncMessageMapper.delete(message);
             } else {
                 message.failCount = message.failCount + 1;
