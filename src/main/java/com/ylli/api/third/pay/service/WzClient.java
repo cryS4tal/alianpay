@@ -94,50 +94,6 @@ public class WzClient {
     }
 
     /**
-     * 代付请求
-     *
-     * @return
-     */
-    public String cash(String sysOrderId) throws Exception {
-        String account = "李玉龙";
-        String card = "6217920274920375";
-        String name = "浦发银行";
-        String fullname = "上海浦东发展银行芜湖中江支行";
-        //随便
-        String linked = "310362002554";
-        String money = "2.01";
-        //随便
-        String cityid = "52";
-        String idcard = "";
-        String mobile = "";
-
-        String requestUrl = UriComponentsBuilder.fromHttpUrl(
-                "http://nfo.cdwzwl.com/createorder/payorder")
-                .queryParam("account", account)
-                .queryParam("card", card)
-                .queryParam("name", name)
-                .queryParam("fullname", fullname)
-                .queryParam("linked", linked)
-                .queryParam("spid", spid_cash)
-                .queryParam("order", sysOrderId)
-                .queryParam("type", 1)
-                .queryParam("money", money)
-                .queryParam("cityid", cityid)
-                .queryParam("idcard", idcard)
-                .queryParam("mobile", mobile)
-                .queryParam("sign", generateSign(money, account, card, name, fullname, linked, sysOrderId))
-                .build().toUriString();
-        try {
-            String result = restTemplate.getForObject(requestUrl, String.class);
-
-            return result;
-        } catch (Exception ex) {
-            ex.getMessage();
-        }
-        return null;
-    }
-
-    /**
      * @param account
      * @param card
      * @param name
