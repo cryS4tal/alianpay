@@ -30,14 +30,6 @@ public class WzpayController {
     }
 
     /**
-     * 测试api
-     */
-    @GetMapping("/test")
-    public String dotest() throws Exception {
-        return wzClient.cash("2018121209305200000003");
-    }
-
-    /**
      * 自己组装参数 向网众发起提现请求。
      */
     @GetMapping("/cash")
