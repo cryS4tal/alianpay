@@ -33,13 +33,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             5, "审核已通过，如需修改信息请联系客服.");
 
-    public static final ErrorCode ERROR_SETTLEMENT_EMPTY
+    public static final ErrorCode ERROR_MCH_DISABLE
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            6, "请先设置结算信息.");
-
-    public static final ErrorCode ERROR_CHARGE_TYPE
-            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            7, "不支持的结算类型");
+            6, "用户已被禁用.");
 
 
     /**

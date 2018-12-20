@@ -4,6 +4,7 @@ import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.mch.model.AdminResetPwd;
 import com.ylli.api.mch.model.MchEnable;
 import com.ylli.api.mch.service.MchManageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,14 @@ public class MchManageController {
     public void mchEnable(@RequestBody MchEnable enable) {
         ServiceUtil.checkNotEmpty(enable);
         manageService.mchEnable(enable.mchId, enable.open);
+    }
+
+    /**
+     * 管理员重置密码
+     */
+    @PostMapping("/pwd")
+    public void resetPwd(@RequestBody AdminResetPwd resetPwd) {
+        ServiceUtil.checkNotEmpty(resetPwd);
+        manageService.resetPwd(resetPwd.mchId, resetPwd.password);
     }
 }

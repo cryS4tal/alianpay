@@ -31,6 +31,5 @@
                 AND t_account.state = #{mch_state}
             </if>
         </where>
-        ORDER BY t_user_base.state DESC
     </select>
 </mapper>
