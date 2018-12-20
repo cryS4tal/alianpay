@@ -3,18 +3,22 @@ package com.ylli.api.pay.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
+import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
+import com.ylli.api.pay.Config;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
 import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
 import com.ylli.api.user.mapper.UserBaseMapper;
 import com.ylli.api.user.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -51,9 +55,16 @@ public class BillService {
     @Autowired
     UserBaseMapper userBaseMapper;
 
+    @Autowired
+    PayService payService;
+
+    @Autowired
+    PayClient payClient;
+
+    @Autowired
+    ChannelService channelService;
+
     /**
-     * todo 目前账单系统是分离的。第一版先直接查询易付宝账单.
-     *
      * @param mchId
      * @param status
      * @param mchOrderId
@@ -95,11 +106,12 @@ public class BillService {
         baseBill.money = bill.money;
         baseBill.mchCharge = bill.payCharge;
         baseBill.payType = typeToString(bill.payType, bill.tradeType);
-        baseBill.state = Bill.statusToString(bill.status);
+        baseBill.state = bill.status;
         if (bill.tradeTime != null) {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
         baseBill.createTime = bill.createTime;
+        baseBill.channel = channelService.getChannelName(bill.channelId);
         return baseBill;
     }
 
@@ -243,5 +255,44 @@ public class BillService {
         bill.tradeType = tradeType;
         billMapper.insertSelective(bill);
         return bill;
+    }
+
+    @Transactional
+    public Object reissue(String sysOrderId) throws Exception {
+        Bill bill = new Bill();
+        bill.sysOrderId = sysOrderId;
+        bill = billMapper.selectOne(bill);
+        if (bill == null) {
+            throw new AwesomeException(Config.ERROR_BILL_NOT_FOUND);
+        }
+        //补单操作..
+        if (bill.status == Bill.NEW || bill.status == Bill.AUTO_CLOSE) {
+            bill.status = Bill.FINISH;
+            bill.tradeTime = Timestamp.from(Instant.now());
+            bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+
+            //不返回上游订单号.
+            bill.superOrderId = new StringBuffer().append("unknown").append(bill.id).toString();
+            bill.msg = (new BigDecimal(bill.money).divide(new BigDecimal(100))).toString();
+            billMapper.updateByPrimaryKeySelective(bill);
+
+            //钱包金额变动。
+            walletService.incr(bill.mchId, bill.money - bill.payCharge);
+
+            //加入异步通知下游商户系统
+            //params jsonStr.
+            String params = payService.generateRes(
+                    bill.money.toString(),
+                    bill.mchOrderId,
+                    bill.sysOrderId,
+                    bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
+                    bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
+                    bill.reserve);
+
+            payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+        } else {
+            throw new AwesomeException(Config.ERROR_BILL_STATUS);
+        }
+        return convert(bill);
     }
 }

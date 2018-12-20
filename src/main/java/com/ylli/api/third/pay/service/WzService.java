@@ -92,14 +92,15 @@ public class WzService {
                     bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
                     bill.reserve);
 
-            payClient.sendNotify(bill.id, bill.notifyUrl, params);
+            payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
 
-            if (bill.isSuccess != null && bill.isSuccess) {
+            /*if (bill.isSuccess != null && bill.isSuccess) {
                 return "ok";
             } else {
                 //隐藏真实返回.待商户系统返回success再做正确处理
                 return "";
-            }
+            }*/
+            return "ok";
         } else {
             return "fail";
         }

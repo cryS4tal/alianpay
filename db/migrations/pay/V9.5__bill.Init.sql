@@ -32,3 +32,10 @@ ADD INDEX `n_mch_id` (`mch_id`) ;
 
 ALTER TABLE `t_bill`
 ADD INDEX `n_status` (`status`) ;
+
+ALTER TABLE `t_bill`
+ADD INDEX `n_is_success` (`is_success`) ,
+ADD INDEX `n_pay_type` (`pay_type`) ,
+ADD INDEX `n_trade_type` (`trade_type`) ,
+ADD INDEX `n_app_id` (`app_id`) ,
+ADD INDEX `n_channel_id` (`channel_id`) ;

@@ -52,7 +52,7 @@ public class WzCashJobs {
         try {
             logs.stream().forEach(item -> {
                 if (item.failCount > failCount) {
-                    cashService.success(item.logId, false);
+                    cashService.successJobs(item.logId, false);
                     wzCashLogMapper.delete(item);
                 } else {
                     try {
@@ -62,7 +62,7 @@ public class WzCashJobs {
                         }
                         WzRes wzRes = gson.fromJson(str, WzRes.class);
                         if (wzRes.code.equals("200")) {
-                            cashService.success(item.logId, true);
+                            cashService.successJobs(item.logId, true);
                             wzCashLogMapper.delete(item);
                         } else {
                             item.failCount = item.failCount + 1;
