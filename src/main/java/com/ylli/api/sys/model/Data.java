@@ -5,4 +5,6 @@ public class Data {
     public Integer count;
     public Integer status;
     public Integer hour;
+    //成功率 百分比
+    public String rate;
 }
