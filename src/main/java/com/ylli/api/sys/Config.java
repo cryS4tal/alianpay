@@ -19,6 +19,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             2, "通道不存在");
 
+    public static final ErrorCode ERROR_CHANNEL_CLOSE
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            3, "当前通道已关闭");
+
     /**
      * 权限
      */
@@ -28,5 +32,7 @@ public class Config {
          * 管理角色与权限
          */
         public static final long MANAGE_STATS = BASE + 1;
+
+        public static final long MANAGE_CHANNEL = BASE + 2;
     }
 }

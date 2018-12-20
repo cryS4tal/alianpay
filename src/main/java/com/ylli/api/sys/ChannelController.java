@@ -2,6 +2,7 @@ package com.ylli.api.sys;
 
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
+import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.sys.service.ChannelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,12 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 系统通道切换.
- * <p>
- * v1.0 先支持整个系统通道切换。后续可以加入不同用户通道选择.
  */
-@Auth
+
 @RestController
 @RequestMapping("/channel")
+@Auth(@Permission(Config.SysPermission.MANAGE_CHANNEL))
 public class ChannelController {
 
     @Autowired

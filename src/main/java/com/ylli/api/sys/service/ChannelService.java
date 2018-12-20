@@ -14,11 +14,15 @@ import com.ylli.api.sys.model.SysChannel;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ChannelService {
+
+    @Value("${default.channel}")
+    public Long defaultChannel;
 
     @Autowired
     SysChannelMapper sysChannelMapper;
@@ -51,8 +55,7 @@ public class ChannelService {
         mchChannel.mchId = mchId;
         mchChannel = mchChannelMapper.selectOne(mchChannel);
         if (mchChannel == null) {
-            //默认插入 网众。后续再改
-            mchChannel = channelInit(mchId, 2L);
+            mchChannel = channelInit(mchId, defaultChannel);
         }
         SysChannel channel = sysChannelMapper.selectByPrimaryKey(mchChannel.channelId);
         return channel;
@@ -60,6 +63,9 @@ public class ChannelService {
 
     @Transactional
     public void mchChannelSwitch(Long mchId, Long channelId) {
+        if (!sysChannelMapper.selectByPrimaryKey(channelId).state) {
+            throw new AwesomeException(Config.ERROR_CHANNEL_CLOSE);
+        }
         MchChannel mchChannel = new MchChannel();
         mchChannel.mchId = mchId;
         mchChannel = mchChannelMapper.selectOne(mchChannel);
@@ -102,8 +108,6 @@ public class ChannelService {
     public Object mchChannels(Long mchId, String mchName, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
         List<Account> accounts = accountMapper.selectByCondition(mchId, mchName);
-
-
 
 
         return null;

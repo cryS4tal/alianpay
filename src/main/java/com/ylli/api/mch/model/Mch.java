@@ -15,4 +15,8 @@ public class Mch {
     public Integer auditState; //审核状态
 
     public String mchState; //账户状态
+
+    public Long channelId;  //通道id
+
+    public String channelName;  //通道名称
 }
