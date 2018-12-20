@@ -11,15 +11,9 @@ import tk.mybatis.mapper.common.Mapper;
  */
 public interface AccountMapper extends Mapper<Account> {
 
-    //List<Account> getAccounts(@Param("name_like") String nameLike);
-
     /**
      * 新增账户全局搜索。
      */
-
-    List<Account> selectByCondition(@Param("mch_id") Long mchId,
-                                    @Param("mch_name") String mchName);
-
     List<Mch> selectByQuery(@Param("phone") String phone,
                             @Param("mch_id") String mchId,
                             @Param("mch_name") String mchName,
