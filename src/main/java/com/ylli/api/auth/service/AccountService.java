@@ -26,10 +26,10 @@ public class AccountService {
         return accountMapper.selectByPrimaryKey(id);
     }
 
-    public Page<Account> getList(String nameLike, int offset, int limit) {
+    /*public Page<Account> getList(String nameLike, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
         return (Page<Account>) accountMapper.getAccounts(nameLike);
-    }
+    }*/
 
     /*public SimpleAccount getSimpleAccount(long id) {
         Account account = accountMapper.selectByPrimaryKey(id);

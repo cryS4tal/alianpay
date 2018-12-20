@@ -2,18 +2,8 @@ package com.ylli.api.mch.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.ylli.api.auth.mapper.PhoneAuthMapper;
-import com.ylli.api.auth.model.PhoneAuth;
-import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.mch.Config;
-import com.ylli.api.mch.mapper.MchKeyMapper;
-import com.ylli.api.mch.mapper.UserSettlementMapper;
-import com.ylli.api.mch.model.MchInfoDetail;
-import com.ylli.api.mch.model.UserSettlement;
-import com.ylli.api.model.base.DataList;
-import com.ylli.api.mch.model.MchInfo;
-import java.util.ArrayList;
-import java.util.List;
+import com.ylli.api.auth.mapper.AccountMapper;
+import com.ylli.api.mch.model.Mch;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,23 +11,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class MchManageService {
 
-
     @Autowired
-    PhoneAuthMapper phoneAuthMapper;
+    AccountMapper accountMapper;
 
-    @Autowired
-    MchKeyMapper userKeyMapper;
-
-    @Autowired
-    UserSettlementMapper userSettlementMapper;
 
     @Autowired
     ModelMapper modelMapper;
 
-    public DataList<MchInfo> getAccountList(String phone, String mchId, int offset, int limit) {
-        /**
-         * 目前先支持 商户号（id）,手机号搜索。
-         */
+    /*public DataList<MchInfo> getAccountList(String phone, String mchId, int offset, int limit) {
+        */
+
+    /**
+     * 目前先支持 商户号（id）,手机号搜索。
+     *//*
         PageHelper.offsetPage(offset, limit);
         Page<PhoneAuth> page = (Page<PhoneAuth>) phoneAuthMapper.selectByQuery(phone, mchId);
 
@@ -52,24 +38,20 @@ public class MchManageService {
         }
         dataList.dataList = list;
         return dataList;
-    }
+    }*/
 
-    public MchInfo userInfoConvert(PhoneAuth auth) {
+    /*public MchInfo userInfoConvert(PhoneAuth auth) {
         MchInfo info = new MchInfo();
         info.mchId = auth.id;
         info.phone = auth.phone;
 
         info.secret = userKeyMapper.getKeyById(auth.id);
-        UserSettlement settlement = userSettlementMapper.selectByUserId(auth.id);
-        if (settlement != null) {
-            info.chargeType = settlement.chargeType;
-            info.chargeRate = settlement.chargeRate;
-        }
+
         info.createTime = auth.createTime;
         return info;
-    }
+    }*/
 
-    public MchInfoDetail getAccountDetail(Long mchId) {
+    /*public MchInfoDetail getAccountDetail(Long mchId) {
         PhoneAuth auth = phoneAuthMapper.selectByPrimaryKey(mchId);
         if (auth == null) {
             throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
@@ -77,7 +59,14 @@ public class MchManageService {
         MchInfo info = userInfoConvert(auth);
         MchInfoDetail detail = new MchInfoDetail();
         modelMapper.map(info, detail);
-        detail.settlement = userSettlementMapper.selectByUserId(auth.id);
+        //detail.settlement = userSettlementMapper.selectByUserId(auth.id);
         return detail;
+    }*/
+    public Object mchList(String phone, String mchId, String mchName, Integer auditState, String mchState, int offset, int limit) {
+        PageHelper.offsetPage(offset, limit);
+        Page<Mch> page = (Page<Mch>) accountMapper.selectByQuery(phone, mchId, mchName, auditState, mchState);
+
+
+        return null;
     }
 }

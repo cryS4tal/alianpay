@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ylli.api.auth.mapper.AccountMapper">
-    <resultMap id="accountMap" type="com.ylli.api.auth.model.Account"/>
+    <resultMap id="mchMap" type="com.ylli.api.mch.model.Mch"/>
 
-    <select id="getAccounts" resultMap="accountMap">
+    <select id="selectByQuery" resultMap="mchMap">
         SELECT
         *
         FROM t_account
