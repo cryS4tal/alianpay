@@ -5,13 +5,32 @@
 
     <select id="selectByQuery" resultMap="mchMap">
         SELECT
-        *
-        FROM t_account
+        t_account.id AS 'mch_id',
+        t_user_base.mch_name,
+        t_user_base.link_phone AS 'phone',
+        t_user_base.state AS 'audit_state',
+        t_account.state AS 'mch_state'
+        FROM
+        t_account
+        LEFT JOIN t_user_base ON t_account.id = t_user_base.mch_id
         <where>
-            <if test="name_like != null">
-                <bind name="name_like_ext" value="name_like + '%'"/>
-                nickname LIKE #{name_like_ext}
+            <if test="mch_name != null">
+                <bind name="name_like_ext" value="mch_name + '%'"/>
+                t_user_base.mch_name LIKE #{name_like_ext}
+            </if>
+            <if test="phone != null">
+                AND (t_user_base.link_phone = #{phone} OR t_user_base.legal_phone = #{phone})
+            </if>
+            <if test="mch_id != null">
+                AND t_account.id = ${mch_id}
+            </if>
+            <if test="audit_state != null">
+                AND t_user_base.state = ${audit_state}
+            </if>
+            <if test="mch_state != null">
+                AND t_account.state = #{mch_state}
             </if>
         </where>
+        ORDER BY t_user_base.state DESC
     </select>
 </mapper>

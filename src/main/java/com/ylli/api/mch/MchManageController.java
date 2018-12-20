@@ -3,9 +3,13 @@ package com.ylli.api.mch;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
+import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.mch.model.MchEnable;
 import com.ylli.api.mch.service.MchManageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,16 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class MchManageController {
 
     @Autowired
-    MchManageService userManageService;
+    MchManageService manageService;
 
 
     /**
      * 设定为admin管理后台唯一获取用户列表接口
      *
-     * @param phone   注册手机 || 法人手机
-     * @param mchId   商户号
-     * @param mchName 商户名
-     * @param state   审核状态
+     * @param phone      注册手机 || 法人手机
+     * @param mchId      商户号
+     * @param mchName    商户名
+     * @param auditState 审核状态
+     * @param mchState   账户状态
      * @param offset
      * @param limit
      * @return
@@ -38,12 +43,15 @@ public class MchManageController {
                              @AwesomeParam(defaultValue = "0") int offset,
                              @AwesomeParam(defaultValue = "10") int limit) {
 
-        return userManageService.mchList(phone, mchId, mchName, auditState,mchState, offset, limit);
+        return manageService.mchList(phone, mchId, mchName, auditState, mchState, offset, limit);
     }
 
-    @GetMapping
-    public Object getMchInfo(@AwesomeParam Long mchId) {
-        //return userManageService.getAccountDetail(mchId);
-        return null;
+    /**
+     * 激活冻结账户
+     */
+    @PostMapping
+    public void mchEnable(@RequestBody MchEnable enable) {
+        ServiceUtil.checkNotEmpty(enable);
+        manageService.mchEnable(enable.mchId, enable.open);
     }
 }

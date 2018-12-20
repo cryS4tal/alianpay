@@ -33,6 +33,10 @@ public class MchBaseController {
     @Autowired
     PermissionService permissionService;
 
+    /**
+     * 基础信息注册
+     * @param userBase
+     */
     @PostMapping
     public void register(@RequestBody MchBase userBase) {
         ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone", "businessLicense", "state");
@@ -45,6 +49,9 @@ public class MchBaseController {
         userBaseService.register(userBase);
     }
 
+    /**
+     * 现在只用于商户基础信息获取。query字段 多余
+     */
     @GetMapping
     public Object getBase(@AwesomeParam(required = false) Long mchId,
                           @AwesomeParam(required = false) Integer state,
@@ -60,6 +67,9 @@ public class MchBaseController {
         return userBaseService.getBase(mchId, state, mchName, name, phone, businessLicense, offset, limit);
     }
 
+    /**
+     * 管理员基础信息审核
+     */
     @PostMapping("/audit")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
     public Object audit(@RequestBody Audit audit) {
@@ -67,6 +77,9 @@ public class MchBaseController {
         return userBaseService.audit(audit.mchId, audit.state);
     }
 
+    /**
+     * 管理员基础信息更新
+     */
     @PutMapping
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
     public Object update(@RequestBody MchBase userBase) {
