@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Auth
 @RestController
-@RequestMapping("/sys/channel")
+@RequestMapping("/channel")
 public class ChannelController {
 
     @Autowired
@@ -33,12 +33,12 @@ public class ChannelController {
      *
      * @param channel
      */
-    @PostMapping
+    @PostMapping("/sys")
     public void channelSwitch(@RequestBody Channel channel) {
         channelService.channelSwitch(channel.id, channel.isOpen);
     }
 
-    @GetMapping
+    @GetMapping("/sys")
     public Object sysChannels(@AwesomeParam(defaultValue = "0") int offset,
                               @AwesomeParam(defaultValue = "20") int limit) {
         return channelService.sysChannels(offset, limit);
