@@ -2,10 +2,9 @@ package com.ylli.api.third.pay.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.ylli.api.pingan.PingAnTest;
-import com.ylli.api.pingan.model.TimeUtil;
-import com.ylli.api.pingan.model.XmlRequestUtil;
-import com.ylli.api.pingan.model.YQUtil;
+import com.ylli.api.third.pay.util.TimeUtil;
+import com.ylli.api.third.pay.util.XmlRequestUtil;
+import com.ylli.api.third.pay.util.YQUtil;
 import com.ylli.api.third.pay.model.PingAnGR;
 import com.ylli.api.third.pay.model.PingAnOrder;
 import com.ylli.api.third.pay.model.PingAnOrderQuery;
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PingAnService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(PingAnTest.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(PingAnService.class);
 
     //@Value("${b2bc.url}")
     public String url = "http://47.99.180.135:7072";
@@ -63,7 +62,7 @@ public class PingAnService {
         order.busiType = "00000";
         //金额转换-分转换为元
         //String amount = (new BigDecimal(bankPayReqDTO.getAmount()).divide(new BigDecimal(100))).toString();
-        order.tranAmount = "100";
+        order.tranAmount = "1";
         order.inAcctNo = gr.inAcctNo;
         order.inAcctName = gr.inAcctName;
         //not required
@@ -88,7 +87,7 @@ public class PingAnService {
 
         }
         String code = StringUtils.substringBefore(res, ":").substring(87);
-        if (code != "000000") {
+        if (!"000000".equals(code)) {
             //平安银行代发交易查询失败
             String msg = StringUtils.substringBefore(res.substring(94), "0").trim();
         } else {
@@ -123,12 +122,12 @@ public class PingAnService {
     public String payQuery() {
         /**组装请求报文-start**/
         PingAnOrderQuery query = new PingAnOrderQuery();
-        query.acctNo = "15000090253679";
-        query.bussFlowNo = "8043431812186167968178";
-        query.orderNumber = "5133";
+        query.acctNo = "15000096544539";
+        query.bussFlowNo = "8043431812213556380702";
+        query.orderNumber = "5162";
 
         String xml = XML_HEAD + XmlRequestUtil.createXmlRequest((JSONObject) JSON.toJSON(query));
-        String reqXml = YQUtil.asemblyPackets("01001034300004539000", "KHKF04", xml);
+        String reqXml = YQUtil.asemblyPackets("00901025000000179000", "KHKF04", xml);
         /**组装请求报文-end**/
 
 

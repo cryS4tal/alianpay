@@ -114,3 +114,4 @@ SELECT _init(7);
 -- 统计
 SET @pm_sys.manage_stats = @pm_sys_base + 1;
 SET @pm_sys.manage_channel = @pm_sys_base + 2;
+SET @pm_sys.manage_bank_payment = @pm_sys_base + 3;

@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Ignore
+@Ignore
 public class PingAnTest {
 
     @Autowired
@@ -26,7 +26,7 @@ public class PingAnTest {
             {
                 //add(new PingAnQY("15000090244196", "Q000201184", "01001034300004537000"));
                 //add(new PingAnQY("15000090253485", "Q000201199", "01001034300004538000"));
-                add(new PingAnQY("15000090253679", "Q000201200", "01001034300004539000"));
+                //add(new PingAnQY("15000090253679", "Q000201200", "01001034300004539000"));
                 //add(new PingAnQY("15000090253776", "Q000201201", "01001034300004540000"));
                 //add(new PingAnQY("15000090253873", "Q000201202", "01001034300004541000"));
                 //release 账户
@@ -36,7 +36,7 @@ public class PingAnTest {
 
         List<PingAnGR> grs = new ArrayList<PingAnGR>() {
             {
-                add(new PingAnGR("6226090000000048", "张三", "招商银行", "18100000000"));
+                //add(new PingAnGR("6226090000000048", "张三", "招商银行", "18100000000"));
                 //add(new PingAnGR("6226388000000095", "张三", "华夏银行", "18100000000"));
                 /*add(new PingAnGR("5200831111111113", "全渠道", "农业银行", "13552535506"));
                 add(new PingAnGR("6226330151030000", "张小花", "华夏", "18100000005"));
@@ -50,10 +50,11 @@ public class PingAnTest {
                 add(new PingAnGR("6222357005000008", "伊丽莎白", "工行", "18100000004"));
                 add(new PingAnGR("6225380092315250", "平安测试三二五零八", "平安银行", ""));
                 add(new PingAnGR("6230580000054508325", "平安测试七八八零六", "平安银行", ""));*/
+                add(new PingAnGR("6217920274920375", "李玉龙", "浦发银行", "15755378327"));
             }
         };
 
-        int order = 5161;
+        int order = 5162;
 
         for (int i = 0; i < qies.size(); i++) {
             for (int j = 0; j < grs.size(); j++) {

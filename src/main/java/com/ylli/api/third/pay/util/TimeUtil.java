@@ -1,4 +1,4 @@
-package com.ylli.api.pingan.model;
+package com.ylli.api.third.pay.util;
 
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -6,19 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-/**
- * **********************************************************
- * Copyright © 2016 转折科技有限公司 Inc.All rights reserved.  *
- * ***********************************************************
- *
- * @Generator: IntelliJ IDEA
- * @Package: com.turn.core.utils
- * @Author: yangdf
- * @Date 2018/5/11 17:31
- * @Description: 时间工具类
- * @ModifyDetail
- * @ModifyDate
- */
 public class TimeUtil {
 
     /**
@@ -69,6 +56,7 @@ public class TimeUtil {
      * 格式转换类型: yyyy/MM/dd HH:mm:ss
      */
     public final static String FORMAT_STRING12 = "yyyy/MM/dd HH:mm:ss";
+
     /**
      * @Author yangdf
      * @Description Date转换成String

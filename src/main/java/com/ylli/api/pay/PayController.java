@@ -1,5 +1,6 @@
 package com.ylli.api.pay;
 
+import com.ylli.api.auth.service.AccountService;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.Response;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 加入版本号..
- * 兼容多通道
  */
 @RestController
 @RequestMapping("/pay")
@@ -27,18 +27,26 @@ public class PayController {
     @Autowired
     PayService payService;
 
+    @Autowired
+    AccountService accountService;
+
     @PostMapping("/order")
     public Object createOrder(@RequestBody BaseOrder baseOrder) throws Exception {
 
         if (!enable) {
             return new Response("999", "系统维护，请稍后再试.");
         }
+        if (!accountService.isActive(baseOrder.mchId)) {
+            return new Response("A100", "商户被冻结，请联系管理员");
+        }
         return payService.createOrder(baseOrder);
     }
 
     @PostMapping("/order/query")
     public Object orderQuery(@RequestBody OrderQueryReq orderQuery) throws Exception {
-
+        if (!accountService.isActive(orderQuery.mchId)) {
+            return new Response("A100", "商户被冻结，请联系管理员");
+        }
         return payService.orderQuery(orderQuery);
     }
 

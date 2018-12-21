@@ -1,4 +1,4 @@
-package com.ylli.api.pingan.model;
+package com.ylli.api.third.pay.util;
 
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;

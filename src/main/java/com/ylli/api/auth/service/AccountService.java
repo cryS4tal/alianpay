@@ -1,7 +1,5 @@
 package com.ylli.api.auth.service;
 
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.auth.Config;
 import com.ylli.api.auth.mapper.AccountMapper;
@@ -24,6 +22,17 @@ public class AccountService {
 
     public Account getById(long id) {
         return accountMapper.selectByPrimaryKey(id);
+    }
+
+    public Boolean isActive(Long mchId) {
+        Account account = accountMapper.selectByPrimaryKey(mchId);
+        if (account == null) {
+            return false;
+        }
+        if (account.state.equals(Account.STATE_ENABLE)) {
+            return true;
+        }
+        return false;
     }
 
     /*public Page<Account> getList(String nameLike, int offset, int limit) {

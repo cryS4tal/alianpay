@@ -34,5 +34,7 @@ public class Config {
         public static final long MANAGE_STATS = BASE + 1;
 
         public static final long MANAGE_CHANNEL = BASE + 2;
+
+        public static final long MANAGE_BANK_PAYMENT = BASE + 3;
     }
 }
