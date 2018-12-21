@@ -23,6 +23,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             3, "当前通道已关闭");
 
+    public static final ErrorCode ERROR_PAYMENT_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            4, "代付渠道不存在");
+
     /**
      * 权限
      */
