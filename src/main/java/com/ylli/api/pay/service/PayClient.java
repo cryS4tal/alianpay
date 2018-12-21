@@ -66,9 +66,11 @@ public class PayClient {
             message.billId = id;
             message = asyncMessageMapper.selectOne(message);
             if (message.failCount > notifyLimit) {
+                //TODO 暂时先删除。后续是否保留？加入状态控制
                 asyncMessageMapper.delete(message);
             } else {
                 message.failCount = message.failCount + 1;
+                message.errmsg = res;
                 asyncMessageMapper.updateByPrimaryKeySelective(message);
             }
         }

@@ -6,7 +6,7 @@ import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.user.service.AppService;
+import com.ylli.api.mch.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;

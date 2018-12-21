@@ -56,4 +56,11 @@ public class StatsService {
 
         return totalData;
     }
+
+    public Object successRate(Long channelId, Long mchId, Long appId) {
+        List<Data> list = billMapper.rate(channelId, mchId, appId);
+
+
+        return null;
+    }
 }

@@ -57,14 +57,14 @@
             <if test="mch_id != null">
                 AND mch_id = ${mch_id}
             </if>
-            GROUP BY
-            status,
-            EXTRACT(
-            HOUR
-            FROM
-            DATE_ADD(create_time, INTERVAL 8 HOUR)
-            )
         </where>
+        GROUP BY
+        status,
+        EXTRACT(
+        HOUR
+        FROM
+        DATE_ADD(create_time, INTERVAL 8 HOUR)
+        )
     </select>
 
     <select id="getDayData" resultMap="dataMap">
@@ -79,8 +79,8 @@
             <if test="mch_id != null">
                 AND mch_id = ${mch_id}
             </if>
-            GROUP BY `status`
         </where>
+        GROUP BY `status`
     </select>
 
     <select id="selectTotalMoney" resultType="java.lang.Long">
@@ -107,6 +107,38 @@
                 AND mch_id = ${mch_id}
             </if>
         </where>
+    </select>
+
+    <select id="rate" resultMap="dataMap">
+        SELECT
+	      `status`,
+	      EXTRACT(
+		    HOUR
+		    FROM
+			DATE_ADD(create_time, INTERVAL 8 HOUR)
+	      ) AS `hour`,
+	      COUNT(*) AS `count`
+        FROM
+	      t_bill
+	    <where>
+            DATE_ADD(create_time, INTERVAL 8 HOUR) > CURDATE()
+            <if test="mch_id != null">
+                AND mch_id = ${mch_id}
+            </if>
+            <if test="channel_id != null">
+                AND channel_id = ${channel_id}
+            </if>
+            <if test="app_id != null">
+                AND app_id = ${app_id}
+            </if>
+        </where>
+        GROUP BY
+	      `status`,
+	      EXTRACT(
+		    HOUR
+		    FROM
+			DATE_ADD(create_time, INTERVAL 8 HOUR)
+	      )
     </select>
 
 </mapper>

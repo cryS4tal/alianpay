@@ -113,3 +113,4 @@ SELECT _init(7);
 -- 系统权限
 -- 统计
 SET @pm_sys.manage_stats = @pm_sys_base + 1;
+SET @pm_sys.manage_channel = @pm_sys_base + 2;

@@ -56,4 +56,21 @@ public class StatsController {
         return statsService.total(mchId);
     }
 
+
+    @GetMapping("/rate")
+    public Object successRate(@AwesomeParam(required = false) Long channelId,
+                              @AwesomeParam(required = false) Long mchId,
+                              @AwesomeParam(required = false) Long appId) {
+        //商户 mch_id 必传
+        //appId 选填
+        if (!permissionService.hasSysPermission(Config.SysPermission.MANAGE_STATS)) {
+            if (mchId == null || mchId != authSession.getAuthId()) {
+                throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+            }
+            if (channelId != null) {
+                throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+            }
+        }
+        return statsService.successRate(channelId, mchId, appId);
+    }
 }

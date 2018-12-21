@@ -35,4 +35,8 @@ public interface BillMapper extends Mapper<Bill> {
     Long selectTotalMoney(@Param("mch_id") Long mchId);
 
     Long selectChargeMoney(@Param("mch_id") Long mchId);
+
+    List<Data> rate(@Param("channel_id") Long channelId,
+                    @Param("mch_id") Long mchId,
+                    @Param("app_id") Long appId);
 }

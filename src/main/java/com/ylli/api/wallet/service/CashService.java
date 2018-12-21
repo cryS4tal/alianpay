@@ -11,8 +11,8 @@ import com.ylli.api.model.base.DataList;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.service.WzClient;
-import com.ylli.api.user.mapper.UserBaseMapper;
-import com.ylli.api.user.model.UserBase;
+import com.ylli.api.mch.mapper.MchBaseMapper;
+import com.ylli.api.mch.model.MchBase;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
@@ -50,7 +50,7 @@ public class CashService {
     WzClient wzClient;
 
     @Autowired
-    UserBaseMapper userBaseMapper;
+    MchBaseMapper userBaseMapper;
 
     @Autowired
     ChannelService channelService;
@@ -63,7 +63,7 @@ public class CashService {
         PageHelper.offsetPage(offset, limit);
         Page<CashLog> page = (Page<CashLog>) cashLogMapper.cashList(mchId, phone);
         page.stream().forEach(item -> {
-            UserBase base = userBaseMapper.selectByMchId(item.mchId);
+            MchBase base = userBaseMapper.selectByMchId(item.mchId);
             if (base != null) {
                 item.mchName = base.mchName;
             }
@@ -138,7 +138,7 @@ public class CashService {
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
         if (success == null || success) {
             /*if (wallet.recharge < cashLog.money + 300) {
-                throw new AwesomeException(com.ylli.api.user.Config.ERROR_CHARGE_REQUEST);
+                throw new AwesomeException(Config.ERROR_CHARGE_REQUEST);
             }*/
             cashLog.state = CashLog.FINISH;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);

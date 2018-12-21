@@ -14,8 +14,8 @@ import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
-import com.ylli.api.user.model.UserKey;
-import com.ylli.api.user.service.UserKeyService;
+import com.ylli.api.mch.model.MchKey;
+import com.ylli.api.mch.service.MchKeyService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,7 @@ public class PayService {
     YfbService yfbService;
 
     @Autowired
-    UserKeyService userKeyService;
+    MchKeyService userKeyService;
 
     @Autowired
     ChannelService channelService;
@@ -268,7 +268,7 @@ public class PayService {
         res.tradeTime = tradeTime;
         res.reserve = reserve;
         Bill bill = billService.selectBySysOrderId(sysOrderId);
-        UserKey key = userKeyService.getKeyByUserId(bill.mchId);
+        MchKey key = userKeyService.getKeyByUserId(bill.mchId);
 
         Map<String, String> map = SignUtil.objectToMap(res);
         res.sign = SignUtil.generateSignature(map, key.secretKey);
