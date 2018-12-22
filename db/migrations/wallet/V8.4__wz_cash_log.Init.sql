@@ -21,3 +21,6 @@ CREATE TABLE t_sys_payment_log (
 
 ALTER TABLE `t_sys_payment_log`
 ADD UNIQUE INDEX `u_order_id` (`order_id`) ;
+
+ALTER TABLE `t_cash_log`
+ADD COLUMN `msg`  varchar(256) NULL COMMENT '描述' AFTER `reserved_phone`;
