@@ -7,6 +7,8 @@ import com.ylli.api.third.pay.model.PingAnOrderQuery;
 import com.ylli.api.third.pay.util.TimeUtil;
 import com.ylli.api.third.pay.util.XmlRequestUtil;
 import com.ylli.api.third.pay.util.YQUtil;
+import com.ylli.api.wallet.mapper.SysPaymentLogMapper;
+import com.ylli.api.wallet.model.SysPaymentLog;
 import java.math.BigDecimal;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +31,9 @@ public class PingAnService {
 
     @Autowired
     PingAnClient pingAnClient;
+
+    @Autowired
+    SysPaymentLogMapper logMapper;
 
     //企业签约帐号
     @Value("${acc.no}")
@@ -100,6 +105,12 @@ public class PingAnService {
             String bussFlowNo = document.getRootElement().element("BussFlowNo").getText();
             //订单号
             String orderNo = document.getRootElement().element("OrderNumber").getText();
+
+            SysPaymentLog log = new SysPaymentLog();
+            log.type = "pingan";
+            log.orderId = orderNo;
+            logMapper.insertSelective(log);
+
             LOGGER.info("平安代付受理成功，系统订单号：" + orderNo + "\n银行业务流水号：" + bussFlowNo);
         }
         /***处理返回结果-end*/
@@ -111,6 +122,12 @@ public class PingAnService {
      * @return
      */
     public String payQuery(String orderId) {
+        SysPaymentLog log = new SysPaymentLog();
+        log.orderId = orderId;
+        log = logMapper.selectOne(log);
+
+
+
         /**组装请求报文-start**/
         PingAnOrderQuery query = new PingAnOrderQuery();
         query.acctNo = acctNo;

@@ -27,7 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.LoggerFactory;
@@ -351,7 +350,7 @@ public class PayService {
         for (int i = 0; i < count; i++) {
             String sysOrderId = new StringBuffer("test").append(serializeUtil.generateSysOrderId()).toString() ;
             list.add("当前订单号：" + sysOrderId);
-            String str = unknownPayClient.createOrder("100", 1, "test", sysOrderId, get20UUID(), 2);
+            String str = unknownPayClient.createOrder("1", 1, "test", sysOrderId, get20UUID(), 2);
             list.add(str);
         }
         list.add("end当前时间：" + sdf.format(System.currentTimeMillis()));

@@ -64,9 +64,9 @@ public class PayController {
     /*@GetMapping("/test/redis")
     public Object testRedis() {
         return payService.testRedis();
-    }
+    }*/
 
-    @GetMapping("/test/123")
+    /*@GetMapping("/test/123")
     public Object testu(@AwesomeParam Integer count) throws Exception {
         return payService.testu(count);
     }*/
