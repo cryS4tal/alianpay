@@ -2,20 +2,22 @@ package com.ylli.api.pay.service;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.ylli.api.mch.model.MchKey;
+import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.NotifyRes;
+import com.ylli.api.third.pay.service.UnknownPayClient;
 import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
-import com.ylli.api.mch.model.MchKey;
-import com.ylli.api.mch.service.MchKeyService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.LoggerFactory;
@@ -55,6 +58,12 @@ public class PayService {
 
     @Autowired
     BillService billService;
+
+    @Autowired
+    SerializeUtil serializeUtil;
+
+    @Autowired
+    UnknownPayClient unknownPayClient;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -319,4 +328,40 @@ public class PayService {
             }
         }
     }
+
+    /*public Object testRedis() {
+        List<String> list = new ArrayList<>();
+        Long time = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+        list.add("start当前时间：" + sdf.format(time));
+        for (int i = 0; i < 1000; i++) {
+            list.add(serializeUtil.generateSysOrderId());
+        }
+        list.add("end当前时间：" + sdf.format(System.currentTimeMillis()));
+        list.add("size:" + (list.size() - 3));
+        return list;
+    }*/
+
+
+    /*public Object testu(Integer count) throws Exception {
+        List<String> list = new ArrayList<>();
+        Long time = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+        list.add("start当前时间：" + sdf.format(time));
+        for (int i = 0; i < count; i++) {
+            String sysOrderId = new StringBuffer("test").append(serializeUtil.generateSysOrderId()).toString() ;
+            list.add("当前订单号：" + sysOrderId);
+            String str = unknownPayClient.createOrder("100", 1, "test", sysOrderId, get20UUID(), 2);
+            list.add(str);
+        }
+        list.add("end当前时间：" + sdf.format(System.currentTimeMillis()));
+        list.add("size:" + (list.size() - 3));
+        return list;
+    }
+
+    public String get20UUID() {
+        UUID id = UUID.randomUUID();
+        String[] idd = id.toString().split("-");
+        return idd[0] + idd[1] + idd[2] + idd[3];
+    }*/
 }

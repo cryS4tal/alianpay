@@ -2,13 +2,12 @@ package com.ylli.api.third.pay.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.ylli.api.third.pay.model.PingAnOrder;
+import com.ylli.api.third.pay.model.PingAnOrderQuery;
 import com.ylli.api.third.pay.util.TimeUtil;
 import com.ylli.api.third.pay.util.XmlRequestUtil;
 import com.ylli.api.third.pay.util.YQUtil;
-import com.ylli.api.third.pay.model.PingAnGR;
-import com.ylli.api.third.pay.model.PingAnOrder;
-import com.ylli.api.third.pay.model.PingAnOrderQuery;
-import com.ylli.api.third.pay.model.PingAnQY;
+import java.math.BigDecimal;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -17,6 +16,7 @@ import org.dom4j.DocumentHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,72 +24,66 @@ public class PingAnService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PingAnService.class);
 
-    //@Value("${b2bc.url}")
-    public String url = "http://47.99.180.135:7072";
+    @Value("${b2bc.url}")
+    public String url;
 
     @Autowired
     PingAnClient pingAnClient;
 
     //企业签约帐号
-    public String acctNo = "";
+    @Value("${acc.no}")
+    public String acctNo;
     //单位代码
-    public String corpId = "Q000201184";
+    @Value("${corp.id}")
+    public String corpId;
     //银企代码
-    public String yqdm = "01001034300004537000";
-
-    //收款卡号
-    public String inAcctNo = "6226330151030000";
-    //收款户名
-    public String inAcctName = "张小花";
-    //收款方银行名称
-    public String inAcctBankName = "华夏";
-    //收款方手机号
-    public String mobile = "";
-
+    @Value("${yqdm}")
+    public String yqdm;
 
     /**
      * xml报文头
      */
     public final static String XML_HEAD = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 
-    public void createPingAnOrder(String orderNumber, PingAnQY qy, PingAnGR gr) {
+    public void createPingAnOrder(String orderId, String inAcctNo, String inAcctName, String inAcctBankName, String mobile, Integer money) {
 
         /**组装请求报文-start*/
         PingAnOrder order = new PingAnOrder();
         //required
-        order.orderNumber = orderNumber;
-        order.acctNo = qy.acctNo;
+        order.orderNumber = orderId;
+        order.acctNo = acctNo;
         order.busiType = "00000";
         //金额转换-分转换为元
-        //String amount = (new BigDecimal(bankPayReqDTO.getAmount()).divide(new BigDecimal(100))).toString();
-        order.tranAmount = "1";
-        order.inAcctNo = gr.inAcctNo;
-        order.inAcctName = gr.inAcctName;
+        order.tranAmount = (new BigDecimal(money).divide(new BigDecimal(100))).toString();
+        order.inAcctNo = inAcctNo;
+        order.inAcctName = inAcctName;
         //not required
-        order.corpId = qy.corpId;
+        order.corpId = corpId;
         order.ccyCode = "RMB";
-        order.inAcctBankName = gr.inAcctBankName;
+        order.inAcctBankName = inAcctBankName;
+        order.mobile = mobile;
         order.inAcctBankNode = "";
-        order.mobile = gr.mobile;
         order.remark = "";
         order.inAcctProvinceName = "";
         order.inAcctCityName = "";
 
         String xml = XML_HEAD + XmlRequestUtil.createXmlRequest((JSONObject) JSON.toJSON(order));
 
-        String reqXml = YQUtil.asemblyPackets(qy.yqdm, "KHKF03", xml);
+        String reqXml = YQUtil.asemblyPackets(yqdm, "KHKF03", xml);
         /**组装请求报文-end*/
 
+        LOGGER.info("平安代付请求报文：" + reqXml);
         String res = pingAnClient.post(reqXml, url);
         if (res == null) {
-            //todo
-
-
+            LOGGER.error("平安代付返回res：null");
+            return;
         }
         String code = StringUtils.substringBefore(res, ":").substring(87);
         if (!"000000".equals(code)) {
-            //平安银行代发交易查询失败
+            //平安银行代发交易失败
             String msg = StringUtils.substringBefore(res.substring(94), "0").trim();
+
+            LOGGER.error("平安代付失败：" + msg);
         } else {
             /**
              *  or res.contains("交易受理成功")
@@ -106,28 +100,25 @@ public class PingAnService {
             String bussFlowNo = document.getRootElement().element("BussFlowNo").getText();
             //订单号
             String orderNo = document.getRootElement().element("OrderNumber").getText();
-            System.out.println(bussFlowNo);
-            System.out.println(orderNo);
+            LOGGER.info("平安代付受理成功，系统订单号：" + orderNo + "\n银行业务流水号：" + bussFlowNo);
         }
         /***处理返回结果-end*/
-
     }
-
 
     /**
      * 跨行快付查询KHKF04
      *
      * @return
      */
-    public String payQuery() {
+    public String payQuery(String orderId) {
         /**组装请求报文-start**/
         PingAnOrderQuery query = new PingAnOrderQuery();
-        query.acctNo = "15000096544539";
-        query.bussFlowNo = "8043431812213556380702";
-        query.orderNumber = "5162";
+        query.acctNo = acctNo;
+        //query.bussFlowNo = "8043431812224558559480";
+        query.orderNumber = orderId;
 
         String xml = XML_HEAD + XmlRequestUtil.createXmlRequest((JSONObject) JSON.toJSON(query));
-        String reqXml = YQUtil.asemblyPackets("00901025000000179000", "KHKF04", xml);
+        String reqXml = YQUtil.asemblyPackets(yqdm, "KHKF04", xml);
         /**组装请求报文-end**/
 
 

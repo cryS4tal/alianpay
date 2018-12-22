@@ -7,12 +7,15 @@ import com.google.gson.Gson;
 import com.ylli.api.auth.mapper.PasswordMapper;
 import com.ylli.api.auth.model.Password;
 import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.model.base.DataList;
-import com.ylli.api.sys.model.SysChannel;
-import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.model.MchBase;
+import com.ylli.api.model.base.DataList;
+import com.ylli.api.sys.model.BankPayment;
+import com.ylli.api.sys.model.SysChannel;
+import com.ylli.api.sys.service.BankPaymentService;
+import com.ylli.api.sys.service.ChannelService;
+import com.ylli.api.third.pay.service.PingAnService;
+import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
@@ -57,6 +60,12 @@ public class CashService {
 
     @Autowired
     WzCashLogMapper wzCashLogMapper;
+
+    @Autowired
+    BankPaymentService bankPaymentService;
+
+    @Autowired
+    PingAnService pingAnService;
 
     public Object cashList(Long mchId, String phone, int offset, int limit) {
 
@@ -184,6 +193,28 @@ public class CashService {
             wallet.pending = wallet.pending - cashLog.money - 200;
             wallet.recharge = wallet.recharge + cashLog.money + 200;
             walletMapper.updateByPrimaryKeySelective(wallet);
+        }
+    }
+
+    public void sysCash(Long bankPayId, Long cashLogId) {
+        BankPayment payment = bankPaymentService.getBankPayment(bankPayId);
+        if (payment == null) {
+            throw new AwesomeException(Config.ERROR_PAYMENT_NOT_FOUND);
+        }
+        if (!payment.state) {
+            throw new AwesomeException(Config.ERROR_PAYMENT_CLOSE);
+        }
+        CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
+        if (cashLog == null) {
+            throw new AwesomeException(Config.ERROR_REQUEST_NOT_FOUND);
+        }
+        if (cashLog.state == CashLog.FINISH || cashLog.state == CashLog.FAILED) {
+            throw new AwesomeException(Config.ERROR_CASH_HANDLED.format(CashLog.stateFormat(cashLog.state)));
+        }
+        //发起平安代付
+        if (payment.code.equals("pingAn")) {
+            pingAnService.createPingAnOrder(new StringBuffer("pingan").append(cashLogId).toString(),
+                    cashLog.bankcardNumber, cashLog.name, cashLog.openBank, null, cashLog.money);
         }
     }
 }

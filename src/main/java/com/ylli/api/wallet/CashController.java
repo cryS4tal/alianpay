@@ -54,7 +54,7 @@ public class CashController {
     }
 
     /**
-     * 临时方法。满足手动提现成功.
+     * 手工代付。.
      */
     static class Suc {
         public Long cashLogId;
@@ -67,4 +67,17 @@ public class CashController {
         cashService.success(suc.cashLogId, suc.success);
     }
 
+    /**
+     * 系统代付
+     */
+    static class SysSuc {
+        //系统代付通道
+        public Long bankPayId;
+        public Long cashLogId;
+    }
+    @PostMapping("/success/sys")
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_CASH))
+    public void sysCash(@RequestBody SysSuc sysSuc) {
+        cashService.sysCash(sysSuc.bankPayId, sysSuc.cashLogId);
+    }
 }

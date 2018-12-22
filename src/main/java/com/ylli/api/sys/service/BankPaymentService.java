@@ -38,4 +38,8 @@ public class BankPaymentService {
         dataList.dataList = page;
         return dataList;
     }
+
+    public BankPayment getBankPayment(Long bankPayId) {
+        return bankPaymentMapper.selectByPrimaryKey(bankPayId);
+    }
 }

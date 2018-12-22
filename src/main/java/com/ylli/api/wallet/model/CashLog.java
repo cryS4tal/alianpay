@@ -14,6 +14,8 @@ public class CashLog {
     public static final Integer FINISH = 1;
     public static final Integer FAILED = 2;
 
+    public static final Integer PROCESS = 9;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
@@ -35,6 +37,8 @@ public class CashLog {
 
     public Integer state;
 
+    public String msg;
+
     public Timestamp createTime;
 
     public Timestamp modifyTime;
@@ -46,6 +50,8 @@ public class CashLog {
             return "成功";
         } else if (state == CashLog.FAILED) {
             return "失败";
+        } else if (state == CashLog.PROCESS) {
+            return "进行中";
         } else {
             return "异常";
         }

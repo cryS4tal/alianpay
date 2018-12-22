@@ -40,6 +40,15 @@ public class Config {
     public static final ErrorCode ERROR_CASH_HANDLED
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             7, "提现请求已处理：%s");
+
+    public static final ErrorCode ERROR_PAYMENT_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            8, "代付渠道不存在");
+
+    public static final ErrorCode ERROR_PAYMENT_CLOSE
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            9, "当前通道已关闭");
+
     /**
      * 权限
      */
