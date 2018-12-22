@@ -29,3 +29,5 @@ ADD UNIQUE INDEX `u_order_id` (`order_id`) ;
 
 ALTER TABLE `t_cash_log`
 ADD COLUMN `msg`  varchar(256) NULL COMMENT '描述' AFTER `reserved_phone`;
+
+INSERT INTO `t_sys_channel` VALUES ('4', 'HRJF', '个码-风控', '1', '2018-12-22 19:26:36', '2018-12-22 19:26:36');
