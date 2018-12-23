@@ -4,6 +4,8 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.mch.mapper.MchBaseMapper;
+import com.ylli.api.mch.service.AppService;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.Config;
 import com.ylli.api.pay.mapper.BillMapper;
@@ -15,8 +17,6 @@ import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
-import com.ylli.api.mch.mapper.MchBaseMapper;
-import com.ylli.api.mch.service.AppService;
 import com.ylli.api.wallet.service.WalletService;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -157,9 +157,7 @@ public class BillService {
         bill.sysOrderId = sysOrderId;
         bill = billMapper.selectOne(bill);
 
-        //todo  test 根据订单通道类型  bill.channelId 去主动请求不同的订单查询client.
         if (code.equals("WZ")) {
-            System.out.println("wzClinet");
 
             WzQueryRes res = wzClient.orderQuery(sysOrderId);
             if (res.code.equals("success")) {
@@ -180,8 +178,7 @@ public class BillService {
             }
             return bill;
 
-        } else if (code.equals("YFB")) {
-            System.out.println("进入易付宝查询");
+        } else if (code.equals("YFB") || code.equals("HRJF")) {
 
             String str = yfbClient.orderQuery(bill.sysOrderId);
             //orderid=20181203040702B000100200000025&opstate=0&ovalue=100.00&sign=52aeb9d6083a43130f3050468a37e30c&msg=查询成功
@@ -217,7 +214,7 @@ public class BillService {
             return bill;
 
         } else {
-            return null;
+            return bill;
         }
     }
 

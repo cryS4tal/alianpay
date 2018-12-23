@@ -1,7 +1,6 @@
 package com.ylli.api.third.pay;
 
 import com.ylli.api.base.annotation.AwesomeParam;
-import com.ylli.api.third.pay.service.YfbClient;
 import com.ylli.api.third.pay.service.YfbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,9 +13,6 @@ public class YfbController {
 
     @Autowired
     YfbService yfbService;
-
-    @Autowired
-    YfbClient client;
 
     /**
      * @param orderid    商户订单号

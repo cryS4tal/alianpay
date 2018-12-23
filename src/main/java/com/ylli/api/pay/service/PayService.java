@@ -9,12 +9,11 @@ import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
-import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.NotifyRes;
-import com.ylli.api.third.pay.service.UnknownPayClient;
+import com.ylli.api.third.pay.service.HRJFService;
 import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
@@ -59,10 +58,7 @@ public class PayService {
     BillService billService;
 
     @Autowired
-    SerializeUtil serializeUtil;
-
-    @Autowired
-    UnknownPayClient unknownPayClient;
+    HRJFService hrjfService;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -76,6 +72,12 @@ public class PayService {
 
     @Value("${yfb.ali.max}")
     public Integer Ali_Max;
+
+    @Value("${hrjf.ali.min}")
+    public Integer hrjf_min;
+
+    @Value("${hrjf.ali.max}")
+    public Integer hrjf_max;
 
     /**
      * 中央调度server. 根据情况选择不同通道
@@ -159,13 +161,14 @@ public class PayService {
 
         } else if (channel.code.equals("unknown")) {
             // ?? unknown 支付
-            //金额校验
-            if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
-                return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
-            }
+
             //支付方式校验
             if (!baseOrder.payType.equals(ALI) || baseOrder.tradeType.equals(APP)) {
                 return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+            }
+            //金额校验
+            if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
+                return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
             }
             if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
                 baseOrder.redirectUrl = "http://www.baidu.com";
@@ -174,12 +177,41 @@ public class PayService {
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+        } else if (channel.code.equals("HRJF")) {
+            return hrjfOrder(baseOrder, channel.id, secretKey);
         } else {
             //
 
             return new Response("A099", "下单失败，暂无可用通道", null);
         }
     }
+
+    public Response hrjfOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
+        //华荣聚付  -  和易付宝基本一致
+
+        //不支持微信
+        if (!baseOrder.payType.equals(ALI)) {
+            return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+        }
+
+        //金额校验  todo  check。
+        if (baseOrder.money < hrjf_min || baseOrder.money > hrjf_max) {
+            return new Response("A007", "交易金额限制：50 - 5000 元", baseOrder);
+        }
+
+        String str = hrjfService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+        /*String str = yfbService.createOrder(baseOrder.mchId, channelId, baseOrder.payType, baseOrder.tradeType, baseOrder.money,
+                baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);*/
+        //return str;
+        str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
+        //str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
+        //str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
+        //str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
+        return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+    }
+
 
     public static List<Integer> Wx_Allow = new ArrayList<Integer>() {
         {
@@ -327,40 +359,4 @@ public class PayService {
             }
         }
     }
-
-    /*public Object testRedis() {
-        List<String> list = new ArrayList<>();
-        Long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
-        list.add("start当前时间：" + sdf.format(time));
-        for (int i = 0; i < 1000; i++) {
-            list.add(serializeUtil.generateSysOrderId());
-        }
-        list.add("end当前时间：" + sdf.format(System.currentTimeMillis()));
-        list.add("size:" + (list.size() - 3));
-        return list;
-    }*/
-
-
-    /*public Object testu(Integer count) throws Exception {
-        List<String> list = new ArrayList<>();
-        Long time = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
-        list.add("start当前时间：" + sdf.format(time));
-        for (int i = 0; i < count; i++) {
-            String sysOrderId = new StringBuffer("test").append(serializeUtil.generateSysOrderId()).toString() ;
-            list.add("当前订单号：" + sysOrderId);
-            String str = unknownPayClient.createOrder("1", 1, "test", sysOrderId, get20UUID(), 2);
-            list.add(str);
-        }
-        list.add("end当前时间：" + sdf.format(System.currentTimeMillis()));
-        list.add("size:" + (list.size() - 3));
-        return list;
-    }
-
-    public String get20UUID() {
-        UUID id = UUID.randomUUID();
-        String[] idd = id.toString().split("-");
-        return idd[0] + idd[1] + idd[2] + idd[3];
-    }*/
 }
