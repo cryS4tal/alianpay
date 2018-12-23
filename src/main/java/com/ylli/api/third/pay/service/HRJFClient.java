@@ -65,4 +65,12 @@ public class HRJFClient {
         return SignUtil.MD5(sb.toString()).toLowerCase();
     }
 
+    public boolean signVerify(String orderid, String opstate, String ovalue, String sign) throws Exception {
+        StringBuffer sb = new StringBuffer()
+                .append("orderid=").append(orderid)
+                .append("&opstate=").append(opstate)
+                .append("&ovalue=").append(ovalue)
+                .append(token);
+        return SignUtil.MD5(sb.toString(), "GB2312").toLowerCase().equals(sign.toLowerCase());
+    }
 }
