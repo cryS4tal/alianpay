@@ -9,6 +9,10 @@ import javax.persistence.Table;
 @Table(name = "t_sys_payment_log")
 public class SysPaymentLog {
 
+    public static final String PINGAN = "PingAn";
+
+    public static final String XIANFEN = "XianFen";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;

@@ -41,6 +41,11 @@ public class CashController {
         return cashService.cashList(mchId, phone, offset, limit);
     }
 
+    /**
+     * 商户发起提现请求
+     *
+     * @param req
+     */
     @PostMapping
     public void cash(@RequestBody CashReq req) {
         ServiceUtil.checkNotEmptyIgnore(req, true, "identityCard", "reservedPhone");
@@ -55,29 +60,32 @@ public class CashController {
 
     /**
      * 手工代付。.
+     * success  = true. 手工代付成功
+     * success = false. 拒绝
      */
     static class Suc {
         public Long cashLogId;
         public Boolean success;
     }
 
-    @PostMapping("/success")
+    @PostMapping("/manual")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CASH))
-    public void success(@RequestBody Suc suc) {
-        cashService.success(suc.cashLogId, suc.success);
+    public void manualCash(@RequestBody Suc suc) {
+        cashService.manualCash(suc.cashLogId, suc.success);
     }
 
     /**
      * 系统代付
      */
-    static class SysSuc {
+    static class Sys {
         //系统代付通道
         public Long bankPayId;
         public Long cashLogId;
     }
-    @PostMapping("/success/sys")
+
+    @PostMapping("/sys")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CASH))
-    public void sysCash(@RequestBody SysSuc sysSuc) {
-        cashService.sysCash(sysSuc.bankPayId, sysSuc.cashLogId);
+    public void sysCash(@RequestBody Sys sys) {
+        cashService.sysCash(sys.bankPayId, sys.cashLogId);
     }
 }

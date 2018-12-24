@@ -49,6 +49,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             9, "当前通道已关闭");
 
+    public static final ErrorCode ERROR_CASH_HANDING
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            10, "提现请求处理中");
+
     /**
      * 权限
      */

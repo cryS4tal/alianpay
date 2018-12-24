@@ -48,3 +48,6 @@ CREATE TABLE t_cash_log (
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );
+
+ALTER TABLE `t_cash_log`
+ADD COLUMN `type`  tinyint NULL COMMENT '代付类型：1-手工，2-平安，3-先锋' AFTER `reserved_phone`;

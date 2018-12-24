@@ -31,3 +31,6 @@ ALTER TABLE `t_cash_log`
 ADD COLUMN `msg`  varchar(256) NULL COMMENT '描述' AFTER `reserved_phone`;
 
 INSERT INTO `t_sys_channel` VALUES ('4', 'HRJF', '个码-风控', '1', '2018-12-22 19:26:36', '2018-12-22 19:26:36');
+
+ALTER TABLE `t_cash_log`
+ADD COLUMN `type`  tinyint NULL COMMENT '代付类型：1-手工，2-平安，3-先锋' AFTER `reserved_phone`;

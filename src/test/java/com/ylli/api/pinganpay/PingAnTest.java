@@ -49,13 +49,12 @@ public class PingAnTest {
                 add(new PingAnGR("6217920274920375", "李玉龙", "", ""));
             }
         };*/
-        service.createPingAnOrder("5168", "6217920274920375", "李玉龙", "农业银行", "", 101);
-
+        service.createPingAnOrder(5168L, "6217920274920375", "李玉龙", "农业银行", "", 101);
     }
 
 
     @Test
     public void orderQuery() {
-        service.payQuery("5168");
+        //service.payQuery(516L);
     }
 }

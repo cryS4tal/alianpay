@@ -16,6 +16,17 @@ public class CashLog {
 
     public static final Integer PROCESS = 9;
 
+
+    /**
+     * 代付类型
+     * 1 - 手工
+     * 2 - 平安
+     * 3 - 先锋
+     */
+    public static final Integer MANUAL = 1;
+    public static final Integer PINGAN = 2;
+    public static final Integer XIANFENG = 3;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
@@ -38,6 +49,9 @@ public class CashLog {
     public Integer state;
 
     public String msg;
+
+    //提现类型（1-手动代付，2-平安代付，3-先锋代付）
+    public Integer type;
 
     public Timestamp createTime;
 

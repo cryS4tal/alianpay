@@ -132,19 +132,24 @@ public class CashService {
                 e.printStackTrace();
             }
         }
-
     }
 
     @Transactional
-    public void success(Long cashLogId, Boolean success) {
+    public void manualCash(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
         if (cashLog == null) {
             throw new AwesomeException(Config.ERROR_REQUEST_NOT_FOUND);
         }
+        //原手动提现. 状态只有成功 与 失败。
+        //加入系统代付之后，新增状态，进行中
         if (cashLog.state == CashLog.FINISH || cashLog.state == CashLog.FAILED) {
             throw new AwesomeException(Config.ERROR_CASH_HANDLED.format(CashLog.stateFormat(cashLog.state)));
         }
+        if (cashLog.state == CashLog.PROCESS) {
+            throw new AwesomeException(Config.ERROR_CASH_HANDING);
+        }
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
+        cashLog.type = CashLog.MANUAL;
         if (success == null || success) {
             /*if (wallet.recharge < cashLog.money + 300) {
                 throw new AwesomeException(Config.ERROR_CHARGE_REQUEST);
@@ -152,16 +157,18 @@ public class CashService {
             cashLog.state = CashLog.FINISH;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-            wallet.pending = wallet.pending - cashLog.money - 200;
+            walletService.cashSuc(wallet, cashLog.money);
+            /*wallet.pending = wallet.pending - cashLog.money - 200;
             wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
-            walletMapper.updateByPrimaryKeySelective(wallet);
+            walletMapper.updateByPrimaryKeySelective(wallet);*/
         } else {
             cashLog.state = CashLog.FAILED;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-            wallet.pending = wallet.pending - cashLog.money - 200;
+            walletService.cashFail(wallet, cashLog.money);
+            /*wallet.pending = wallet.pending - cashLog.money - 200;
             wallet.recharge = wallet.recharge + cashLog.money + 200;
-            walletMapper.updateByPrimaryKeySelective(wallet);
+            walletMapper.updateByPrimaryKeySelective(wallet);*/
         }
     }
 
@@ -179,20 +186,17 @@ public class CashService {
             return;
         }
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
+        cashLog.type = CashLog.MANUAL;
         if (success == null || success) {
             cashLog.state = CashLog.FINISH;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-            wallet.pending = wallet.pending - cashLog.money - 200;
-            wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
-            walletMapper.updateByPrimaryKeySelective(wallet);
+            walletService.cashSuc(wallet, cashLog.money);
         } else {
             cashLog.state = CashLog.FAILED;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-            wallet.pending = wallet.pending - cashLog.money - 200;
-            wallet.recharge = wallet.recharge + cashLog.money + 200;
-            walletMapper.updateByPrimaryKeySelective(wallet);
+            walletService.cashFail(wallet, cashLog.money);
         }
     }
 
@@ -208,13 +212,16 @@ public class CashService {
         if (cashLog == null) {
             throw new AwesomeException(Config.ERROR_REQUEST_NOT_FOUND);
         }
-        if (cashLog.state == CashLog.FINISH || cashLog.state == CashLog.FAILED) {
+        if (cashLog.state != CashLog.NEW) {
             throw new AwesomeException(Config.ERROR_CASH_HANDLED.format(CashLog.stateFormat(cashLog.state)));
         }
         //发起平安代付
         if (payment.code.equals("pingAn")) {
-            pingAnService.createPingAnOrder(new StringBuffer("pingan").append(cashLogId).toString(),
-                    cashLog.bankcardNumber, cashLog.name, cashLog.openBank, null, cashLog.money);
+            pingAnService.createPingAnOrder(cashLogId, cashLog.bankcardNumber, cashLog.name, cashLog.openBank, null, cashLog.money);
+        } else {
+            //其他
+            //先锋
+
         }
     }
 }
