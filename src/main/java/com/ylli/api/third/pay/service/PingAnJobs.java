@@ -27,22 +27,25 @@ public class PingAnJobs {
     /**
      * 自动轮询提现请求（平安代付）
      */
-    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(cron = "0 0/3 * * * ?")
     @Transactional
     public void autoQuery() {
         if (!isRunning.compareAndSet(false, true)) {
             LOGGER.info("pingan auto query is running, please waiting");
             return;
         }
-        //每分钟查询一次.. 最多查询10次
-        List<SysPaymentLog> logs = sysPaymentLogMapper.selectProcess();
-        if (logs.size() == 0) {
-            return;
+
+        try {
+            //每分钟查询一次.. 最多查询10次
+            List<SysPaymentLog> logs = sysPaymentLogMapper.selectProcess();
+            if (logs.size() == 0) {
+                return;
+            }
+            logs.stream().forEach(item -> {
+                pingAnService.payQuery(item);
+            });
+        } finally {
+            isRunning.set(false);
         }
-        logs.stream().forEach(item -> {
-            pingAnService.payQuery(item);
-        });
     }
-
-
 }
