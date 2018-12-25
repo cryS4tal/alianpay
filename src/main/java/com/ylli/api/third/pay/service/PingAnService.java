@@ -108,6 +108,9 @@ public class PingAnService {
                     log.msg = msg;
                     cashLogMapper.updateByPrimaryKeySelective(log);
                 }
+                //回滚金额
+                walletService.cashFail(log.mchId, log.money);
+
                 LOGGER.error("平安代付失败：" + msg);
             } else {
                 /**
@@ -144,9 +147,10 @@ public class PingAnService {
                 LOGGER.info("平安代付受理成功，系统订单号：" + orderNumber + "\n银行业务流水号：" + bussFlowNo);
             }
             /***处理返回结果-end*/
+        } else {
+            //没有返回.暂时默认平安没有受理。cash_log 状态 保持不变，待处理
+            LOGGER.error("平安代付返回res：null");
         }
-        LOGGER.error("平安代付返回res：null");
-        //没有返回.暂时默认平安没有受理。cash_log 状态 保持不变，待处理
     }
 
     /**
