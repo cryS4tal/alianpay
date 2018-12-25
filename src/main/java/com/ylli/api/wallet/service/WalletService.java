@@ -69,4 +69,12 @@ public class WalletService {
         wallet.recharge = wallet.recharge + money + cashCharge;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
+
+    public void rollback(Long mchId, int money) {
+        Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
+        wallet.recharge = wallet.recharge - money;
+        wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
+        walletMapper.updateByPrimaryKeySelective(wallet);
+        // todo 加入钱包金额变动 关联 账单日志表。  wallet log
+    }
 }

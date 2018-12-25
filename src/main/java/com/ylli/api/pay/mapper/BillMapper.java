@@ -39,4 +39,7 @@ public interface BillMapper extends Mapper<Bill> {
     List<Data> rate(@Param("channel_id") Long channelId,
                     @Param("mch_id") Long mchId,
                     @Param("app_id") Long appId);
+
+    @Update("UPDATE t_bill SET `status` = 1,trade_time = NULL,pay_charge = NULL,super_order_id = NULL,msg = NULL,is_success = NULL WHERE sys_order_id = #{sys_order_id}")
+    void rollback(@Param("sys_order_id") String sysOrderId);
 }

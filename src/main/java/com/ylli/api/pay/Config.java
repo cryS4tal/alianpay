@@ -25,6 +25,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             3, "订单状态非法");
 
+    public static final ErrorCode ERROR_BILL_ROLLBACK
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            4, "此订单不是手工补单，不能回滚");
+
 
     /**
      * 权限

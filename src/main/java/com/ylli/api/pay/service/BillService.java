@@ -292,4 +292,25 @@ public class BillService {
         }
         return convert(bill);
     }
+
+    @Transactional
+    public Object rollback(String sysOrderId) {
+        Bill bill = new Bill();
+        bill.sysOrderId = sysOrderId;
+        bill = billMapper.selectOne(bill);
+        if (bill == null) {
+            throw new AwesomeException(Config.ERROR_BILL_NOT_FOUND);
+        }
+        if (!bill.superOrderId.startsWith("unknown")) {
+            throw new AwesomeException(Config.ERROR_BILL_ROLLBACK);
+        }
+        if (bill.status == Bill.FINISH) {
+            //钱包金额变动。
+            walletService.rollback(bill.mchId, bill.money - bill.payCharge);
+
+            billMapper.rollback(sysOrderId);
+            return "success";
+        }
+        return "fail";
+    }
 }
