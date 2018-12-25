@@ -42,7 +42,11 @@ public class PingAnJobs {
                 return;
             }
             logs.stream().forEach(item -> {
-                pingAnService.payQuery(item);
+                if (item.failCount > 10) {
+                    sysPaymentLogMapper.delete(item);
+                } else {
+                    pingAnService.payQuery(item);
+                }
             });
         } finally {
             isRunning.set(false);

@@ -43,6 +43,10 @@ public class PayClient {
         }
         LOGGER.info("received mch res:" + res);
 
+        if (res == null) {
+            return "res null";
+        }
+
         if (res.toUpperCase().equals("SUCCESS")) {
             Bill bill = billMapper.selectByPrimaryKey(id);
             if (bill != null) {

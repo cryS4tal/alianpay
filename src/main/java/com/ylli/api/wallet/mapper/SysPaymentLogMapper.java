@@ -7,6 +7,6 @@ import tk.mybatis.mapper.common.Mapper;
 
 public interface SysPaymentLogMapper extends Mapper<SysPaymentLog> {
 
-   @Select("SELECT * FROM t_sys_payment_log WHERE fail_count < 10 AND type = 'PingAn'")
+   @Select("SELECT * FROM t_sys_payment_log WHERE type = 'PingAn'")
     List<SysPaymentLog> selectProcess();
 }

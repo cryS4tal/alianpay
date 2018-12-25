@@ -197,10 +197,9 @@ public class PingAnService {
                 }
             }
             //交易进行中
-            CashLog cashLog = cashLogMapper.selectByPrimaryKey(log.orderId.replace(SysPaymentLog.PINGAN, ""));
-            cashLog.state = CashLog.PROCESS;
-            cashLog.type = CashLog.PINGAN;
-            cashLogMapper.updateByPrimaryKeySelective(cashLog);
+            log.failCount = log.failCount + 1;
+            logMapper.updateByPrimaryKeySelective(log);
+            return;
             //return "processing";
         }
 
@@ -219,37 +218,40 @@ public class PingAnService {
             String RetMsg = document.getRootElement().element("RetMsg").getText();
             //成功
             if ("20".equals(stt)) {
-                CashLog cashLog = cashLogMapper.selectByPrimaryKey(log.orderId.replace(SysPaymentLog.PINGAN, ""));
+                CashLog cashLog = cashLogMapper.selectByPrimaryKey(Long.parseLong(log.orderId.replace(SysPaymentLog.PINGAN, "")));
                 cashLog.state = CashLog.FINISH;
                 cashLog.type = CashLog.PINGAN;
                 cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
                 walletService.cashSuc(cashLog.mchId, cashLog.money);
+
+                //删除终态
+                logMapper.delete(log);
                 //return "success";
             }
             //失败
             else if ("30".equals(stt)) {
-                CashLog cashLog = cashLogMapper.selectByPrimaryKey(log.orderId.replace(SysPaymentLog.PINGAN, ""));
+                CashLog cashLog = cashLogMapper.selectByPrimaryKey(Long.parseLong(log.orderId.replace(SysPaymentLog.PINGAN, "")));
                 cashLog.state = CashLog.FAILED;
                 cashLog.type = CashLog.PINGAN;
                 cashLog.msg = RetMsg;
                 cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
                 walletService.cashFail(cashLog.mchId, cashLog.money);
+
+                //删除终态
+                logMapper.delete(log);
                 //return "fail";
             }
             //处理中
             else {
-                CashLog cashLog = cashLogMapper.selectByPrimaryKey(log.orderId.replace(SysPaymentLog.PINGAN, ""));
-                cashLog.state = CashLog.PROCESS;
-                cashLog.type = CashLog.PINGAN;
-                cashLogMapper.updateByPrimaryKeySelective(cashLog);
+                log.failCount = log.failCount + 1;
+                logMapper.updateByPrimaryKeySelective(log);
                 //return "processing";
             }
         } catch (Exception e) {
             LOGGER.error("平安银行代发交易查询返回报文解析失败", e);
         }
-        //return "";
         /***处理返回结果-end*/
     }
 }
