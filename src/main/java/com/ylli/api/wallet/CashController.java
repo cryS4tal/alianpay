@@ -10,6 +10,7 @@ import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.service.CashService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/cash")
 @Auth
 public class CashController {
+
+    @Value("${cash.min}")
+    public Integer min;
+
+    @Value("${cash.max}")
+    public Integer max;
 
     @Autowired
     CashService cashService;
@@ -52,7 +59,7 @@ public class CashController {
         if (authSession.getAuthId() != req.mchId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        if (req.money > 5 * 10000 * 100 || req.money < 10 * 100) {
+        if (req.money > max || req.money < min) {
             throw new AwesomeException(Config.ERROR_CHARGE_MONEY);
         }
         cashService.cash(req);
