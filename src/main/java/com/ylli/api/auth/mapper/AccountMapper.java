@@ -3,6 +3,8 @@ package com.ylli.api.auth.mapper;
 import com.ylli.api.auth.model.Account;
 import com.ylli.api.mch.model.Mch;
 import java.util.List;
+
+import com.ylli.api.mch.model.MchSubDto;
 import org.apache.ibatis.annotations.Param;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -19,4 +21,10 @@ public interface AccountMapper extends Mapper<Account> {
                             @Param("mch_name") String mchName,
                             @Param("audit_state") Integer auditState,
                             @Param("mch_state") String mchState);
+
+    /**
+     * 获取可以成为子账户的账户
+     * @return
+     */
+    List<MchSubDto> getCanSubAccount();
 }

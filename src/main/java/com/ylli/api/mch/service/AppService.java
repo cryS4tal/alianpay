@@ -14,8 +14,10 @@ import com.ylli.api.pay.service.PayService;
 import com.ylli.api.mch.Config;
 import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.model.MchApp;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -162,7 +164,7 @@ public class AppService {
             details.add(doSome(list.get(i), mchId));
         }
         String mchName = userBaseMapper.selectByMchId(mchId).mchName;
-        details.stream().forEach(i ->{
+        details.stream().forEach(i -> {
             i.mchId = mchId;
             i.mchName = mchName;
         });
@@ -187,5 +189,14 @@ public class AppService {
             detail.isDefault = false;
         }
         return detail;
+    }
+
+    public List<MchAppDetail> getMchRate(Long mchId) {
+        List<SysApp> list = sysAppMapper.selectAll();
+        List<MchAppDetail> details = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            details.add(doSome(list.get(i), mchId));
+        }
+        return details;
     }
 }

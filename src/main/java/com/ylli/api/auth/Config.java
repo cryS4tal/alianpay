@@ -73,6 +73,14 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             15, "权限不足");
 
+    public static final ErrorCode ERROR_EMPTY_MCH_NAME
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            15, "商户名称不能为空");
+
+    public static final ErrorCode ERROR_PHONE_NAME
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            13, "手机号已经存在");
+
 
     /**
      * 默认系统部门

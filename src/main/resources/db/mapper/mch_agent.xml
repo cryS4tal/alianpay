@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.mch.mapper.MchAgentMapper">
+    <resultMap id="mchAgentMap" type="com.ylli.api.mch.model.MchAgent"/>
+    <resultMap id="mchAgentDtoMap" type="com.ylli.api.mch.model.MchAgentDto"/>
+
+
+    <select id="getAgents" resultMap="mchAgentDtoMap">
+        select t_agent.mch_id,t_agent.mch_name,t_agent.link_phone as phone from t_agent
+    </select>
+
+</mapper>

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.ylli.api.auth.mapper.AccountMapper">
     <resultMap id="mchMap" type="com.ylli.api.mch.model.Mch"/>
-
+    <resultMap id="mchSubDtoMap" type="com.ylli.api.mch.model.MchSubDto"/>
     <select id="selectByQuery" resultMap="mchMap">
         SELECT
         t_account.id AS 'mch_id',
@@ -31,5 +31,9 @@
                 AND t_account.state = #{mch_state}
             </if>
         </where>
+    </select>
+
+    <select id="getCanSubAccount" resultMap="mchSubDtoMap">
+        select t_account.id as mch_id from t_account where t_account.id not in (select mch_id from t_agent) and id not in (select sub_id from t_mch_sub)
     </select>
 </mapper>

@@ -37,6 +37,14 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             6, "用户已被禁用.");
 
+    public static final ErrorCode ERROR_MCH_SUB
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            4, "其他商户已设置了此子账户.");
+
+    public static final ErrorCode ERROR_MCH_SUB_RATE
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            4, "代理商费率必须小于下级商家.");
+
 
     /**
      * 权限
