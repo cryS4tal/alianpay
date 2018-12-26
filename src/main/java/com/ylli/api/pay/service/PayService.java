@@ -28,11 +28,13 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class PayService {
@@ -209,7 +211,40 @@ public class PayService {
         //str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
         //str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
         //str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
-        return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+        str = formToUrl(str);
+        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+        //return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+    }
+
+    public String formToUrl(String form) {
+        form = form.replace("<form name=\"payform\" id=\"payform\" method=\"post\" action=\"http://gateway.iexindex.com/ydpay/PayH5New.aspx\">", "");
+        form = form.replace("</form>", "");
+        form = form.replace("<script type=\"text/javascript\" language=\"javascript\">function go(){ var _form = document.forms['payform']; _form.submit();};setTimeout(function(){go()},100);</script>", "");
+
+        String price =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"price\" value=\""), "\"");
+
+        String istype =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"istype\" value=\""), "\"");
+
+        String return_url =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"return_url\" value=\""), "\"");
+
+        String payurl =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"payurl\" value=\""), "\"");
+
+        String id =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"id\" value=\""), "\"");
+
+        String url = UriComponentsBuilder.fromHttpUrl(
+                "http://gateway.iexindex.com/ydpay/PayH5New.aspx")
+                .queryParam("price", price)
+                .queryParam("istype", istype)
+                .queryParam("return_url", return_url)
+                .queryParam("payurl", payurl)
+                .queryParam("id", id)
+                .build().toUriString();
+        return url;
     }
 
 
