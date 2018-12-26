@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 加入版本号..
+ *
+ * 支付类
  */
 @RestController
 @RequestMapping("/pay")
