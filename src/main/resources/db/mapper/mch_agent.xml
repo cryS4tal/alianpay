@@ -6,7 +6,7 @@
 
 
     <select id="getAgents" resultMap="mchAgentDtoMap">
-        select t_agent.mch_id,t_agent.mch_name,t_agent.link_phone as phone from t_agent
+        select t_mch_agent.mch_id,t_mch_agent.mch_name,t_mch_agent.link_phone as phone from t_mch_agent
     </select>
 
 </mapper>

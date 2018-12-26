@@ -34,6 +34,6 @@
     </select>
 
     <select id="getCanSubAccount" resultMap="mchSubDtoMap">
-        select t_account.id as mch_id from t_account where t_account.id not in (select mch_id from t_agent) and id not in (select sub_id from t_mch_sub)
+        select t_account.id as mch_id from t_account where t_account.id not in (select mch_id from t_mch_agent) and id not in (select sub_id from t_mch_sub)
     </select>
 </mapper>
