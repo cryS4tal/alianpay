@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.mch.mapper.MchSubMapper">
+    <resultMap id="mchSubMap" type="com.ylli.api.mch.model.MchSub"/>
+    <resultMap id="mchSubDtoMap" type="com.ylli.api.mch.model.MchSubDto"/>
+
+
+    <select id="selectSubAccounts" resultMap="mchSubDtoMap">
+        select ms.mch_id,ms.sub_id,t_phone_auth.phone, ms.sub_id,ub.mch_name,w.recharge as money,w.bonus as bouns_money from t_mch_sub ms
+        LEFT JOIN t_account a on ms.sub_id=a.id
+        LEFT JOIN t_wallet w on ms.sub_id=w.id
+        LEFT JOIN t_user_base ub on ub.mch_id=ms.sub_id
+        LEFT JOIN t_phone_auth on t_phone_auth.id=ms.sub_id
+        <if test="mch_id != null">
+            <where>
+                ms.mch_id = ${mch_id}
+            </where>
+        </if>
+    </select>
+
+</mapper>

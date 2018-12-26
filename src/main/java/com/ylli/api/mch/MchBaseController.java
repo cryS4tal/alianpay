@@ -12,12 +12,7 @@ import com.ylli.api.mch.model.Audit;
 import com.ylli.api.mch.model.MchBase;
 import com.ylli.api.mch.service.MchBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Auth
 @RestController
@@ -35,6 +30,7 @@ public class MchBaseController {
 
     /**
      * 基础信息注册
+     *
      * @param userBase
      */
     @PostMapping
@@ -87,5 +83,10 @@ public class MchBaseController {
             throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
         }
         return userBaseService.update(userBase);
+    }
+
+    @GetMapping("/mchName/{mchName}")
+    public Object getMchName(@PathVariable String mchName) {
+        return userBaseService.getMchNameLike(mchName);
     }
 }

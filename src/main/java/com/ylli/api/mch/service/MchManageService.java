@@ -137,29 +137,31 @@ public class MchManageService {
         MchAgent checkAgent = mchAgentMapper.selectOne(agent);
         if (null == checkAgent)
             throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
-
+        Timestamp modifyTime = Timestamp.from(Instant.now());
         if (!phone.equals(checkAgent.linkPhone)) {
             PhoneAuth phoneAuth = new PhoneAuth();
             phoneAuth.id = mchId;
             phoneAuth.phone = phone;
+            phoneAuth.modifyTime=modifyTime;
             phoneAuthMapper.updateByPrimaryKeySelective(phoneAuth);
-            agent.linkPhone = phone;
+            checkAgent.linkPhone = phone;
         }
         if (!Strings.isNullOrEmpty(password)) {
             Password pwd = new Password();
             pwd.id = mchId;
+            pwd.modifyTime=modifyTime;
             pwd.password = BCrypt.hashpw(password, BCrypt.gensalt());
             passwordMapper.updateByPrimaryKeySelective(pwd);
         }
         if (!mchName.equals(checkAgent.mchName)) {
-            MchBase userBase = new MchBase();
-            userBase.id = mchId;
+            MchBase userBase = mchBaseMapper.selectByMchId(mchId);
             userBase.linkPhone = phone;
             userBase.mchName = mchName;
+            userBase.modifyTime=modifyTime;
             mchBaseMapper.updateByPrimaryKeySelective(userBase);
-            agent.mchName = mchName;
+            checkAgent.mchName = mchName;
         }
-        mchAgentMapper.updateByPrimaryKeySelective(agent);
+        mchAgentMapper.updateByPrimaryKeySelective(checkAgent);
         Apps apps = new Apps();
         apps.apps = userApps;
         appService.setUserRate(apps);

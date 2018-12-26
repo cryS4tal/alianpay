@@ -2,14 +2,18 @@ package com.ylli.api.mch.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.base.Strings;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.mch.Config;
 import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.model.MchBase;
+
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +41,7 @@ public class MchBaseService {
         //强制转换.
         userBase.state = MchBase.NEW;
         //fix use modelMapper cause not update data
-        userBase.id  = base.id;
+        userBase.id = base.id;
         modelMapper.map(userBase, base);
         userBaseMapper.updateByPrimaryKeySelective(base);
     }
@@ -97,9 +101,15 @@ public class MchBaseService {
             base = init(userBase.mchId, userBase.linkPhone);
         }
         //fix use modelMapper cause not update data
-        userBase.id  = base.id;
+        userBase.id = base.id;
         modelMapper.map(userBase, base);
         userBaseMapper.updateByPrimaryKeySelective(base);
         return userBaseMapper.selectByPrimaryKey(userBase);
+    }
+
+    public Object getMchNameLike(String mchName) {
+        if (!Strings.isNullOrEmpty(mchName))
+            mchName = mchName + "%";
+        return userBaseMapper.getMchNameLike(mchName);
     }
 }
