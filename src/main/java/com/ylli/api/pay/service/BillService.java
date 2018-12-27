@@ -18,6 +18,7 @@ import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
 import com.ylli.api.wallet.service.WalletService;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -113,6 +115,11 @@ public class BillService {
         baseBill.createTime = bill.createTime;
         baseBill.channel = channelService.getChannelName(bill.channelId);
         return baseBill;
+    }
+
+    public Integer countBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
+                              String tradeType, Date tradeTime, Date startTime, Date endTime) {
+        return billMapper.countBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
     }
 
     public Object getTodayDetail(Long mchId) {

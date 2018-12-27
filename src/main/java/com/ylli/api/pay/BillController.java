@@ -78,6 +78,30 @@ public class BillController {
         return billService.getTodayDetail(mchId);
     }
 
+    @GetMapping("/count")
+    public Integer countMoney(@AwesomeParam(required = false) Long mchId,
+                              @AwesomeParam(required = false) Integer status,
+                              @AwesomeParam(required = false) String mchOrderId,
+                              @AwesomeParam(required = false) String sysOrderId,
+                              @AwesomeParam(required = false) String payType,
+                              @AwesomeParam(required = false) String tradeType,
+                              @AwesomeParam(required = false) AwesomeDateTime tradeTime,
+                              @AwesomeParam(required = false) AwesomeDateTime startTime,
+                              @AwesomeParam(required = false) AwesomeDateTime endTime) {
+        if (mchId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+
+        return billService.countBills(mchId, status,
+                Strings.isNullOrEmpty(mchOrderId) ? null : mchOrderId,
+                Strings.isNullOrEmpty(sysOrderId) ? null : sysOrderId,
+                Strings.isNullOrEmpty(payType) ? null : payType,
+                Strings.isNullOrEmpty(tradeType) ? null : tradeType,
+                tradeTime == null ? null : tradeTime.getDate(),
+                startTime == null ? null : startTime.getDate(),
+                endTime == null ? null : endTime.getDate());
+    }
+
     static class Reissue {
         public String sysOrderId;
     }

@@ -3,8 +3,10 @@ package com.ylli.api.pay.mapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
 import com.ylli.api.sys.model.Data;
+
 import java.util.Date;
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -27,6 +29,16 @@ public interface BillMapper extends Mapper<Bill> {
 
     @Update("UPDATE t_bill SET status = 9 WHERE status = 1 AND DATE_ADD(create_time,INTERVAL 9 HOUR) < NOW()")
     Integer autoClose();
+
+    Integer countBills(@Param("mch_id") Long mchId,
+                       @Param("status") Integer status,
+                       @Param("mch_order_id") String mchOrderId,
+                       @Param("sys_order_id") String sysOrderId,
+                       @Param("pay_type") String payType,
+                       @Param("trade_type") String tradeType,
+                       @Param("trade_time") Date tradeTime,
+                       @Param("start_time") Date startTime,
+                       @Param("end_time") Date endTime);
 
     List<Data> getHourlyData(@Param("mch_id") Long mchId);
 

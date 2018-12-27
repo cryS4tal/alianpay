@@ -20,6 +20,6 @@ public interface MchBaseMapper extends Mapper<MchBase> {
                           @Param("phone") String phone,
                           @Param("license") String businessLicense);
 
-    @Select("select mch_name from t_user_base where mch_name like ${mch_name}")
+    @Select("select mch_name from t_user_base where mch_name like #{mch_name}")
     List<String> getMchNameLike(@Param("mch_name") String mchName);
 }
