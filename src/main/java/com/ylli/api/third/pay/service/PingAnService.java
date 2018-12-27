@@ -444,7 +444,6 @@ public class PingAnService {
             log.failCount = log.failCount + 1;
             logMapper.updateByPrimaryKeySelective(log);
             return;
-            //return "processing";
         }
 
         //获取返回xml
@@ -465,12 +464,12 @@ public class PingAnService {
                 //
 
 
-                CashLog cashLog = cashLogMapper.selectByPrimaryKey(Long.parseLong(log.orderId.replace(SysPaymentLog.PINGAN, "")));
+                /*CashLog cashLog = cashLogMapper.selectByPrimaryKey(Long.parseLong(log.orderId.replace(SysPaymentLog.PINGAN, "")));
                 cashLog.state = CashLog.FINISH;
                 cashLog.type = CashLog.PINGAN;
                 cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-                walletService.cashSuc(cashLog.mchId, cashLog.money);
+                walletService.cashSuc(cashLog.mchId, cashLog.money);*/
 
                 //删除终态
                 logMapper.delete(log);
