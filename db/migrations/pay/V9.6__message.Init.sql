@@ -12,3 +12,9 @@ CREATE TABLE t_async_message (
 
 ALTER TABLE `t_async_message`
 ADD UNIQUE INDEX `u_bill_id` (`bill_id`) ;
+
+ALTER TABLE `t_async_message`
+ADD COLUMN `bank_pay_order_id`  varchar(64) NULL AFTER `bill_id`;
+
+ALTER TABLE `t_async_message`
+ADD UNIQUE INDEX `u_order_id` (`bank_pay_order_id`) ;

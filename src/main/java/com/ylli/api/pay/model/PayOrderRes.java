@@ -8,5 +8,5 @@ public class PayOrderRes {
 
     public Integer money;
 
-    public Integer status;
+    public String status;
 }

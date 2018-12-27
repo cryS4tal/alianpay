@@ -19,7 +19,7 @@ public class Config {
 
     public static final ErrorCode ERROR_CHARGE_MONEY
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            2, "提现金额区间为：500 - 49900 元");
+            2, "提现金额区间为：100 - 49900 元");
 
     public static final ErrorCode ERROR_VERIFY
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,

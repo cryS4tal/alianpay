@@ -196,7 +196,7 @@ public class PayService {
             return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
         }
 
-        //金额校验  todo  check。
+        //金额校验
         if (baseOrder.money < hrjf_min || baseOrder.money > hrjf_max) {
             return new Response("A007", "交易金额限制：50 - 9999 元", baseOrder);
         }

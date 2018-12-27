@@ -15,6 +15,8 @@ public class AsyncMessage {
 
     public Long billId;
 
+    public String bankPayOrderId;
+
     public String url;
 
     public String params;

@@ -15,18 +15,13 @@ public class MessageService {
     @Autowired
     PayClient payClient;
 
+    @Autowired
+    BankPayClient bankPayClient;
+
     private static Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
 
     @Autowired
     AsyncMessageMapper asyncMessageMapper;
-
-    public void addNotifyJobs(Long billId, String url, String params) {
-        AsyncMessage asyncMessage = new AsyncMessage();
-        asyncMessage.billId = billId;
-        asyncMessage.url = url;
-        asyncMessage.params = params;
-        asyncMessageMapper.insertSelective(asyncMessage);
-    }
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -37,7 +32,7 @@ public class MessageService {
             return;
         }
         try {
-            List<AsyncMessage> list = asyncMessageMapper.selectAll();
+            List<AsyncMessage> list = asyncMessageMapper.selectAllBill();
             for (AsyncMessage message : list) {
                 try {
                     //
@@ -48,6 +43,28 @@ public class MessageService {
             }
         } finally {
             isRunning.set(false);
+        }
+    }
+
+    private AtomicBoolean isRunning2 = new AtomicBoolean(false);
+
+    public void autoOrderNotify() {
+        if (!isRunning2.compareAndSet(false, true)) {
+            LOGGER.info("async send message is running, please waiting");
+            return;
+        }
+        try {
+            List<AsyncMessage> list = asyncMessageMapper.selectAllOrder();
+            for (AsyncMessage message : list) {
+                try {
+                    //
+                    String res = bankPayClient.sendNotify(message.bankPayOrderId, message.url, message.params, false);
+                } catch (Exception ex) {
+                    continue;
+                }
+            }
+        } finally {
+            isRunning2.set(false);
         }
     }
 }

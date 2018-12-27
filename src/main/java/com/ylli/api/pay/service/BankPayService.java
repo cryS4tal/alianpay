@@ -4,12 +4,15 @@ import com.google.common.base.Strings;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.mapper.BankPayOrderMapper;
 import com.ylli.api.pay.model.BankPayOrder;
+import com.ylli.api.pay.model.OrderQueryReq;
+import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.service.PingAnService;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -146,5 +149,41 @@ public class BankPayService {
 
         bankPayOrderMapper.insertSelective(bankPayOrder);
         return bankPayOrder;
+    }
+
+    public Object orderQuery(OrderQueryReq orderQuery) throws Exception {
+        String key = mchKeyService.getKeyById(orderQuery.mchId);
+        Map<String, String> map = SignUtil.objectToMap(orderQuery);
+        String sign = SignUtil.generateSignature(map, key);
+        if (sign.equals(orderQuery.sign.toUpperCase())) {
+
+            BankPayOrder order = bankPayOrderMapper.selectByMchOrderId(orderQuery.mchOrderId);
+            if (order == null) {
+                return new OrderQueryRes("A006", "订单不存在");
+            }
+            if (order.status == BankPayOrder.FINISH || order.status == BankPayOrder.FAIL) {
+
+            } else {
+                //TODO 主动查询
+                //pingAn query
+                //xianfeng query
+            }
+            //直接返回订单信息
+            OrderQueryRes res = new OrderQueryRes();
+            res.code = "A000";
+            res.message = "成功";
+            res.money = order.money;
+            res.mchOrderId = order.mchOrderId;
+            res.sysOrderId = order.sysOrderId;
+            res.status = BankPayOrder.statusToString(order.status);
+            if (order.tradeTime != null) {
+                res.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(order.tradeTime);
+            }
+
+            Map<String, String> map1 = SignUtil.objectToMap(res);
+            res.sign = SignUtil.generateSignature(map1, key);
+            return res;
+        }
+        return new OrderQueryRes("A001", "签名校验失败");
     }
 }

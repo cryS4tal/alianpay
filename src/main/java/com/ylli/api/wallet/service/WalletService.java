@@ -111,4 +111,17 @@ public class WalletService {
         wallet.reservoir = wallet.reservoir - money;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
+
+    /**
+     * 商户接口发起代付请求，回滚金额。
+     *
+     * @param mchId
+     * @param money
+     */
+    @Transactional
+    public void incrReservoir(Long mchId, Integer money) {
+        Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
+        wallet.reservoir = wallet.reservoir + money;
+        walletMapper.updateByPrimaryKeySelective(wallet);
+    }
 }

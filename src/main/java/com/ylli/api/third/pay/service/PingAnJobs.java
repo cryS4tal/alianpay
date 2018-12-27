@@ -47,9 +47,10 @@ public class PingAnJobs {
                     sysPaymentLogMapper.delete(item);
                 } else {
                     if (item.type.equals(SysPaymentLog.TYPE_MCH)) {
+                        //sys auto query.
                         pingAnService.payQuery(item);
                     } else if (item.type.equals(SysPaymentLog.TYPE_SYS)) {
-                        //TODO mch auto query.
+                        //mch auto query.
                         pingAnService.payQueryMch(item);
                     } else {
                         System.out.println(new Gson().toJson(item));
