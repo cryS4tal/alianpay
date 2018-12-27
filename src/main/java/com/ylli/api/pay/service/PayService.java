@@ -212,7 +212,7 @@ public class PayService {
         //str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
         //str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
         //TODO temp code. test some mch return url can success.
-        if (baseOrder.mchId == 1033) {
+        if (baseOrder.mchId == 1033 || baseOrder.mchId == 1008) {
             str = formToUrl(str);
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
         } else {
