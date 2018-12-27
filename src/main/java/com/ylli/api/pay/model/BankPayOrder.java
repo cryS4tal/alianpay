@@ -1,9 +1,22 @@
 package com.ylli.api.pay.model;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
+@Table(name = "t_bank_pay_order")
 public class BankPayOrder {
+
+    public static final Integer NEW = 1;
+    public static final Integer ING = 2;
+    public static final Integer FINISH = 3;
+    public static final Integer FAIL = 4;
+
 
     //对公账户
     public static final Integer PAY_TYPE_COMPANY = 2;
@@ -29,6 +42,9 @@ public class BankPayOrder {
         }
     };
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
     /**
      * 必传字段：
@@ -42,6 +58,10 @@ public class BankPayOrder {
     public Long mchId;
 
     public String mchOrderId;
+
+    public String sysOrderId;
+
+    public String superOrderId;
 
     public Integer money;
 
@@ -73,8 +93,29 @@ public class BankPayOrder {
 
     public String bankNo;
 
-    public String noyifyUrl;
+    public String noifyUrl;
 
-
+    @Transient
     public String sign;
+
+    //预留 - 代付通道id
+    public Long bankPaymentId;
+
+    //预留 - 结算类型：定额 / 百分比
+    public Integer chargeType;
+
+    //预留 - 结算金额
+    public Integer chargeMoney;
+
+    //子系统是否接受通知.
+    public Boolean isSuccess;
+
+    public Integer status;
+
+    //交易成立时间
+    public Timestamp tradeTime;
+
+    public Timestamp createTime;
+
+    public Timestamp modifyTime;
 }

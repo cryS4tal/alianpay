@@ -2,6 +2,11 @@ package com.ylli.api.third.pay.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.ylli.api.pay.mapper.BankPayOrderMapper;
+import com.ylli.api.pay.model.BankPayOrder;
+import com.ylli.api.pay.model.PayOrderRes;
+import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.model.PingAnOrder;
 import com.ylli.api.third.pay.model.PingAnOrderQuery;
 import com.ylli.api.third.pay.util.TimeUtil;
@@ -45,6 +50,9 @@ public class PingAnService {
     CashLogMapper cashLogMapper;
 
     @Autowired
+    BankPayOrderMapper bankPayOrderMapper;
+
+    @Autowired
     WalletService walletService;
 
     //企业签约帐号
@@ -62,6 +70,16 @@ public class PingAnService {
      */
     public final static String XML_HEAD = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
 
+    /**
+     * 系统内部代付方法
+     *
+     * @param cashLogId      提现请求id，由于测试时暂用了很多自增序列。故修改规则为 "PingAn".append(cashLogId) 作为提现单号
+     * @param inAcctNo
+     * @param inAcctName
+     * @param inAcctBankName
+     * @param mobile
+     * @param money
+     */
     public void createPingAnOrder(Long cashLogId, String inAcctNo, String inAcctName, String inAcctBankName, String mobile, Integer money) {
 
         /**组装请求报文-start*/
@@ -152,6 +170,119 @@ public class PingAnService {
             LOGGER.error("平安代付返回res：null");
         }
     }
+
+    /**
+     * 用于提供给商户代付
+     *
+     * @param sysOrderId     使用生成的系统订单号作为代付商户订单号
+     * @param inAcctNo
+     * @param inAcctName
+     * @param inAcctBankName
+     * @param mobile
+     * @param money
+     * @return
+     */
+    public Response createPingAnOrder(String sysOrderId, String inAcctNo, String inAcctName, String inAcctBankName,
+                                      String mobile, Integer money, String secretKey, String mchOrderId) throws Exception {
+
+        /**组装请求报文-start*/
+        PingAnOrder order = new PingAnOrder();
+        //required
+        order.orderNumber = sysOrderId;
+        order.acctNo = acctNo;
+        order.busiType = "00000";
+        //金额转换-分转换为元
+        order.tranAmount = (new BigDecimal(money).divide(new BigDecimal(100))).toString();
+        order.inAcctNo = inAcctNo;
+        order.inAcctName = inAcctName;
+        //not required
+        order.corpId = corpId;
+        order.ccyCode = "RMB";
+        order.inAcctBankName = inAcctBankName;
+        order.mobile = mobile;
+        order.inAcctBankNode = "";
+        order.remark = "";
+        order.inAcctProvinceName = "";
+        order.inAcctCityName = "";
+
+        String xml = XML_HEAD + XmlRequestUtil.createXmlRequest((JSONObject) JSON.toJSON(order));
+
+        String reqXml = YQUtil.asemblyPackets(yqdm, "KHKF03", xml);
+        /**组装请求报文-end*/
+
+        LOGGER.info("平安代付请求报文：" + reqXml);
+        String res = pingAnClient.post(reqXml, url);
+
+        BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(sysOrderId);
+
+        /***处理返回结果-start*/
+        if (res != null) {
+            String code = StringUtils.substringBefore(res, ":").substring(87);
+            if (!"000000".equals(code)) {
+                //平安银行代发交易失败
+                String msg = StringUtils.substringBefore(res.substring(94), "0").trim();
+
+                //更新订单
+                payOrder.status = BankPayOrder.FAIL;
+                bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                //TODO 回滚金额
+                //walletService.cashFail(log.mchId, log.money);
+
+                LOGGER.error("平安代付失败：" + msg);
+                return new Response("A010", String.format("代付失败：%s"), msg);
+            } else {
+                /**
+                 *  or res.contains("交易受理成功")
+                 */
+                //A001010201010010343000045390000000000134KHKF03123450220181218033745YQTEST20181218033745000000:交易受理成功                                                                                 000001            00000000000<?xml version="1.0" encoding="UTF-8" ?><Result><OrderNumber>5111</OrderNumber><BussFlowNo>8043431812186167923315</BussFlowNo></Result>
+                String returnXml = StringUtils.substringAfter(res, "?>");
+                Document document = null;
+                try {
+                    document = DocumentHelper.parseText(returnXml);
+                } catch (DocumentException e) {
+                    e.printStackTrace();
+                }
+                //银行业务流水号
+                String bussFlowNo = document.getRootElement().element("BussFlowNo").getText();
+                //订单号
+                String orderNumber = document.getRootElement().element("OrderNumber").getText();
+
+                //更新订单 使用业务流水号作为父级订单号
+                payOrder.status = BankPayOrder.ING;
+                payOrder.superOrderId = bussFlowNo;
+                bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                //TODO 修改。加入自动轮询
+                SysPaymentLog sysPaymentLog = new SysPaymentLog();
+                sysPaymentLog.type = SysPaymentLog.PINGAN;
+                sysPaymentLog.orderId = orderNumber;
+                logMapper.insertSelective(sysPaymentLog);
+
+                LOGGER.info("平安代付受理成功，系统订单号：" + orderNumber + "\n银行业务流水号：" + bussFlowNo);
+                return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);
+            }
+            /***处理返回结果-end*/
+        } else {
+            LOGGER.error("平安代付返回res：null");
+            //没有返回. 暂时认为 处理失败。
+            return new Response("A011", "系统异常");
+            //TODO 金额是否回滚？
+            //TODO 查询订单决定成功 or 失败
+        }
+    }
+
+    public Response success(String mchOrderId, String sysOrderId, Integer money, Integer status, String secretKey) throws Exception {
+        PayOrderRes res = new PayOrderRes();
+        res.mchOrderId = mchOrderId;
+        res.sysOrderId = sysOrderId;
+        res.money = money;
+        res.status = status;
+        Response response = new Response("A000", "成功", null, res);
+        response.sign = SignUtil.generateSignature(SignUtil.objectToMap(response), secretKey);
+        return response;
+    }
+
 
     /**
      * 跨行快付查询KHKF04

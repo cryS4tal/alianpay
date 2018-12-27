@@ -211,9 +211,13 @@ public class PayService {
         //str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
         //str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
         //str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
-        str = formToUrl(str);
-        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
-        //return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+        //TODO temp code. test some mch return url can success.
+        if (baseOrder.mchId == 1033) {
+            str = formToUrl(str);
+            return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+        } else {
+            return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+        }
     }
 
     public String formToUrl(String form) {
