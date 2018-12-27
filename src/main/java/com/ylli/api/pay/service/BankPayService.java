@@ -8,6 +8,8 @@ import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.service.PingAnService;
+import com.ylli.api.wallet.model.Wallet;
+import com.ylli.api.wallet.service.WalletService;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +25,10 @@ public class BankPayService {
     @Value("${bank.pay.max}")
     public Integer bankPayMax;
 
+    //手续费暂时设置定值...是否需要修改
+    @Value("${bank.pay.charge}")
+    public Integer bankPayCharge;
+
     @Autowired
     BankPayOrderMapper bankPayOrderMapper;
 
@@ -34,6 +40,9 @@ public class BankPayService {
 
     @Autowired
     PingAnService pingAnService;
+
+    @Autowired
+    WalletService walletService;
 
     @Transactional
     public Object createOrder(BankPayOrder bankPayOrder) throws Exception {
@@ -87,15 +96,19 @@ public class BankPayService {
 
         //代付通道选择（系统统一切换还是可以按商户单独分配）
         if (true) {
-            //TODO 检查钱包。
+            //TODO 代付手续费暂时设置为定值...是否需要修改
+            Wallet wallet = walletService.getOwnWallet(bankPayOrder.mchId);
+            if (wallet.reservoir < (bankPayOrder.money + bankPayCharge)) {
+                return new Response("A012", "代付余额不足");
+            }
 
             //TODO 代付订单系统 , 1 - 平安，2先锋 ，                             1 - 固定
-
             //平安
-            bankPayOrder = insertOrder(bankPayOrder, 1L, 1, 0);
+            bankPayOrder = insertOrder(bankPayOrder, 1L, BankPayOrder.FIX, 0);
 
             return pingAnService.createPingAnOrder(bankPayOrder.sysOrderId, bankPayOrder.accNo, bankPayOrder.accName,
-                    bankPayOrder.bankName, bankPayOrder.mobile, bankPayOrder.money, secretKey, bankPayOrder.mchOrderId);
+                    bankPayOrder.bankName, bankPayOrder.mobile, bankPayOrder.money, secretKey, bankPayOrder.mchOrderId,
+                    bankPayOrder.chargeMoney, bankPayOrder.mchId);
 
         } else {
             //先锋

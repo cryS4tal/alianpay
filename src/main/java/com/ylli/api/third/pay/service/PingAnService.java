@@ -183,7 +183,8 @@ public class PingAnService {
      * @return
      */
     public Response createPingAnOrder(String sysOrderId, String inAcctNo, String inAcctName, String inAcctBankName,
-                                      String mobile, Integer money, String secretKey, String mchOrderId) throws Exception {
+                                      String mobile, Integer money, String secretKey, String mchOrderId,
+                                      Integer chargeMoney, Long mchId) throws Exception {
 
         /**组装请求报文-start*/
         PingAnOrder order = new PingAnOrder();
@@ -226,9 +227,6 @@ public class PingAnService {
                 payOrder.status = BankPayOrder.FAIL;
                 bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-                //TODO 回滚金额
-                //walletService.cashFail(log.mchId, log.money);
-
                 LOGGER.error("平安代付失败：" + msg);
                 return new Response("A010", msg);
             } else {
@@ -253,11 +251,15 @@ public class PingAnService {
                 payOrder.superOrderId = bussFlowNo;
                 bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-                //TODO 修改。加入自动轮询
+                //加入自动轮询
                 SysPaymentLog sysPaymentLog = new SysPaymentLog();
                 sysPaymentLog.type = SysPaymentLog.TYPE_SYS;
                 sysPaymentLog.orderId = orderNumber;
                 logMapper.insertSelective(sysPaymentLog);
+
+                //只有受理成功，才扣除代付池金额。
+                //扣除金额.(代付金额+手续费)
+                walletService.decrReservoir(mchId, (money + chargeMoney));
 
                 LOGGER.info("平安代付受理成功，系统订单号：" + orderNumber + "\n银行业务流水号：" + bussFlowNo);
                 return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);
@@ -266,9 +268,11 @@ public class PingAnService {
         } else {
             LOGGER.error("平安代付返回res：null");
             //没有返回. 暂时认为 处理失败。
+            //更新订单为失败。
+            payOrder.status = BankPayOrder.FAIL;
+            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
             return new Response("A011", "系统异常");
-            //TODO 金额是否回滚？
-            //TODO 查询订单决定成功 or 失败
         }
     }
 
@@ -286,6 +290,7 @@ public class PingAnService {
 
     /**
      * 跨行快付查询KHKF04
+     * 系统内部使用。（支付提现）
      *
      * @return
      */
@@ -380,6 +385,117 @@ public class PingAnService {
             }
             //处理中
             else {
+                log.failCount = log.failCount + 1;
+                logMapper.updateByPrimaryKeySelective(log);
+                //return "processing";
+            }
+        } catch (Exception e) {
+            LOGGER.error("平安银行代发交易查询返回报文解析失败", e);
+        }
+        /***处理返回结果-end*/
+    }
+
+    /**
+     * 用户商户代付-自动轮询
+     */
+    public void payQueryMch(SysPaymentLog log) {
+
+        /**组装请求报文-start**/
+        PingAnOrderQuery query = new PingAnOrderQuery();
+        query.acctNo = acctNo;
+        //query.bussFlowNo = "8043431812224558559480";
+        query.orderNumber = log.orderId;
+
+        String xml = XML_HEAD + XmlRequestUtil.createXmlRequest((JSONObject) JSON.toJSON(query));
+        String reqXml = YQUtil.asemblyPackets(yqdm, "KHKF04", xml);
+        /**组装请求报文-end**/
+
+
+        /***处理返回结果-start*/
+        String res = pingAnClient.post(reqXml, url);
+        if (res == null) {
+            log.failCount = log.failCount + 1;
+            log.modifyTime = Timestamp.from(Instant.now());
+            logMapper.updateByPrimaryKeySelective(log);
+            LOGGER.info("平安跨行快付查询KHKF04：res = null");
+            return;
+        }
+
+        //获取返回code
+        String code = StringUtils.substringBefore(res, ":").substring(87);
+        if (!"000000".equals(code)) {
+            /**
+             * 平安银行代发交易查询失败
+             * YQ9996 查询不存在交易返回码
+             * 订单创建时间于当前时间小于1分钟，返回处理中；否则返回交易失败
+             */
+            /*if ("YQ9996".equals(code)) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(log.createTime);
+                cal.add(Calendar.HOUR, 8);
+                Date tradeTime = cal.getTime();
+                if (tradeTime.compareTo(TimeUtil.nextTime(new Date(), null, -1, null)) < 0) {
+                    //todo 逻辑先不处理。
+                    //交易失败
+                    //return "fail";
+                }
+            }*/
+            //交易进行中
+            log.failCount = log.failCount + 1;
+            logMapper.updateByPrimaryKeySelective(log);
+            return;
+            //return "processing";
+        }
+
+        //获取返回xml
+        String returnXml = StringUtils.substringAfter(res, "?>");
+
+        try {
+            Document document = DocumentHelper.parseText(returnXml);
+            //银行业务流水号
+            String BussFlowNo = document.getRootElement().element("BussFlowNo").getText();
+            //银行交易流水号
+            String TranFlowNo = document.getRootElement().elementText("TranFlowNo");
+
+            String stt = document.getRootElement().element("Status").getText();
+            String RetCode = document.getRootElement().element("RetCode").getText();
+            String RetMsg = document.getRootElement().element("RetMsg").getText();
+            //成功
+            if ("20".equals(stt)) {
+                //
+
+
+                CashLog cashLog = cashLogMapper.selectByPrimaryKey(Long.parseLong(log.orderId.replace(SysPaymentLog.PINGAN, "")));
+                cashLog.state = CashLog.FINISH;
+                cashLog.type = CashLog.PINGAN;
+                cashLogMapper.updateByPrimaryKeySelective(cashLog);
+
+                walletService.cashSuc(cashLog.mchId, cashLog.money);
+
+                //删除终态
+                logMapper.delete(log);
+                //return "success";
+            }
+            //失败
+            else if ("30".equals(stt)) {
+                //
+
+                CashLog cashLog = cashLogMapper.selectByPrimaryKey(Long.parseLong(log.orderId.replace(SysPaymentLog.PINGAN, "")));
+                cashLog.state = CashLog.FAILED;
+                cashLog.type = CashLog.PINGAN;
+                cashLog.msg = RetMsg;
+                cashLogMapper.updateByPrimaryKeySelective(cashLog);
+
+                walletService.cashFail(cashLog.mchId, cashLog.money);
+
+                //删除终态
+                logMapper.delete(log);
+                //return "fail";
+            }
+            //处理中
+            else {
+                //
+
                 log.failCount = log.failCount + 1;
                 logMapper.updateByPrimaryKeySelective(log);
                 //return "processing";

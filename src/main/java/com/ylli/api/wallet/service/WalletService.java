@@ -72,6 +72,7 @@ public class WalletService {
 
     /**
      * 补单金额回滚
+     *
      * @param mchId
      * @param money
      */
@@ -86,6 +87,7 @@ public class WalletService {
 
     /**
      * 用户发起提现请求。金额进入在途.
+     *
      * @param wallet
      * @param money
      * @param cashCharge
@@ -94,6 +96,19 @@ public class WalletService {
     public void pendingSuc(Wallet wallet, Integer money, Integer cashCharge) {
         wallet.recharge = wallet.recharge - money - cashCharge;
         wallet.pending = wallet.pending + money + cashCharge;
+        walletMapper.updateByPrimaryKeySelective(wallet);
+    }
+
+    /**
+     * 商户接口发起代付请求，扣除代付池中可用余额 （请求金额 + 手续费）
+     *
+     * @param mchId
+     * @param money 请求金额 + 手续费
+     */
+    @Transactional
+    public void decrReservoir(Long mchId, Integer money) {
+        Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
+        wallet.reservoir = wallet.reservoir - money;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 }

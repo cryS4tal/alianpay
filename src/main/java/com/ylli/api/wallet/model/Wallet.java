@@ -22,6 +22,9 @@ public class Wallet {
     //分润金额
     public Integer bonus;
 
+    //代付池
+    public Integer reservoir;
+
     public Timestamp createTime;
 
     public Timestamp modifyTime;

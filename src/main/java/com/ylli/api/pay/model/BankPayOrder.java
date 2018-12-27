@@ -17,6 +17,9 @@ public class BankPayOrder {
     public static final Integer FINISH = 3;
     public static final Integer FAIL = 4;
 
+    public static final Integer FIX = 1;
+    public static final Integer FLOAT = 2;
+
 
     //对公账户
     public static final Integer PAY_TYPE_COMPANY = 2;

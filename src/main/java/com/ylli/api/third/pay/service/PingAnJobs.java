@@ -48,8 +48,10 @@ public class PingAnJobs {
                 } else {
                     if (item.type.equals(SysPaymentLog.TYPE_MCH)) {
                         pingAnService.payQuery(item);
-                    } else {
+                    } else if (item.type.equals(SysPaymentLog.TYPE_SYS)) {
                         //TODO mch auto query.
+                        pingAnService.payQueryMch(item);
+                    } else {
                         System.out.println(new Gson().toJson(item));
                         System.out.println("商户自动查询未处理");
                     }
