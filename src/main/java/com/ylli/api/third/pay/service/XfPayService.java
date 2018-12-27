@@ -115,7 +115,7 @@ public class XfPayService {
             xfBillMapper.insertSelective(bill);
 
             bill = xfBillMapper.selectOne(bill);
-            bill.orderNo = serializeUtil.generateOrderNo(SerializeUtil.XF_PAY, userId, bill.id);
+            //bill.orderNo = serializeUtil.generateOrderNo(SerializeUtil.XF_PAY, userId, bill.id);
             xfBillMapper.updateByPrimaryKeySelective(bill);
 
             //钱包金额变更

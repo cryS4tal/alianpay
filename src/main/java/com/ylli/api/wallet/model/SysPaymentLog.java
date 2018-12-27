@@ -13,6 +13,10 @@ public class SysPaymentLog {
 
     public static final String XIANFEN = "XianFen";
 
+    public static final String TYPE_SYS = "sys";
+
+    public static final String TYPE_MCH = "mch";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;

@@ -29,7 +29,7 @@ public class BankPayController {
     public Object createOrder(@RequestBody BankPayOrder bankPayOrder) throws Exception {
 
         if (!enable) {
-            return new Response("999", "系统维护，请稍后再试.");
+            return new Response("A999", "系统维护，请稍后再试.");
         }
         if (!accountService.isActive(bankPayOrder.mchId)) {
             return new Response("A100", "商户被冻结，请联系管理员");

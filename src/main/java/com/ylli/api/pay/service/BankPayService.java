@@ -5,6 +5,7 @@ import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.mapper.BankPayOrderMapper;
 import com.ylli.api.pay.model.BankPayOrder;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.service.PingAnService;
 import java.util.Map;
@@ -24,6 +25,9 @@ public class BankPayService {
 
     @Autowired
     BankPayOrderMapper bankPayOrderMapper;
+
+    @Autowired
+    SerializeUtil serializeUtil;
 
     @Autowired
     MchKeyService mchKeyService;
@@ -60,7 +64,9 @@ public class BankPayService {
         if (!BankPayOrder.payAllows.contains(bankPayOrder.payType)) {
             return new Response("A003", "代付类型不正确", bankPayOrder);
         }
-        if (bankPayOrder.payType == BankPayOrder.PAY_TYPE_PERSON && !BankPayOrder.accAllows.contains(bankPayOrder.accType)) {
+        //默认值
+        if (bankPayOrder.payType == BankPayOrder.PAY_TYPE_PERSON &&
+                (bankPayOrder.accType != null && !BankPayOrder.accAllows.contains(bankPayOrder.accType))) {
             return new Response("A003", "账户类型不正确", bankPayOrder);
         }
         //联行号校验
@@ -117,7 +123,7 @@ public class BankPayService {
      */
     public BankPayOrder insertOrder(BankPayOrder bankPayOrder, Long bankPaymentId, Integer chargeType, Integer chargeMoney) {
         bankPayOrder.id = null;
-        bankPayOrder.superOrderId = "";
+        bankPayOrder.sysOrderId = serializeUtil.generateSysOrderId20();
         bankPayOrder.superOrderId = null;
         bankPayOrder.bankPaymentId = bankPaymentId;
         bankPayOrder.chargeType = chargeType;

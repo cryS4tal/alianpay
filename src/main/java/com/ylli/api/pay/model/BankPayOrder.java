@@ -93,7 +93,7 @@ public class BankPayOrder {
 
     public String bankNo;
 
-    public String noifyUrl;
+    public String notifyUrl;
 
     @Transient
     public String sign;

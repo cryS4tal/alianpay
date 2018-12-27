@@ -2,7 +2,6 @@ package com.ylli.api.pay.util;
 
 import com.google.common.base.Strings;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -19,11 +18,6 @@ public class SerializeUtil {
 
     private static final String SERIAL_KEY = "serial";
     private static final String SERIAL_VALUE = "0";
-
-    //先锋支付
-    public static final String XF_PAY = "A";
-    //易付宝
-    public static final String YFB_PAY = "B";
 
     @PostConstruct
     void init() {
@@ -46,8 +40,6 @@ public class SerializeUtil {
 
     /**
      * 订单号生成。
-     * v1.0 开始测试使用
-     * @return
      */
     public String generateSysOrderId() {
 
@@ -57,18 +49,13 @@ public class SerializeUtil {
     }
 
     /**
-     * 商户订单号：yyyyMMddHHmmss + 支付通道标识 + leftPad(mchId,7,0) + leftPad(billId,8,0)
-     *
-     * @return
+     * 订单号生成。
      */
-    public String generateOrderNo(String code, Long mchId, Long billId) {
+    public String generateSysOrderId20() {
 
-        return new StringBuffer()
-                .append(new SimpleDateFormat("yyyyMMdd").format(java.sql.Date.from(Instant.now())))
-                .append(code)
-                .append(StringUtils.leftPad(String.valueOf(mchId), 7, "0"))
-                .append(StringUtils.leftPad(String.valueOf(billId), 8, "0"))
-                .toString();
+        String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        StringBuffer sb = new StringBuffer(dateStr);
+        return sb.append(StringUtils.leftPad(String.valueOf(getValue()), 6, "0")).toString();
     }
 
 }

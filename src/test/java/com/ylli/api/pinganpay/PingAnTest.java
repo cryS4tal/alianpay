@@ -46,7 +46,7 @@ public class PingAnTest {
     public void orderQuery() {
 
         SysPaymentLog sysPaymentLog = new SysPaymentLog();
-        sysPaymentLog.type = SysPaymentLog.PINGAN;
+        sysPaymentLog.type = SysPaymentLog.TYPE_MCH;
         sysPaymentLog.orderId = "PingAn" + "96";
         sysPaymentLog = sysPaymentLogMapper.selectOne(sysPaymentLog);
 

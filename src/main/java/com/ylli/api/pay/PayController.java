@@ -38,7 +38,7 @@ public class PayController {
     public Object createOrder(@RequestBody BaseOrder baseOrder) throws Exception {
 
         if (!enable) {
-            return new Response("999", "系统维护，请稍后再试.");
+            return new Response("A999", "系统维护，请稍后再试.");
         }
         if (!accountService.isActive(baseOrder.mchId)) {
             return new Response("A100", "商户被冻结，请联系管理员");

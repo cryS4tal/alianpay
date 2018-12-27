@@ -1,5 +1,6 @@
 package com.ylli.api.third.pay.service;
 
+import com.google.gson.Gson;
 import com.ylli.api.wallet.mapper.SysPaymentLogMapper;
 import com.ylli.api.wallet.model.SysPaymentLog;
 import java.util.List;
@@ -37,7 +38,7 @@ public class PingAnJobs {
 
         try {
             //每分钟查询一次.. 最多查询10次
-            List<SysPaymentLog> logs = sysPaymentLogMapper.selectProcess();
+            List<SysPaymentLog> logs = sysPaymentLogMapper.selectAll();
             if (logs.size() == 0) {
                 return;
             }
@@ -45,7 +46,13 @@ public class PingAnJobs {
                 if (item.failCount > 10) {
                     sysPaymentLogMapper.delete(item);
                 } else {
-                    pingAnService.payQuery(item);
+                    if (item.type.equals(SysPaymentLog.TYPE_MCH)) {
+                        pingAnService.payQuery(item);
+                    } else {
+                        //TODO mch auto query.
+                        System.out.println(new Gson().toJson(item));
+                        System.out.println("商户自动查询未处理");
+                    }
                 }
             });
         } finally {

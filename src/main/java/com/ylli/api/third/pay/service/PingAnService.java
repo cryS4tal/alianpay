@@ -158,7 +158,7 @@ public class PingAnService {
                 }
 
                 SysPaymentLog sysPaymentLog = new SysPaymentLog();
-                sysPaymentLog.type = SysPaymentLog.PINGAN;
+                sysPaymentLog.type = SysPaymentLog.TYPE_MCH;
                 sysPaymentLog.orderId = orderNumber;
                 logMapper.insertSelective(sysPaymentLog);
 
@@ -230,7 +230,7 @@ public class PingAnService {
                 //walletService.cashFail(log.mchId, log.money);
 
                 LOGGER.error("平安代付失败：" + msg);
-                return new Response("A010", String.format("代付失败：%s"), msg);
+                return new Response("A010", msg);
             } else {
                 /**
                  *  or res.contains("交易受理成功")
@@ -255,7 +255,7 @@ public class PingAnService {
 
                 //TODO 修改。加入自动轮询
                 SysPaymentLog sysPaymentLog = new SysPaymentLog();
-                sysPaymentLog.type = SysPaymentLog.PINGAN;
+                sysPaymentLog.type = SysPaymentLog.TYPE_SYS;
                 sysPaymentLog.orderId = orderNumber;
                 logMapper.insertSelective(sysPaymentLog);
 
