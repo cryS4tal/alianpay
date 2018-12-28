@@ -120,4 +120,15 @@ public class BillController {
     public Object reissue(@RequestBody Reissue reissue) throws Exception {
         return billService.reissue(reissue.sysOrderId);
     }
+
+    /**
+     * 补单回滚
+     *
+     * @return
+     */
+    @PostMapping("/reissue/rollback")
+    @Auth(@Permission(Config.SysPermission.MANAGE_USER_BILL))
+    public Object rollback(@RequestBody Reissue reissue) throws Exception {
+        return billService.rollback(reissue.sysOrderId);
+    }
 }

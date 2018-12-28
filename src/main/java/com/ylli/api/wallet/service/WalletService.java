@@ -69,4 +69,31 @@ public class WalletService {
         wallet.recharge = wallet.recharge + money + cashCharge;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
+
+    /**
+     * 补单金额回滚
+     * @param mchId
+     * @param money
+     */
+    @Transactional
+    public void rollback(Long mchId, int money) {
+        Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
+        wallet.recharge = wallet.recharge - money;
+        wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
+        walletMapper.updateByPrimaryKeySelective(wallet);
+    }
+
+
+    /**
+     * 用户发起提现请求。金额进入在途.
+     * @param wallet
+     * @param money
+     * @param cashCharge
+     */
+    @Transactional
+    public void pendingSuc(Wallet wallet, Integer money, Integer cashCharge) {
+        wallet.recharge = wallet.recharge - money - cashCharge;
+        wallet.pending = wallet.pending + money + cashCharge;
+        walletMapper.updateByPrimaryKeySelective(wallet);
+    }
 }

@@ -27,12 +27,16 @@ import com.ylli.api.wallet.model.WzCashLog;
 import com.ylli.api.wallet.model.WzRes;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CashService {
+
+    @Value("${cash.charge}")
+    public Integer cashCharge;
 
     @Autowired
     CashLogMapper cashLogMapper;
@@ -99,8 +103,8 @@ public class CashService {
         // v1.0 加入限制，存在待处理的体现申请，金额进入钱包待处理部分
         Wallet wallet = walletService.getOwnWallet(req.mchId);
 
-        if (req.money + 200 > wallet.recharge) {
-            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - 200) / 100.0))));
+        if (req.money + cashCharge > wallet.recharge) {
+            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - cashCharge) / 100.0))));
         }
 
         //记录日志
@@ -109,9 +113,7 @@ public class CashService {
         log.state = CashLog.NEW;
         cashLogMapper.insertSelective(log);
 
-        wallet.recharge = wallet.recharge - req.money - 200;
-        wallet.pending = wallet.pending + req.money + 200;
-        walletMapper.updateByPrimaryKeySelective(wallet);
+        walletService.pendingSuc(wallet, req.money, cashCharge);
 
         SysChannel channel = channelService.getCurrentChannel(req.mchId);
         if (channel.code.equals("WZ")) {
@@ -119,7 +121,7 @@ public class CashService {
 
             try {
                 String str = wzClient.cash(log.name, log.bankcardNumber, log.openBank, log.subBank, "309394005125"
-                        , String.format("%.2f", ((log.money + 200) / 100.0)), "104", log.identityCard, log.reservedPhone, log.id.toString());
+                        , String.format("%.2f", ((log.money + cashCharge) / 100.0)), "104", log.identityCard, log.reservedPhone, log.id.toString());
                 WzRes res = new Gson().fromJson(str, WzRes.class);
                 if (!res.code.equals("200")) {
                     throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(res.msg));
