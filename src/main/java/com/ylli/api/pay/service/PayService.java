@@ -207,7 +207,7 @@ public class PayService {
         String str = hrjfService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-        //str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
+        str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
         //str = str.replace("/ydpay/Pay.aspx", "http://gateway.iexindex.com/ydpay/Pay.aspx");
         //str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
         //str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
@@ -218,7 +218,9 @@ public class PayService {
         } else {
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
         }*/
+        str = formToUrl(str);
         return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+        //return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
     }
 
     public String formToUrl(String form) {
