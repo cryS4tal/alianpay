@@ -10,6 +10,7 @@ import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.service.PingAnService;
+import com.ylli.api.third.pay.service.XianFenService;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.text.SimpleDateFormat;
@@ -43,6 +44,9 @@ public class BankPayService {
 
     @Autowired
     PingAnService pingAnService;
+
+    @Autowired
+    XianFenService xianFenService;
 
     @Autowired
     WalletService walletService;
@@ -96,15 +100,14 @@ public class BankPayService {
         if (isSignValid(bankPayOrder, secretKey)) {
             return new Response("A001", "签名校验失败", bankPayOrder);
         }
+        //TODO 代付手续费暂时设置为定值...是否需要修改
+        Wallet wallet = walletService.getOwnWallet(bankPayOrder.mchId);
+        if (wallet.reservoir < (bankPayOrder.money + bankPayCharge)) {
+            return new Response("A012", "代付余额不足");
+        }
 
         //代付通道选择（系统统一切换还是可以按商户单独分配）
         if (true) {
-            //TODO 代付手续费暂时设置为定值...是否需要修改
-            Wallet wallet = walletService.getOwnWallet(bankPayOrder.mchId);
-            if (wallet.reservoir < (bankPayOrder.money + bankPayCharge)) {
-                return new Response("A012", "代付余额不足");
-            }
-
             //TODO 代付订单系统 , 1 - 平安，2先锋 ，                             1 - 固定
             //平安
             bankPayOrder = insertOrder(bankPayOrder, 1L, BankPayOrder.FIX, 0);
@@ -115,12 +118,12 @@ public class BankPayService {
 
         } else {
             //先锋
+            bankPayOrder = insertOrder(bankPayOrder, 2L, BankPayOrder.FIX, 0);
 
-
+            return xianFenService.createXianFenOrder(bankPayOrder.sysOrderId, bankPayOrder.money, bankPayOrder.accNo,
+                    bankPayOrder.accName, bankPayOrder.mobile, bankPayOrder.payType, bankPayOrder.accType,
+                    bankPayOrder.mchId, secretKey, bankPayOrder.mchOrderId, bankPayOrder.chargeMoney);
         }
-
-
-        return null;
     }
 
     private boolean mchOrderExist(String mchOrderId) {
@@ -165,8 +168,18 @@ public class BankPayService {
 
             } else {
                 //TODO 主动查询
-                //pingAn query
+                /**
+                 * 平安代付：
+                 * 创建订单 success,扣除代付池金额。加入主动轮询日志，系统自动轮询。
+                 * 当轮询返回ok.fail(金额回滚).删除日志，以日志得存在形态来保证不重复入账
+                 * 固这里不适合去主动调取平安服务更新状态.
+                 */
+
+
                 //xianfeng query
+
+                //更新订单信息
+                //order = bankPayOrderMapper.selectByMchOrderId(orderQuery.mchOrderId);
             }
             //直接返回订单信息
             OrderQueryRes res = new OrderQueryRes();

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class PingAnJobs {
@@ -29,7 +28,7 @@ public class PingAnJobs {
      * 自动轮询提现请求（平安代付）
      */
     @Scheduled(cron = "0 0/3 * * * ?")
-    @Transactional
+    //@Transactional
     public void autoQuery() {
         if (!isRunning.compareAndSet(false, true)) {
             LOGGER.info("pingan auto query is running, please waiting");

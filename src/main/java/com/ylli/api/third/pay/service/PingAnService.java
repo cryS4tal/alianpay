@@ -38,9 +38,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@EnableAsync
 public class PingAnService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(PingAnService.class);
@@ -308,6 +311,7 @@ public class PingAnService {
      *
      * @return
      */
+    @Transactional
     public void payQuery(SysPaymentLog log) {
 
         /**组装请求报文-start**/
@@ -412,6 +416,7 @@ public class PingAnService {
     /**
      * 用户商户代付-自动轮询
      */
+    @Transactional
     public void payQueryMch(SysPaymentLog log) {
 
         /**组装请求报文-start**/

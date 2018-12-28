@@ -4,8 +4,7 @@ import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.third.pay.model.CreditPay;
-import com.ylli.api.third.pay.model.Wage;
-import com.ylli.api.third.pay.service.XfPayService;
+import com.ylli.api.third.pay.service.XianFenService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class XfPayController {
 
     @Autowired
-    XfPayService xfPayService;
+    XianFenService xianFenService;
 
     @Autowired
     AuthSession authSession;
 
-    @PostMapping("/wage")
-    @Auth
-    public Object wagesPay(@RequestBody Wage request) throws Exception {
-        if (request.userId == null || authSession.getAuthId() != request.userId) {
-            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-        }
-        return xfPayService.wagesPay(request.userId, request.amount, request.accountNo, request.accountName,
-                request.mobileNo, request.bankNo, request.userType, request.accountType, request.memo, request.orderNo);
-    }
-
     @PostMapping("/notify")
     public void payNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        xfPayService.payNotify(request, response);
+        xianFenService.payNotify(request, response);
     }
 
     static class A {
@@ -52,15 +41,6 @@ public class XfPayController {
         if (request.userId == null || authSession.getAuthId() != request.userId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return xfPayService.orderQuery(request.userId, request.orderNo);
-    }
-
-    /**
-     * 提供给服务商的带单代发接口.
-     * @return
-     */
-    @PostMapping("/wage/credit")
-    public Object wagesPayNoAuth(@RequestBody CreditPay pay) throws Exception {
-        return xfPayService.wagesPayNoAuth(pay);
+        return xianFenService.orderQuery(request.userId, request.orderNo);
     }
 }

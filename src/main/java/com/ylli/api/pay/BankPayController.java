@@ -45,5 +45,4 @@ public class BankPayController {
         }
         return bankPayService.orderQuery(orderQuery);
     }
-
 }

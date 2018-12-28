@@ -23,6 +23,9 @@ public class XfClient {
     @Value("${xf.pay.url}")
     public String url;
 
+    @Value("${xf.pay.notify.url}")
+    public String notifyUrl;
+
     @Value("${xf.pay.version}")
     public String version;
 
@@ -44,7 +47,7 @@ public class XfClient {
     /**
      * 单笔代发
      *
-     * @param merchantNo  订单编号
+     * @param merchantNo  订单编号 = sysOrderId
      * @param amount      金额
      * @param accountNo   银行卡号
      * @param accountName 持卡人姓名
@@ -71,7 +74,7 @@ public class XfClient {
         request.memo = memo;
 
         request.transCur = transCur;
-        request.noticeUrl = "http://47.99.180.135:8080/xfpay/notify";
+        request.noticeUrl = notifyUrl;
         Map<String, String> map = objectToMap(request);
 
         //System.out.println(new Gson().toJson(map));
