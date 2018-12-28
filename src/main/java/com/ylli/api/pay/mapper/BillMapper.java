@@ -20,6 +20,7 @@ public interface BillMapper extends Mapper<Bill> {
                         @Param("sys_order_id") String sysOrderId,
                         @Param("pay_type") String payType,
                         @Param("trade_type") String tradeType,
+                        @Param("mch_name") String mchName,
                         @Param("trade_time") Date tradeTime,
                         @Param("start_time") Date startTime,
                         @Param("end_time") Date endTime);
@@ -30,15 +31,16 @@ public interface BillMapper extends Mapper<Bill> {
     @Update("UPDATE t_bill SET status = 9 WHERE status = 1 AND DATE_ADD(create_time,INTERVAL 9 HOUR) < NOW()")
     Integer autoClose();
 
-    Integer countBills(@Param("mch_id") Long mchId,
-                       @Param("status") Integer status,
-                       @Param("mch_order_id") String mchOrderId,
-                       @Param("sys_order_id") String sysOrderId,
-                       @Param("pay_type") String payType,
-                       @Param("trade_type") String tradeType,
-                       @Param("trade_time") Date tradeTime,
-                       @Param("start_time") Date startTime,
-                       @Param("end_time") Date endTime);
+    Data countBills(@Param("mch_id") Long mchId,
+                    @Param("status") Integer status,
+                    @Param("mch_order_id") String mchOrderId,
+                    @Param("sys_order_id") String sysOrderId,
+                    @Param("pay_type") String payType,
+                    @Param("trade_type") String tradeType,
+                    @Param("mch_name") String mchName,
+                    @Param("trade_time") Date tradeTime,
+                    @Param("start_time") Date startTime,
+                    @Param("end_time") Date endTime);
 
     List<Data> getHourlyData(@Param("mch_id") Long mchId);
 

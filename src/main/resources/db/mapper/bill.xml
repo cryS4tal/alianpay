@@ -33,13 +33,18 @@
             <if test="end_time != null">
                 AND create_time &lt; #{end_time}
             </if>
+            <if test="mch_name !=null">
+                AND mch_id in (select mch_id from t_user_base where mch_name = #{mch_name} )
+            </if>
         </where>
         ORDER BY create_time DESC
     </select>
 
-    <select id="countBills" resultType="java.lang.Integer">
+    <select id="countBills" resultMap="dataMap">
         SELECT
-        sum(t_bill.money)
+        sum(t_bill.money) as sum,
+        count(t_bill.mch_id) as count,
+        sum(t_bill.pay_charge) as mch_charge
         FROM t_bill
         <where>
             <if test="mch_id != null">
@@ -66,6 +71,10 @@
             <if test="end_time != null">
                 AND create_time &lt; #{end_time}
             </if>
+            <if test="mch_name != null">
+                AND mch_id in (select mch_id from t_user_base where mch_name = #{mch_name} )
+            </if>
+
         </where>
     </select>
 

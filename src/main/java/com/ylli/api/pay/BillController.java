@@ -46,6 +46,7 @@ public class BillController {
                            @AwesomeParam(required = false) String sysOrderId,
                            @AwesomeParam(required = false) String payType,
                            @AwesomeParam(required = false) String tradeType,
+                           @AwesomeParam(required = false) String mchName,
                            @AwesomeParam(required = false) AwesomeDateTime tradeTime,
                            @AwesomeParam(required = false) AwesomeDateTime startTime,
                            @AwesomeParam(required = false) AwesomeDateTime endTime,
@@ -59,6 +60,7 @@ public class BillController {
                 Strings.isNullOrEmpty(sysOrderId) ? null : sysOrderId,
                 Strings.isNullOrEmpty(payType) ? null : payType,
                 Strings.isNullOrEmpty(tradeType) ? null : tradeType,
+                Strings.isNullOrEmpty(mchName) ? null : mchName,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(), offset, limit);
@@ -79,15 +81,16 @@ public class BillController {
     }
 
     @GetMapping("/count")
-    public Integer countMoney(@AwesomeParam(required = false) Long mchId,
-                              @AwesomeParam(required = false) Integer status,
-                              @AwesomeParam(required = false) String mchOrderId,
-                              @AwesomeParam(required = false) String sysOrderId,
-                              @AwesomeParam(required = false) String payType,
-                              @AwesomeParam(required = false) String tradeType,
-                              @AwesomeParam(required = false) AwesomeDateTime tradeTime,
-                              @AwesomeParam(required = false) AwesomeDateTime startTime,
-                              @AwesomeParam(required = false) AwesomeDateTime endTime) {
+    public Object countMoney(@AwesomeParam(required = false) Long mchId,
+                             @AwesomeParam(required = false) Integer status,
+                             @AwesomeParam(required = false) String mchOrderId,
+                             @AwesomeParam(required = false) String sysOrderId,
+                             @AwesomeParam(required = false) String payType,
+                             @AwesomeParam(required = false) String tradeType,
+                             @AwesomeParam(required = false) String mchName,
+                             @AwesomeParam(required = false) AwesomeDateTime tradeTime,
+                             @AwesomeParam(required = false) AwesomeDateTime startTime,
+                             @AwesomeParam(required = false) AwesomeDateTime endTime) {
         if (mchId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
@@ -97,6 +100,7 @@ public class BillController {
                 Strings.isNullOrEmpty(sysOrderId) ? null : sysOrderId,
                 Strings.isNullOrEmpty(payType) ? null : payType,
                 Strings.isNullOrEmpty(tradeType) ? null : tradeType,
+                Strings.isNullOrEmpty(mchName) ? null : mchName,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate());

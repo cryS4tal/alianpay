@@ -7,4 +7,6 @@ public class Data {
     public Integer hour;
     //成功率 百分比
     public String rate;
+    //手续费
+    public Long mchCharge;
 }

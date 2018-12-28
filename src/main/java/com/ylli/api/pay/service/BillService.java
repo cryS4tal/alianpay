@@ -80,10 +80,10 @@ public class BillService {
      */
 
     public Object getBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
-                           String tradeType, Date tradeTime, Date startTime, Date endTime, int offset, int limit) {
+                           String tradeType, String mchName, Date tradeTime, Date startTime, Date endTime, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
-        Page<Bill> page = (Page<Bill>) billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
+        Page<Bill> page = (Page<Bill>) billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, mchName, tradeTime, startTime, endTime);
 
         DataList<BaseBill> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
@@ -117,9 +117,9 @@ public class BillService {
         return baseBill;
     }
 
-    public Integer countBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
-                              String tradeType, Date tradeTime, Date startTime, Date endTime) {
-        return billMapper.countBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
+    public Object countBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
+                              String tradeType, String mchName, Date tradeTime, Date startTime, Date endTime) {
+        return billMapper.countBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, mchName, tradeTime, startTime, endTime);
     }
 
     public Object getTodayDetail(Long mchId) {
