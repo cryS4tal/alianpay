@@ -4,24 +4,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ucf.sdk.UcfForOnline;
-import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.model.MchKey;
-import com.ylli.api.mch.service.MchBaseService;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.mapper.BankPayOrderMapper;
 import com.ylli.api.pay.model.BankPayOrder;
 import com.ylli.api.pay.model.PayOrderRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.service.BankPayClient;
-import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.third.pay.Config;
 import com.ylli.api.third.pay.mapper.XfBillMapper;
-import com.ylli.api.third.pay.model.CreditPay;
 import com.ylli.api.third.pay.model.Data;
 import com.ylli.api.third.pay.model.NotifyRes;
-import com.ylli.api.third.pay.model.WagesPayResponse;
-import com.ylli.api.third.pay.model.XfBill;
 import com.ylli.api.third.pay.model.XfPaymentResponse;
 import com.ylli.api.wallet.service.WalletService;
 import java.io.IOException;
@@ -103,8 +96,8 @@ public class XianFenService {
                     payOrder.status = BankPayOrder.FINISH;
                     payOrder.superOrderId = data.tradeNo;
                     try {
-                        payOrder.tradeTime = (Timestamp) new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime);
-                    } catch (Exception e){
+                        payOrder.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
+                    } catch (Exception e) {
                         payOrder.tradeTime = Timestamp.from(Instant.now());
                     }
                     bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
@@ -140,11 +133,8 @@ public class XianFenService {
                     //扣除金额.(代付金额+手续费)
                     walletService.decrReservoir(mchId, (money + chargeMoney));
 
-                    //发送异步通知
-                    if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
-                        String params = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
-                        bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params, true);
-                    }
+                    //进行中暂时不去通知下游商户
+
                     return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);
                 }
             }
@@ -217,14 +207,6 @@ public class XianFenService {
         return response;
     }
 
-    public String getResJson(String code, String msg, Object object) {
-        WagesPayResponse response = new WagesPayResponse();
-        response.code = code;
-        response.message = msg;
-        response.object = object;
-        return new Gson().toJson(response);
-    }
-
     @Transactional
     public void payNotify(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -257,73 +239,71 @@ public class XianFenService {
 
                     Data data = new Gson().fromJson(decryptData, Data.class);
 
+                    BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
 
-
-                    XfBill xfBill = new XfBill();
-                    xfBill.orderNo = data.merchantNo;
-                    xfBill = xfBillMapper.selectOne(xfBill);
-                    if (xfBill == null) {
-                        writer.write("订单不存在");
+                    if (payOrder == null) {
+                        LOGGER.error("XianFen notify empty, sysOrderId: " + data.merchantNo);
+                        writer.write(getResStr("404 not found"));
+                        return;
+                    }
+                    //若订单在下单返回时已经处理成功失败。不再去进行相应得逻辑。
+                    if (payOrder.status != BankPayOrder.ING) {
                         return;
                     }
                     if (data.tradeTime != null) {
-                        xfBill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
+                        payOrder.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
                     }
 
                     if (data.status != null && data.status.toUpperCase().equals("S")) {
-                        //walletService.finishOrder(xfBill.id, xfBill.amount);
+                        payOrder.status = BankPayOrder.FINISH;
+                        bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-                        xfBill.status = XfBill.FINISH;
-                        xfBill.resCode = data.resCode;
-                        xfBill.resMessage = data.resMessage;
-                        xfBillMapper.updateByPrimaryKeySelective(xfBill);
-
+                        //发送异步通知
+                        if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                            String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                            bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                        }
                         writer.write(getResStr("SUCCESS"));
                     }
                     if (data.status != null && data.status.toUpperCase().equals("F")) {
-                        //walletService.failedOrder(xfBill.id, xfBill.amount);
+                        payOrder.status = BankPayOrder.FAIL;
+                        bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-                        xfBill.status = XfBill.FAIL;
-                        xfBill.resCode = data.resCode;
-                        xfBill.resMessage = data.resMessage;
-                        xfBillMapper.updateByPrimaryKeySelective(xfBill);
-
-                        writer.write("FAIL");
+                        //发送异步通知
+                        if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                            String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                            bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                        }
+                        writer.write(getResStr("SUCCESS"));
                     }
                     if (data.status != null && data.status.toUpperCase().equals("I")) {
-                        xfBill.status = XfBill.ING;
+                        //do nothing.
 
-                        xfBill.resCode = data.resCode;
-                        xfBill.resMessage = data.resMessage;
-                        xfBillMapper.updateByPrimaryKeySelective(xfBill);
-
-                        writer.write("ING");
+                        writer.write(data.resCode + "|" + data.resMessage);
                     }
                 } else if ("99001".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
                     //code=99001，接口调用异常，无法确认订单状态
                     decryptData = params.get("code").toString() + "|" + params.get("message").toString();
-                    //System.out.println("返回数据：" + decryptData);
-
                     writer.write(decryptData);
                 } else {
                     Data data = new Gson().fromJson(decryptData, Data.class);
 
-                    XfBill xfBill = new XfBill();
-                    xfBill.orderNo = data.merchantNo;
-                    xfBill = xfBillMapper.selectOne(xfBill);
-                    if (xfBill == null) {
-                        writer.write(getResStr("订单不存在"));
-                        return;
+                    BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
+                    payOrder.status = BankPayOrder.FAIL;
+                    payOrder.superOrderId = data.tradeNo;
+
+                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                    //金额回滚(代付金额+手续费)
+                    //订单状态为ing时 已扣除金额
+                    walletService.incrReservoir(payOrder.mchId, (payOrder.money + payOrder.chargeMoney));
+
+                    //发送异步通知
+                    if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                        String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                        bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
                     }
-                    xfBill.status = XfBill.FAIL;
-
-                    xfBill.resCode = data.resCode;
-                    xfBill.resMessage = data.resMessage;
-                    xfBill.modifyTime = Timestamp.from(Instant.now());
-                    xfBillMapper.updateByPrimaryKeySelective(xfBill);
-                    // todo 加入 通知第三方.
-
-                    writer.write(getResStr("FAIL"));
+                    writer.write(getResStr("SUCCESS"));
                 }
             } else {
                 writer.write("先锋报文签名验证：验签失败");
@@ -341,17 +321,11 @@ public class XianFenService {
     }
 
     @Transactional
-    public Object orderQuery(Long userId, String orderNo) throws Exception {
-        if (Strings.isNullOrEmpty(orderNo)) {
-            throw new AwesomeException(Config.ERROR_ORDERNO_NOT_EMPTY);
-        }
-        XfBill bill = new XfBill();
-        bill.orderNo = orderNo;
-        bill = xfBillMapper.selectOne(bill);
-        if (bill == null) {
-            throw new AwesomeException(Config.ERROR_ORDER_NOT_FOUND);
-        }
-        String str = xfClient.orderQuery(orderNo);
+    public Object orderQuery(String sysOrderId) throws Exception {
+        //TODO sysOrderId CHECK.
+
+
+        String str = xfClient.orderQuery(sysOrderId);
 
         XfPaymentResponse response = new Gson().fromJson(str, XfPaymentResponse.class);
         //加密后的业务数据
@@ -362,74 +336,41 @@ public class XianFenService {
             //交易成功返回订单数据
             Data data = new Gson().fromJson(bizData, Data.class);
 
-            bill.superNo = data.tradeNo;
+            String superOrderId = data.tradeNo;
             if (data.tradeTime != null) {
-                bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
+                //bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
             }
 
             if (data.status != null && data.status.toUpperCase().equals("S")) {
-                if (bill.status == XfBill.FINISH) {
-                    return getResJson("A000", "交易成功", null);
-                }
-                //walletService.finishOrder(bill.id, bill.amount);
+                //
 
-                bill.status = XfBill.FINISH;
-                bill.resCode = data.resCode;
-                bill.resMessage = data.resMessage;
-                xfBillMapper.updateByPrimaryKeySelective(bill);
 
-                return getResJson("A000", "交易成功", null);
             }
             if (data.status != null && data.status.toUpperCase().equals("F")) {
-                if (bill.status == XfBill.FAIL) {
-                    bill.resCode = data.resCode;
-                    bill.resMessage = data.resMessage;
-                    xfBillMapper.updateByPrimaryKeySelective(bill);
+                //
 
-                    //业务处理失败. 具体返回先锋message.
-                    return getResJson("A005", data.resMessage, null);
-                }
-                //walletService.failedOrder(bill.id, bill.amount);
 
-                bill.status = XfBill.FAIL;
-                bill.resCode = data.resCode;
-                bill.resMessage = data.resMessage;
-                xfBillMapper.updateByPrimaryKeySelective(bill);
-
-                return getResJson("A005", data.resMessage, null);
             }
             if (data.status != null && data.status.toUpperCase().equals("I")) {
-                if (bill.status == XfBill.ING) {
-                    return getResJson("A006", "交易进行中", null);
-                }
+                //
 
-                bill.status = XfBill.ING;
-                bill.resCode = data.resCode;
-                bill.resMessage = data.resMessage;
-                xfBillMapper.updateByPrimaryKeySelective(bill);
-
-                //原样返回先锋支付业务code.message
-                return getResJson("A006", "交易进行中", null);
             }
 
             //兼容status 没有返回值.
             //具体情况未知
-            return getResJson("A999", data.resCode + data.resMessage, null);
+            //return getResJson("A999", data.resCode + data.resMessage, null);
 
+            return null;
         } else if (response.code.equals("99001")) {
 
-            return getResJson(response.code, response.message, null);
+            //return getResJson(response.code, response.message, null);
+            return null;
         } else {
             //通用错误返回.
             //具体原因 @see 先锋支付网关返回码.
             //对下游服务商隐藏先锋返回message，统一返回请求失败
-            return getResJson(response.code, "请求失败", null);
+            //return getResJson(response.code, "请求失败", null);
+            return null;
         }
-    }
-
-
-    public String sign(CreditPay pay, String secret) throws Exception {
-        Map<String, String> map = SignUtil.objectToMap(pay);
-        return SignUtil.generateSignature(map, secret);
     }
 }
