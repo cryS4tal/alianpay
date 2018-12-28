@@ -1,14 +1,18 @@
 package com.ylli.api.sys.service;
 
+import com.google.gson.Gson;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.sys.model.Data;
 import com.ylli.api.sys.model.HourlyData;
 import com.ylli.api.sys.model.TotalData;
 import com.ylli.api.wallet.mapper.CashLogMapper;
-import java.util.List;
-import java.util.Optional;
+
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.util.*;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,8 +63,26 @@ public class StatsService {
 
     public Object successRate(Long channelId, Long mchId, Long appId) {
         List<Data> list = billMapper.rate(channelId, mchId, appId);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR, 8);
+        int hour = cal.get(Calendar.HOUR);
+        Map<Integer, String> map = new HashMap<>();
+        for (int i = 0; i <= hour; i++) {
+            int h = i;
+            double hourSum = list.stream().filter(item -> item.hour == h).mapToDouble(item -> item.count).sum();
+            double successHourSum = list.stream().filter(item -> item.hour == h).filter(item -> item.status == Bill.FINISH).mapToDouble(item -> item.count).sum();
+            map.put(i, dividePercent(hourSum, successHourSum));
+        }
+        return map;
+    }
 
-
-        return null;
+    public String dividePercent(double m, double s) {
+        if(m==0 || s==0)
+            return "0";
+        NumberFormat percent = NumberFormat.getPercentInstance();
+        percent.setMaximumFractionDigits(2);
+        BigDecimal mother = new BigDecimal(m);
+        BigDecimal son = new BigDecimal(s);
+        return percent.format(son.divide(mother, 4, BigDecimal.ROUND_UP));
     }
 }
