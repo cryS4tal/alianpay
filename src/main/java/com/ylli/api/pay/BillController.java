@@ -100,7 +100,7 @@ public class BillController {
      */
     @PostMapping("/reissue/rollback")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BILL))
-    public Object rollback(@RequestBody Reissue reissue) throws Exception {
-        return billService.rollback(reissue.sysOrderId);
+    public void rollback(@RequestBody Reissue reissue) throws Exception {
+        billService.rollback(reissue.sysOrderId);
     }
 }
