@@ -7,7 +7,6 @@ import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
-import static com.ylli.api.pay.service.PayService.NATIVE;
 import com.ylli.api.wallet.service.WalletService;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -42,10 +41,7 @@ public class HRJFService {
 
     @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
-        if (tradeType == null) {
-            //支付方式. 默认扫码
-            tradeType = NATIVE;
-        }
+
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
         String value = (new BigDecimal(money).divide(new BigDecimal(100))).toString();

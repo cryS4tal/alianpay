@@ -190,10 +190,13 @@ public class PayService {
 
     public Response hrjfOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
         //华荣聚付  -  和易付宝基本一致
-
+        if (baseOrder.tradeType == null) {
+            //支付方式. 默认wap
+            baseOrder.tradeType = WAP;
+        }
         //不支持微信
-        if (!baseOrder.payType.equals(ALI)) {
-            return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+        if (!baseOrder.payType.equals(ALI) || !baseOrder.tradeType.equals(WAP)) {
+            return new Response("A098", "临时限制：系统暂时只支持支付宝wap（payType=alipay，tradeType=wap）", baseOrder);
         }
 
         //金额校验
