@@ -4,7 +4,6 @@ import com.ylli.api.pay.mapper.AsyncMessageMapper;
 import com.ylli.api.pay.mapper.BankPayOrderMapper;
 import com.ylli.api.pay.model.AsyncMessage;
 import com.ylli.api.pay.model.BankPayOrder;
-import com.ylli.api.third.pay.service.WzClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class BankPayClient {
-    private static Logger LOGGER = LoggerFactory.getLogger(WzClient.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(BankPayClient.class);
 
     @Value("${notify.limit}")
     public Integer notifyLimit;
