@@ -204,20 +204,18 @@ public class PayService {
         String str = hrjfService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-        /*String str = yfbService.createOrder(baseOrder.mchId, channelId, baseOrder.payType, baseOrder.tradeType, baseOrder.money,
-                baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);*/
-        //return str;
-        str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
-        //str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
+        //str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
+        //str = str.replace("/ydpay/Pay.aspx", "http://gateway.iexindex.com/ydpay/Pay.aspx");
         //str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
         //str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
         //TODO temp code. test some mch return url can success.
-        if (baseOrder.mchId == 1033 || baseOrder.mchId == 1008) {
+        /*if (baseOrder.mchId == 1033 || baseOrder.mchId == 1008 || baseOrder.mchId == 1002) {
             str = formToUrl(str);
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
         } else {
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
-        }
+        }*/
+        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
     }
 
     public String formToUrl(String form) {

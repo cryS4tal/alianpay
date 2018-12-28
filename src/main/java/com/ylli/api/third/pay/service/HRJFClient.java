@@ -30,13 +30,14 @@ public class HRJFClient {
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
                 "http://gateway.iexindex.com/quickpay/index.aspx")
                 .queryParam("parter", parter)
-                .queryParam("type", "6018")
+                .queryParam("type", "6013")
                 .queryParam("value", value)
                 .queryParam("orderid", sysOrderId)
                 .queryParam("callbackurl", notifyUrl)
                 .queryParam("hrefbackurl", redirectUrl)
                 .queryParam("attach", 1)
                 .queryParam("payuserid", mchId)
+                .queryParam("h5", 2)
                 .queryParam("sign", generateSign(value, sysOrderId, mchId))
                 .build().toUriString();
 
@@ -54,7 +55,7 @@ public class HRJFClient {
     public String generateSign(String value, String sysOrderId, Long mchId) throws Exception {
         StringBuffer sb = new StringBuffer()
                 .append("parter=").append(parter)
-                .append("&type=").append("6018")
+                .append("&type=").append("6013")
                 .append("&value=").append(value)
                 .append("&orderid=").append(sysOrderId)
                 .append("&callbackurl=").append(notifyUrl)
