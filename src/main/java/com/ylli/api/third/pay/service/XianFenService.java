@@ -16,6 +16,9 @@ import com.ylli.api.third.pay.mapper.XfBillMapper;
 import com.ylli.api.third.pay.model.Data;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.model.XfPaymentResponse;
+import com.ylli.api.wallet.mapper.CashLogMapper;
+import com.ylli.api.wallet.mapper.SysPaymentLogMapper;
+import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.SysPaymentLog;
 import com.ylli.api.wallet.service.WalletService;
 import java.io.IOException;
@@ -57,6 +60,12 @@ public class XianFenService {
 
     @Autowired
     BankPayOrderMapper bankPayOrderMapper;
+
+    @Autowired
+    CashLogMapper cashLogMapper;
+
+    @Autowired
+    SysPaymentLogMapper logMapper;
 
     @Autowired
     BankPayClient bankPayClient;
@@ -429,6 +438,21 @@ public class XianFenService {
             if (data.resCode.equals("00000")) {
 
                 if (data.status != null && data.status.toUpperCase().equals("S")) {
+
+                    //更新提现处理请求
+                    CashLog log = cashLogMapper.selectByPrimaryKey(cashLogId);
+                    if (log != null) {
+                        //TODO ？？？？
+                        log.state = CashLog.FINISH;
+                        log.type = CashLog.XIANFENG;
+                        //log.msg = msg;
+                        cashLogMapper.updateByPrimaryKeySelective(log);
+                    }
+
+                    SysPaymentLog sysPaymentLog = new SysPaymentLog();
+                    sysPaymentLog.type = SysPaymentLog.TYPE_MCH;
+                    sysPaymentLog.orderId = merchantNo;
+                    logMapper.insertSelective(sysPaymentLog);
                     /*payOrder.status = BankPayOrder.FINISH;
                     payOrder.superOrderId = data.tradeNo;
                     try {
@@ -449,6 +473,17 @@ public class XianFenService {
                     return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
                 }
                 if (data.status != null && data.status.toUpperCase().equals("F")) {
+
+                    //更新提现处理请求
+                    CashLog log = cashLogMapper.selectByPrimaryKey(cashLogId);
+                    if (log != null) {
+                        log.state = CashLog.FAILED;
+                        log.type = CashLog.XIANFENG;
+                        log.msg = data.resMessage;
+                        cashLogMapper.updateByPrimaryKeySelective(log);
+                    }
+                    //回滚金额
+                    walletService.cashFail(log.mchId, log.money);
                     /*payOrder.status = BankPayOrder.FAIL;
                     payOrder.superOrderId = data.tradeNo;
 
