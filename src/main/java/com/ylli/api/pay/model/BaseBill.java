@@ -25,6 +25,9 @@ public class BaseBill {
     //系统订单号
     public String sysOrderId;
 
+    //上游订单号
+    public String superOrderId;
+
     //支付方式：支付宝/微信   +   tradeType  native  wap
     public String payType;
 

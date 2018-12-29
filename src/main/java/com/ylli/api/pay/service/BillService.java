@@ -103,6 +103,7 @@ public class BillService {
         baseBill.mchName = Optional.ofNullable(userBaseMapper.selectByMchId(bill.mchId)).map(i -> i.mchName).orElse(null);
         baseBill.mchOrderId = bill.mchOrderId;
         baseBill.sysOrderId = bill.sysOrderId;
+        baseBill.superOrderId = bill.superOrderId;
         baseBill.money = bill.money;
         baseBill.mchCharge = bill.payCharge;
         baseBill.payType = typeToString(bill.payType, bill.tradeType);
@@ -301,8 +302,8 @@ public class BillService {
         if (bill == null) {
             throw new AwesomeException(Config.ERROR_BILL_NOT_FOUND);
         }
-        if (bill.status != Bill.FINISH ) {
-             throw new AwesomeException(Config.ERROR_BILL_STATUS);
+        if (bill.status != Bill.FINISH) {
+            throw new AwesomeException(Config.ERROR_BILL_STATUS);
         }
 
         if (!bill.superOrderId.startsWith("unknown")) {
