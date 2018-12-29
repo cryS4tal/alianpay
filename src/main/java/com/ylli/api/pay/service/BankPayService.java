@@ -7,6 +7,7 @@ import com.ylli.api.pay.model.BankPayOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.model.SignPayOrder;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.service.PingAnService;
@@ -15,6 +16,7 @@ import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.text.SimpleDateFormat;
 import java.util.Map;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,9 @@ public class BankPayService {
 
     @Autowired
     BankPayOrderMapper bankPayOrderMapper;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @Autowired
     SerializeUtil serializeUtil;
@@ -97,7 +102,7 @@ public class BankPayService {
         if (secretKey == null) {
             return new Response("A002", "请先上传商户私钥", null);
         }
-        if (isSignValid(bankPayOrder, secretKey)) {
+        if (isSignValid(formatParams(bankPayOrder), secretKey)) {
             return new Response("A001", "签名校验失败", bankPayOrder);
         }
         //TODO 代付手续费暂时设置为定值...是否需要修改
@@ -126,13 +131,17 @@ public class BankPayService {
         }
     }
 
+    public SignPayOrder formatParams(BankPayOrder bankPayOrder) {
+        return modelMapper.map(bankPayOrder, SignPayOrder.class);
+    }
+
     private boolean mchOrderExist(String mchOrderId) {
         BankPayOrder payOrder = new BankPayOrder();
         payOrder.mchOrderId = mchOrderId;
         return bankPayOrderMapper.selectOne(payOrder) != null;
     }
 
-    public boolean isSignValid(BankPayOrder order, String secretKey) throws Exception {
+    public boolean isSignValid(SignPayOrder order, String secretKey) throws Exception {
         Map<String, String> map = SignUtil.objectToMap(order);
         return !SignUtil.generateSignature(map, secretKey).equals(order.sign.toUpperCase());
     }
