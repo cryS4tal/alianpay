@@ -115,7 +115,7 @@ public class BankPayService {
         if (true) {
             //TODO 代付订单系统 , 1 - 平安，2先锋 ，                             1 - 固定
             //平安
-            bankPayOrder = insertOrder(bankPayOrder, 1L, BankPayOrder.FIX, 0);
+            bankPayOrder = insertOrder(bankPayOrder, 1L, BankPayOrder.FIX, bankPayCharge);
 
             return pingAnService.createPingAnOrder(bankPayOrder.sysOrderId, bankPayOrder.accNo, bankPayOrder.accName,
                     bankPayOrder.bankName, bankPayOrder.mobile, bankPayOrder.money, secretKey, bankPayOrder.mchOrderId,
@@ -123,7 +123,7 @@ public class BankPayService {
 
         } else {
             //先锋
-            bankPayOrder = insertOrder(bankPayOrder, 2L, BankPayOrder.FIX, 0);
+            bankPayOrder = insertOrder(bankPayOrder, 2L, BankPayOrder.FIX, bankPayCharge);
 
             return xianFenService.createXianFenOrder(bankPayOrder.sysOrderId, bankPayOrder.money, bankPayOrder.accNo,
                     bankPayOrder.accName, bankPayOrder.mobile, bankPayOrder.payType, bankPayOrder.accType,
