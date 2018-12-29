@@ -13,10 +13,8 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.NotifyRes;
-import com.ylli.api.third.pay.service.HRJFService;
-import com.ylli.api.third.pay.service.UnknownPayService;
-import com.ylli.api.third.pay.service.WzService;
-import com.ylli.api.third.pay.service.YfbService;
+import com.ylli.api.third.pay.service.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +59,9 @@ public class PayService {
 
     @Autowired
     HRJFService hrjfService;
+
+    @Autowired
+    CntService cntService;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -179,7 +180,23 @@ public class PayService {
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
-        } else if (channel.code.equals("HRJF")) {
+        }else if (channel.code.equals("CNT")) {
+            //支付方式校验
+            if (!baseOrder.payType.equals(ALI) || baseOrder.tradeType.equals(APP)) {
+                return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+            }
+            //金额校验
+            /*if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
+                return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
+            }*/
+            if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
+                baseOrder.redirectUrl = "http://www.baidu.com";
+            }
+            String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+        }  else if (channel.code.equals("HRJF")) {
             return hrjfOrder(baseOrder, channel.id, secretKey);
         } else {
             //
