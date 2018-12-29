@@ -226,7 +226,7 @@ public class CashService {
             pingAnService.createPingAnOrder(cashLogId, cashLog.bankcardNumber, cashLog.name, cashLog.openBank, null, cashLog.money);
         } else if (payment.code.equals("xianFen")) {
             //TODO 系统代付 - 如何区分对公账户 与私人账户？
-            xianFenService.createXianFenOrder(cashLogId,cashLog.money,cashLog.bankcardNumber,cashLog.name,cashLog.reservedPhone,1,1);
+            //xianFenService.createXianFenOrder(cashLogId,cashLog.money,cashLog.bankcardNumber,cashLog.name,cashLog.reservedPhone,1,1);
         } else {
             //其他
 
