@@ -13,6 +13,7 @@ import com.ylli.api.mch.model.Mch;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
+import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -47,7 +48,9 @@ public class MchManageService {
         dataList.count = page.size();
         dataList.totalCount = page.getTotal();
         page.stream().forEach(item -> {
-            item.money = walletService.getOwnWallet(item.mchId).total;
+            Wallet wallet = walletService.getOwnWallet(item.mchId);
+            item.money = wallet.total;
+            item.reservoir = wallet.reservoir;
             SysChannel channel = channelService.getCurrentChannel(item.mchId);
             item.channelId = channel.id;
             item.channelName = channel.name;

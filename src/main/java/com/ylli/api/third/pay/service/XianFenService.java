@@ -16,6 +16,7 @@ import com.ylli.api.third.pay.mapper.XfBillMapper;
 import com.ylli.api.third.pay.model.Data;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.model.XfPaymentResponse;
+import com.ylli.api.wallet.model.SysPaymentLog;
 import com.ylli.api.wallet.service.WalletService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -66,6 +67,21 @@ public class XianFenService {
     @Value("${xf.pay.xf_pub_key}")
     public String xf_pub_key;
 
+    /**
+     * @param sysOrderId  系统订单号
+     * @param money       代付金额
+     * @param accNo       收款账户
+     * @param accName     姓名
+     * @param mobile      手机
+     * @param payType     1-对私，2-对公
+     * @param accType     1-借记卡，2-贷记卡
+     * @param mchId       商户号
+     * @param secretKey   商户密钥
+     * @param mchOrderId  商户订单号
+     * @param chargeMoney 手续费
+     * @return
+     * @throws Exception
+     */
     @Transactional
     public Object createXianFenOrder(String sysOrderId, Integer money, String accNo, String accName, String mobile,
                                      Integer payType, Integer accType, Long mchId, String secretKey, String mchOrderId,
@@ -372,5 +388,123 @@ public class XianFenService {
             //return getResJson(response.code, "请求失败", null);
             return null;
         }
+    }
+
+    /**
+     * 系统内部提现使用.
+     *
+     * @param cashLogId      提现日志id
+     * @param money          金额
+     * @param bankcardNumber 卡号
+     * @param name           姓名
+     * @param reservedPhone  预留手机
+     * @param payType        代付类型
+     * @param accType        账户类型
+     */
+    @Transactional
+    public void createXianFenOrder(Long cashLogId, Integer money, String bankcardNumber, String name, String reservedPhone, Integer payType, Integer accType) throws Exception {
+
+        //测试单时占用了很多，不能直接使用原生id
+        String merchantNo = new StringBuffer(SysPaymentLog.XIANFEN).append(cashLogId).toString();
+        String str = xfClient.agencyPayment(merchantNo, money, bankcardNumber, name, reservedPhone, "SDPB", payType, accType, null);
+
+        XfPaymentResponse response = new Gson().fromJson(str, XfPaymentResponse.class);
+        //加密后的业务数据
+        String bizData = UcfForOnline.decryptData(str, mer_pri_key);
+
+        //BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(sysOrderId);
+
+        /**
+         * 99000 - 接口调用成功
+         * 99001 - 接口调用异常
+         * 其他返回码，接口调用失败，可置订单为失败
+         *
+         * 成功或者待确认均扣除钱包代付池（非失败），后续若订单状态为Ing,且同步结果为fail才进行金额回滚
+         */
+        if (response.code.equals("99000")) {
+            //交易成功返回订单数据
+            Data data = new Gson().fromJson(bizData, Data.class);
+
+            //应答码，00000 成功
+            if (data.resCode.equals("00000")) {
+
+                if (data.status != null && data.status.toUpperCase().equals("S")) {
+                    /*payOrder.status = BankPayOrder.FINISH;
+                    payOrder.superOrderId = data.tradeNo;
+                    try {
+                        payOrder.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
+                    } catch (Exception e) {
+                        payOrder.tradeTime = Timestamp.from(Instant.now());
+                    }
+                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                    //扣除金额.(代付金额+手续费)
+                    walletService.decrReservoir(mchId, (money + chargeMoney));
+
+                    //发送异步通知
+                    if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                        String params = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                        bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params, true);
+                    }
+                    return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
+                }
+                if (data.status != null && data.status.toUpperCase().equals("F")) {
+                    /*payOrder.status = BankPayOrder.FAIL;
+                    payOrder.superOrderId = data.tradeNo;
+
+                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                    //发送异步通知
+                    if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                        String params = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                        bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params, true);
+                    }
+                    return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
+                }
+                if (data.status != null && data.status.toUpperCase().equals("I")) {
+                    /*payOrder.status = BankPayOrder.ING;
+                    payOrder.superOrderId = data.tradeNo;
+                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                    //扣除金额.(代付金额+手续费)
+                    walletService.decrReservoir(mchId, (money + chargeMoney));
+
+                    //进行中暂时不去通知下游商户
+
+                    return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
+                }
+            }
+            /*LOGGER.error("sysOrderId = " + sysOrderId + " ,XianFen response exception: [ code = " + data.resCode + ", message = " + data.resMessage + " ]");
+
+            //应答失败，状态置为进行中，扣除钱包代付池。等待轮询结果
+            payOrder.status = BankPayOrder.ING;
+            payOrder.superOrderId = data.tradeNo;
+            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+            //扣除金额.(代付金额+手续费)
+            walletService.decrReservoir(mchId, (money + chargeMoney));
+
+            return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
+        } else if (response.code.equals("99001")) {
+            /*//接口调用异常，无法确认订单状态
+            //更新订单，获取不到父级订单号
+            //暂时置订单状态为进行中。等待先锋异步轮询确定最终状态
+            payOrder.status = BankPayOrder.ING;
+            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+            //扣除金额.(代付金额+手续费)
+            walletService.decrReservoir(mchId, (money + chargeMoney));
+
+            return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
+        } else {
+            /*LOGGER.error("sysOrderId = " + sysOrderId + " ,create XianFen order fail: [ code = " + response.code + ", message = " + response.message + " ]");
+            //通用错误返回.
+            //具体原因 @see 先锋支付网关返回码.
+            //对下游服务商隐藏先锋返回message，统一返回系统异常
+            payOrder.status = BankPayOrder.FAIL;
+            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+            return new Response("A011", "系统异常");*/
+        }
+
     }
 }

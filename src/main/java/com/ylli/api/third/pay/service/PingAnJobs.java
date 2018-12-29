@@ -38,7 +38,7 @@ public class PingAnJobs {
         }
 
         try {
-            //每分钟查询一次.. 最多查询10次
+            //每3分钟查询一次.. 最多查询10次
             List<SysPaymentLog> logs = sysPaymentLogMapper.selectAll();
             if (logs.size() == 0) {
                 return;
@@ -48,10 +48,10 @@ public class PingAnJobs {
                     sysPaymentLogMapper.delete(item);
                 } else {
                     if (item.type.equals(SysPaymentLog.TYPE_MCH)) {
-                        //sys auto query.
+                        //mch auto query.
                         pingAnService.payQuery(item);
                     } else if (item.type.equals(SysPaymentLog.TYPE_SYS)) {
-                        //mch auto query.
+                        //sys auto query.
                         pingAnService.payQueryMch(item);
                     } else {
                         System.out.println(new Gson().toJson(item));

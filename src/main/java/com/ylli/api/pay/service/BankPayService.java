@@ -105,7 +105,6 @@ public class BankPayService {
         if (isSignValid(formatParams(bankPayOrder), secretKey)) {
             return new Response("A001", "签名校验失败", bankPayOrder);
         }
-        //TODO 代付手续费暂时设置为定值...是否需要修改
         Wallet wallet = walletService.getOwnWallet(bankPayOrder.mchId);
         if (wallet.reservoir < (bankPayOrder.money + bankPayCharge)) {
             return new Response("A012", "代付余额不足");
@@ -113,7 +112,7 @@ public class BankPayService {
 
         //代付通道选择（系统统一切换还是可以按商户单独分配）
         if (true) {
-            //TODO 代付订单系统 , 1 - 平安，2先锋 ，                             1 - 固定
+            //TODO 代付订单系统 , 1 - 平安，2先锋 ，
             //平安
             bankPayOrder = insertOrder(bankPayOrder, 1L, BankPayOrder.FIX, bankPayCharge);
 

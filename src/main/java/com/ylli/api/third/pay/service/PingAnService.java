@@ -189,7 +189,7 @@ public class PingAnService {
     }
 
     /**
-     * 用于提供给商户代付
+     * 用于提供给商户系统代付  外部使用
      *
      * @param sysOrderId     使用生成的系统订单号作为代付商户订单号
      * @param inAcctNo
