@@ -65,8 +65,7 @@ public class WalletController {
     @PostMapping("/recharge")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_WALLET))
     public Object recharge(@RequestBody Recharge recharge) {
-        //return walletService.recharge();
-        return null;
+        return walletService.recharge(recharge.mchId, recharge.money);
     }
 
 }

@@ -139,4 +139,15 @@ public class WalletService {
         walletMapper.updateByPrimaryKeySelective(wallet);
         return wallet;
     }
+
+    /**
+     * 充值代付池
+     */
+    @Transactional
+    public Object recharge(Long mchId, Integer money) {
+        Wallet wallet = getOwnWallet(mchId);
+        wallet.reservoir = wallet.reservoir + money;
+        walletMapper.updateByPrimaryKeySelective(wallet);
+        return wallet;
+    }
 }
