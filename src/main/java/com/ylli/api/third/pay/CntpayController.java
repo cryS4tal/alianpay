@@ -1,11 +1,21 @@
 package com.ylli.api.third.pay;
 
+import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import com.ylli.api.mch.service.MchKeyService;
+import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.model.CardReq;
+import com.ylli.api.third.pay.model.CntCashReq;
+import com.ylli.api.third.pay.model.CntNotifyReq;
 import com.ylli.api.third.pay.model.ConfirmReq;
 import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.third.pay.service.CntService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.xml.crypto.KeySelector;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/pay/cnt")
@@ -15,20 +25,13 @@ public class CntpayController {
 
     @Autowired
     CntClient cntClient;
+    @Autowired
+    MchKeyService mchKeyService;
 
-    @GetMapping("/notify")
-    public String payNotify(@RequestParam Long userId,
-                            @RequestParam String orderId,
-                            @RequestParam String userOrder,
-                            @RequestParam String number,
-                            @RequestParam String merPriv,
-                            @RequestParam String date,
-                            @RequestParam String resultCode,
-                            @RequestParam String resultMsg,
-                            @RequestParam String remark,
-                            @RequestParam String appID,
-                            @RequestParam String chkValue) throws Exception {
-        return cntService.payNotify(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID, chkValue);
+    @PostMapping("/notify")
+    public String payNotify(@RequestBody CntNotifyReq req) throws Exception {
+        System.out.println(new Gson().toJson(req));
+        return cntService.payNotify(req.userid, req.orderid, req.userorder, req.number, req.remark, req.merpriv, req.data, req.resultcode, req.resultmsg, req.appid, req.ispur, req.chkvalue);
     }
 
     /**
@@ -40,7 +43,12 @@ public class CntpayController {
      */
     @PostMapping("/confirm")
     public Object payConfirm(@RequestBody ConfirmReq req) throws Exception {
-        return cntService.payConfirm(req.cardId, req.orderId, req.sgin, req.mchId);
+        String key = mchKeyService.getKeyById(req.mchId);
+        Map<String, String> map = SignUtil.objectToMap(req);
+        if (!SignUtil.generateSignature(map, key).equals(req.sign.toUpperCase())) {
+            return new Response("A001", "签名校验失败", req);
+        }
+        return cntService.payConfirm(req.mchOrderId, req.mchId);
     }
 
     /**
@@ -52,7 +60,8 @@ public class CntpayController {
      */
     @PostMapping("/cancel")
     public Object payCancel(@RequestBody ConfirmReq req) throws Exception {
-        return cntService.payCancel(req.orderId, req.mchId, req.sgin);
+//        return cntService.payCancel(req);
+        return null;
     }
 
     /**
@@ -73,7 +82,12 @@ public class CntpayController {
      * @return
      */
     @PostMapping("/cash")
-    public Object cash() {
-        return null;
+    public Object cash(@RequestBody CntCashReq req) throws Exception {
+        String key = mchKeyService.getKeyById(req.mchId);
+        Map<String, String> map = SignUtil.objectToMap(req);
+        if (!SignUtil.generateSignature(map, key).equals(req.sign.toUpperCase())) {
+            return new Response("A001", "签名校验失败", req);
+        }
+        return cntService.cash(req);
     }
 }

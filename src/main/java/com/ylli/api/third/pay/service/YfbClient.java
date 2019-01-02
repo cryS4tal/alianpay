@@ -26,7 +26,7 @@ public class YfbClient {
 
 
     @Value("${yfb.notify.url}")
-    public String notifyUrl;// = "http://47.99.180.135:8080/pay/yfb/notify";
+    public String notifyUrl;// = "http://116.62.209.131:8088/pay/yfb/notify";
 
     /**
      * @param type        银行类型

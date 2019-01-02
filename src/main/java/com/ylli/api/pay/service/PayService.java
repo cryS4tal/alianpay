@@ -92,34 +92,16 @@ public class PayService {
      */
     public Object createOrderDefault(BaseOrder baseOrder) throws Exception {
 
-        if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
-                || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
-                || Strings.isNullOrEmpty(baseOrder.sign)) {
-            return new Response("A003", "非法的请求参数", baseOrder);
-        }
+        Response response = keyValid(baseOrder);
+        if (!response.code.equals("A000"))
+            return response;
+        String secretKey = response.message;
 
-        //sign 前置校验
-        String secretKey = userKeyService.getKeyById(baseOrder.mchId);
-        if (secretKey == null) {
-            return new Response("A002", "请先上传商户私钥", null);
-        }
-        if (!payTypes.contains(baseOrder.payType)) {
-            return new Response("A004", "不支持的支付类型", baseOrder);
-        }
-        if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
-            return new Response("A008", "不支持的支付方式", baseOrder);
-        }
-        if (isSignValid(baseOrder, secretKey)) {
-            return new Response("A001", "签名校验失败", baseOrder);
-        }
-        SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
-        // v1.1 新增 通道关闭的话。不允许下单
-        if (channel.state == false) {
-            return new Response("A009", "当前通道关闭，请联系管理员切换通道");
-        }
-        if (billService.mchOrderExist(baseOrder.mchOrderId)) {
-            return new Response("A005", "订单号重复", baseOrder);
-        }
+        response = channelValid(baseOrder);
+        if (!response.code.equals("A000"))
+            return response;
+
+        SysChannel channel = (SysChannel) response.data;
 
         if (channel.code.equals("YFB")) {
             //易付宝支付
@@ -182,22 +164,6 @@ public class PayService {
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
-        } else if (channel.code.equals("CNT")) {
-            //支付方式校验
-            if (!baseOrder.payType.equals(ALI) || baseOrder.tradeType.equals(APP)) {
-                return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
-            }
-            //金额校验
-            /*if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
-                return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
-            }*/
-            if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
-                baseOrder.redirectUrl = "http://www.baidu.com";
-            }
-            String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
-                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-
-            return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
         } else if (channel.code.equals("HRJF")) {
             return hrjfOrder(baseOrder, channel.id, secretKey);
         } else {
@@ -205,6 +171,42 @@ public class PayService {
 
             return new Response("A099", "下单失败，暂无可用通道", null);
         }
+    }
+
+    private Response channelValid(BaseOrder baseOrder) {
+        SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
+        // v1.1 新增 通道关闭的话。不允许下单
+        if (channel.state == false) {
+            return new Response("A009", "当前通道关闭，请联系管理员切换通道");
+        }
+        if (billService.mchOrderExist(baseOrder.mchOrderId)) {
+            return new Response("A005", "订单号重复", baseOrder);
+        }
+        return new Response("A000", "", channel);
+    }
+
+    private Response keyValid(BaseOrder baseOrder) throws Exception {
+        if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
+                || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
+                || Strings.isNullOrEmpty(baseOrder.sign)) {
+            return new Response("A003", "非法的请求参数", baseOrder);
+        }
+
+        //sign 前置校验
+        String secretKey = userKeyService.getKeyById(baseOrder.mchId);
+        if (secretKey == null) {
+            return new Response("A002", "请先上传商户私钥", null);
+        }
+        if (!payTypes.contains(baseOrder.payType)) {
+            return new Response("A004", "不支持的支付类型", baseOrder);
+        }
+        if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
+            return new Response("A008", "不支持的支付方式", baseOrder);
+        }
+        if (isSignValid(baseOrder, secretKey)) {
+            return new Response("A001", "签名校验失败", baseOrder);
+        }
+        return new Response("A000", secretKey, null);
     }
 
     public Response hrjfOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
@@ -421,7 +423,22 @@ public class PayService {
         }
     }
 
-    public Object createOrderCNT(BaseOrder baseOrder) {
-        return null;
+    public Object createOrderCNT(BaseOrder baseOrder) throws Exception {
+        Response response = keyValid(baseOrder);
+        if (!response.code.equals("A000"))
+            return response;
+        String secretKey = response.message;
+
+        response = channelValid(baseOrder);
+        if (!response.code.equals("A000"))
+            return response;
+        SysChannel channel = (SysChannel) response.data;
+
+        String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+        if (Strings.isNullOrEmpty(str)) {
+            return new Response("A099", "下单失败");
+        }
+        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
     }
 }
