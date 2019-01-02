@@ -25,6 +25,9 @@ public class MessageService {
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
+    /**
+     * 支付 - 向下游发送异步结果通知
+     */
     //@Transactional
     public void autoSendNotify() {
         if (!isRunning.compareAndSet(false, true)) {
@@ -48,6 +51,9 @@ public class MessageService {
 
     private AtomicBoolean isRunning2 = new AtomicBoolean(false);
 
+    /**
+     * 代付 - 向下游发送异步结果通知
+     */
     public void autoOrderNotify() {
         if (!isRunning2.compareAndSet(false, true)) {
             LOGGER.info("async send message is running, please waiting");
