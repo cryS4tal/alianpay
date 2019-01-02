@@ -265,13 +265,11 @@ public class XianFenService {
                  */
                 Boolean flag = data.merchantNo.startsWith(SysPaymentLog.XIANFEN);
 
-                Long cashLogId = Long.parseLong(data.merchantNo.replace(SysPaymentLog.XIANFEN, ""));
-                CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
-
                 //服务调用成功
                 if ("99000".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
                     if (flag) {
-
+                        Long cashLogId = Long.parseLong(data.merchantNo.replace(SysPaymentLog.XIANFEN, ""));
+                        CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
                         if (cashLog == null) {
                             LOGGER.error("XianFen notify empty, cashLogId: " + cashLogId);
                             writer.write(getResStr("404 not found"));
@@ -378,6 +376,8 @@ public class XianFenService {
 
                     } else {
                         //系统内部
+                        Long cashLogId = Long.parseLong(data.merchantNo.replace(SysPaymentLog.XIANFEN, ""));
+                        CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
                         cashLog.state = CashLog.FAILED;
                         cashLog.msg = data.resMessage;
                         cashLogMapper.updateByPrimaryKeySelective(cashLog);
