@@ -5,6 +5,10 @@ package com.ylli.api.pay.model;
  */
 public class BaseOrder {
 
+    public static final String DEFAULT = "1.0";
+    //单独开放给cnt通道支付.
+    public static final String CNT = "1.1";
+
     public Long mchId;        //商户id  →  accountId】
 
     public Integer money;        //金额分
@@ -19,20 +23,21 @@ public class BaseOrder {
 
     public String sign;         //
 
-    //todo 加入支付类型，商户可控制支付方式，由此带来的参数差异？？
     /**
      * alipay
      * wx
      */
     public String payType;
 
-    /**
-     * todo 加入交易类型.
-     * like 扫码支付，app支付，网战支付etc.
-     */
     public String tradeType;
 
     //待定义，解决不同渠道商参数兼容问题。
     public Object extra;
+
+    /**
+     * 新增加入版本号：原始第三方支付可以不传.
+     * 新通道CNT version = 1.1
+     */
+    public String version;
 
 }

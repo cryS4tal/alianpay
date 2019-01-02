@@ -77,6 +77,8 @@ public class XianFenService {
     public String xf_pub_key;
 
     /**
+     * 商户代付api method
+     *
      * @param sysOrderId  系统订单号
      * @param money       代付金额
      * @param accNo       收款账户
@@ -88,8 +90,6 @@ public class XianFenService {
      * @param secretKey   商户密钥
      * @param mchOrderId  商户订单号
      * @param chargeMoney 手续费
-     * @return
-     * @throws Exception
      */
     @Transactional
     public Object createXianFenOrder(String sysOrderId, Integer money, String accNo, String accName, String mobile,
@@ -259,74 +259,87 @@ public class XianFenService {
                 //解密业务数据
                 String decryptData = UcfForOnline.decryptData(JSONObject.toJSONString(params), mer_pri_key);
 
+                Data data = new Gson().fromJson(decryptData, Data.class);
+                Boolean isSys = !data.merchantNo.startsWith(SysPaymentLog.XIANFEN);
+
                 //服务调用成功
                 if ("99000".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
+                    if (isSys) {
+                        BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
 
-                    Data data = new Gson().fromJson(decryptData, Data.class);
-
-                    BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
-
-                    if (payOrder == null) {
-                        LOGGER.error("XianFen notify empty, sysOrderId: " + data.merchantNo);
-                        writer.write(getResStr("404 not found"));
-                        return;
-                    }
-                    //若订单在下单返回时已经处理成功失败。不再去进行相应得逻辑。
-                    if (payOrder.status != BankPayOrder.ING) {
-                        return;
-                    }
-                    if (data.tradeTime != null) {
-                        payOrder.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
-                    }
-
-                    if (data.status != null && data.status.toUpperCase().equals("S")) {
-                        payOrder.status = BankPayOrder.FINISH;
-                        bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
-
-                        //发送异步通知
-                        if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
-                            String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
-                            bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                        if (payOrder == null) {
+                            LOGGER.error("XianFen notify empty, sysOrderId: " + data.merchantNo);
+                            writer.write(getResStr("404 not found"));
+                            return;
                         }
-                        writer.write(getResStr("SUCCESS"));
-                    }
-                    if (data.status != null && data.status.toUpperCase().equals("F")) {
-                        payOrder.status = BankPayOrder.FAIL;
-                        bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
-
-                        //发送异步通知
-                        if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
-                            String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
-                            bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                        //若订单在下单返回时已经处理成功失败。不再去进行相应得逻辑。
+                        if (payOrder.status != BankPayOrder.ING) {
+                            return;
                         }
-                        writer.write(getResStr("SUCCESS"));
-                    }
-                    if (data.status != null && data.status.toUpperCase().equals("I")) {
-                        //do nothing.
+                        if (data.tradeTime != null) {
+                            payOrder.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
+                        }
 
-                        writer.write(data.resCode + "|" + data.resMessage);
+                        if (data.status != null && data.status.toUpperCase().equals("S")) {
+                            payOrder.status = BankPayOrder.FINISH;
+                            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                            //发送异步通知
+                            if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                                String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                                bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                            }
+                            writer.write(getResStr("SUCCESS"));
+                        }
+                        if (data.status != null && data.status.toUpperCase().equals("F")) {
+                            payOrder.status = BankPayOrder.FAIL;
+                            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+                            //发送异步通知
+                            if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                                String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                                bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                            }
+                            writer.write(getResStr("SUCCESS"));
+                        }
+                        if (data.status != null && data.status.toUpperCase().equals("I")) {
+                            //do nothing.
+
+                            writer.write(data.resCode + "|" + data.resMessage);
+                        }
+
+                    } else {
+                        //
+
+
                     }
                 } else if ("99001".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
                     //code=99001，接口调用异常，无法确认订单状态
                     decryptData = params.get("code").toString() + "|" + params.get("message").toString();
                     writer.write(decryptData);
                 } else {
-                    Data data = new Gson().fromJson(decryptData, Data.class);
+                    if (isSys) {
+                        // 进入商户api
+                        BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
+                        payOrder.status = BankPayOrder.FAIL;
+                        payOrder.superOrderId = data.tradeNo;
 
-                    BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
-                    payOrder.status = BankPayOrder.FAIL;
-                    payOrder.superOrderId = data.tradeNo;
+                        bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+                        //金额回滚(代付金额+手续费)
+                        //订单状态为ing时 已扣除金额
+                        walletService.incrReservoir(payOrder.mchId, (payOrder.money + payOrder.chargeMoney));
 
-                    //金额回滚(代付金额+手续费)
-                    //订单状态为ing时 已扣除金额
-                    walletService.incrReservoir(payOrder.mchId, (payOrder.money + payOrder.chargeMoney));
+                        //发送异步通知
+                        if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+                            String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+                            bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                        }
 
-                    //发送异步通知
-                    if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
-                        String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
-                        bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+                    } else {
+                        //系统内部
+
+
                     }
                     writer.write(getResStr("SUCCESS"));
                 }
@@ -401,8 +414,10 @@ public class XianFenService {
 
     /**
      * 系统内部提现使用.
+     * 先锋不同于PingAn，平安不会自动发送异步回调。所以加入SYS_PAYMENT_LOG 来更新状态.
+     * 先锋含有主动回调。固不再去使用SYS_PAYMENT_LOG 去主动轮询结果
      *
-     * @param cashLogId      提现日志id
+     * @param cashLogId      提现日志id，由于测试时暂用了很多自增序列。故修改规则为 "XianFen".append(cashLogId) 作为提现单号
      * @param money          金额
      * @param bankcardNumber 卡号
      * @param name           姓名
@@ -421,8 +436,6 @@ public class XianFenService {
         //加密后的业务数据
         String bizData = UcfForOnline.decryptData(str, mer_pri_key);
 
-        //BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(sysOrderId);
-
         /**
          * 99000 - 接口调用成功
          * 99001 - 接口调用异常
@@ -436,46 +449,20 @@ public class XianFenService {
 
             //应答码，00000 成功
             if (data.resCode.equals("00000")) {
-
+                CashLog log = cashLogMapper.selectByPrimaryKey(cashLogId);
                 if (data.status != null && data.status.toUpperCase().equals("S")) {
 
                     //更新提现处理请求
-                    CashLog log = cashLogMapper.selectByPrimaryKey(cashLogId);
                     if (log != null) {
-                        //TODO ？？？？
                         log.state = CashLog.FINISH;
                         log.type = CashLog.XIANFENG;
-                        //log.msg = msg;
                         cashLogMapper.updateByPrimaryKeySelective(log);
                     }
 
-                    SysPaymentLog sysPaymentLog = new SysPaymentLog();
-                    sysPaymentLog.type = SysPaymentLog.TYPE_MCH;
-                    sysPaymentLog.orderId = merchantNo;
-                    logMapper.insertSelective(sysPaymentLog);
-                    /*payOrder.status = BankPayOrder.FINISH;
-                    payOrder.superOrderId = data.tradeNo;
-                    try {
-                        payOrder.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
-                    } catch (Exception e) {
-                        payOrder.tradeTime = Timestamp.from(Instant.now());
-                    }
-                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
-
-                    //扣除金额.(代付金额+手续费)
-                    walletService.decrReservoir(mchId, (money + chargeMoney));
-
-                    //发送异步通知
-                    if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
-                        String params = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
-                        bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params, true);
-                    }
-                    return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
                 }
                 if (data.status != null && data.status.toUpperCase().equals("F")) {
 
                     //更新提现处理请求
-                    CashLog log = cashLogMapper.selectByPrimaryKey(cashLogId);
                     if (log != null) {
                         log.state = CashLog.FAILED;
                         log.type = CashLog.XIANFENG;
@@ -484,61 +471,56 @@ public class XianFenService {
                     }
                     //回滚金额
                     walletService.cashFail(log.mchId, log.money);
-                    /*payOrder.status = BankPayOrder.FAIL;
-                    payOrder.superOrderId = data.tradeNo;
-
-                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
-
-                    //发送异步通知
-                    if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
-                        String params = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
-                        bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params, true);
-                    }
-                    return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
                 }
                 if (data.status != null && data.status.toUpperCase().equals("I")) {
-                    /*payOrder.status = BankPayOrder.ING;
-                    payOrder.superOrderId = data.tradeNo;
-                    bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-                    //扣除金额.(代付金额+手续费)
-                    walletService.decrReservoir(mchId, (money + chargeMoney));
+                    //更新提现处理请求
+                    if (log != null) {
+                        log.state = CashLog.PROCESS;
+                        log.type = CashLog.XIANFENG;
+                        log.msg = data.resMessage;
+                        cashLogMapper.updateByPrimaryKeySelective(log);
+                    }
+                }
 
-                    //进行中暂时不去通知下游商户
-
-                    return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
+                //data 无返回状态。默认更新处理中。等待回调
+                //更新提现处理请求
+                if (log != null) {
+                    log.state = CashLog.PROCESS;
+                    log.type = CashLog.XIANFENG;
+                    log.msg = data.resMessage;
+                    cashLogMapper.updateByPrimaryKeySelective(log);
                 }
             }
-            /*LOGGER.error("sysOrderId = " + sysOrderId + " ,XianFen response exception: [ code = " + data.resCode + ", message = " + data.resMessage + " ]");
-
-            //应答失败，状态置为进行中，扣除钱包代付池。等待轮询结果
-            payOrder.status = BankPayOrder.ING;
-            payOrder.superOrderId = data.tradeNo;
-            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
-
-            //扣除金额.(代付金额+手续费)
-            walletService.decrReservoir(mchId, (money + chargeMoney));
-
-            return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
         } else if (response.code.equals("99001")) {
-            /*//接口调用异常，无法确认订单状态
-            //更新订单，获取不到父级订单号
+            LOGGER.error("cashLogId = " + cashLogId + " ,create XianFen order 99001: [ code = " + response.code + ", message = " + response.message + " ]");
+            //接口调用异常，无法确认订单状态
             //暂时置订单状态为进行中。等待先锋异步轮询确定最终状态
-            payOrder.status = BankPayOrder.ING;
-            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-            //扣除金额.(代付金额+手续费)
-            walletService.decrReservoir(mchId, (money + chargeMoney));
+            //更新提现处理请求
+            CashLog log = cashLogMapper.selectByPrimaryKey(cashLogId);
+            if (log != null) {
+                log.state = CashLog.PROCESS;
+                log.type = CashLog.XIANFENG;
+                log.msg = new StringBuffer("response.code").append("|").append(response.message).toString();
+                cashLogMapper.updateByPrimaryKeySelective(log);
+            }
+            //不回滚金额.等待异步回调 notify 最终决定。
 
-            return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);*/
         } else {
-            /*LOGGER.error("sysOrderId = " + sysOrderId + " ,create XianFen order fail: [ code = " + response.code + ", message = " + response.message + " ]");
-            //通用错误返回.
+            LOGGER.error("cashLogId = " + cashLogId + " ,create XianFen order fail: [ code = " + response.code + ", message = " + response.message + " ]");
             //具体原因 @see 先锋支付网关返回码.
-            //对下游服务商隐藏先锋返回message，统一返回系统异常
-            payOrder.status = BankPayOrder.FAIL;
-            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
-            return new Response("A011", "系统异常");*/
+
+            //更新提现处理请求
+            CashLog log = cashLogMapper.selectByPrimaryKey(cashLogId);
+            if (log != null) {
+                log.state = CashLog.FAILED;
+                log.type = CashLog.XIANFENG;
+                log.msg = new StringBuffer("response.code").append("|").append(response.message).toString();
+                cashLogMapper.updateByPrimaryKeySelective(log);
+            }
+            //回滚金额
+            walletService.cashFail(log.mchId, log.money);
         }
 
     }

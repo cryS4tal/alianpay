@@ -94,7 +94,9 @@ public class CashService {
     }
 
     /**
-     * 后续接入api...
+     * 发起提现请求。
+     * 扣除对应金额进入pending 池，
+     * 若对应通道时网众支付，主动向网众发起代付请求
      */
     @Transactional
     public void cash(CashReq req) {
@@ -140,6 +142,12 @@ public class CashService {
         }
     }
 
+    /**
+     * 手动提现
+     *
+     * @param cashLogId
+     * @param success
+     */
     @Transactional
     public void manualCash(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
@@ -178,6 +186,12 @@ public class CashService {
         }
     }
 
+    /**
+     * 网众 - 提现任务轮询
+     *
+     * @param cashLogId
+     * @param success
+     */
     public void successJobs(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
         if (cashLog == null) {
@@ -226,7 +240,7 @@ public class CashService {
             pingAnService.createPingAnOrder(cashLogId, cashLog.bankcardNumber, cashLog.name, cashLog.openBank, null, cashLog.money);
         } else if (payment.code.equals("xianFen")) {
             //TODO 系统代付 - 如何区分对公账户 与私人账户？
-            //xianFenService.createXianFenOrder(cashLogId,cashLog.money,cashLog.bankcardNumber,cashLog.name,cashLog.reservedPhone,1,1);
+            xianFenService.createXianFenOrder(cashLogId,cashLog.money,cashLog.bankcardNumber,cashLog.name,cashLog.reservedPhone,1,1);
         } else {
             //其他
 

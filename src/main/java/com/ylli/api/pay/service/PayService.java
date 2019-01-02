@@ -87,7 +87,7 @@ public class PayService {
      * @param baseOrder
      * @return
      */
-    public Object createOrder(BaseOrder baseOrder) throws Exception {
+    public Object createOrderDefault(BaseOrder baseOrder) throws Exception {
 
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
@@ -400,5 +400,9 @@ public class PayService {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Object createOrderCNT(BaseOrder baseOrder) {
+        return null;
     }
 }
