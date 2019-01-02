@@ -255,6 +255,26 @@ public class BillService {
     }
 
     @Transactional
+    public Bill createCntBill(String superOrderId, String sysOrderId,Long mchId, String mchOrderId, Long channelId, String payType, String tradeType, Integer money, String reserve) {
+        Bill bill = new Bill();
+        bill.mchId = mchId;
+        bill.sysOrderId = sysOrderId;
+        bill.mchOrderId = mchOrderId;
+        bill.channelId = channelId;
+        bill.superOrderId=superOrderId;
+        // todo 应用模块 关联.
+        bill.appId = appService.getAppId(payType, tradeType);
+
+        bill.money = money;
+        bill.status = Bill.NEW;
+        bill.reserve = reserve;
+        bill.payType = payType;
+        bill.tradeType = tradeType;
+        billMapper.insertSelective(bill);
+        return bill;
+    }
+
+    @Transactional
     public Object reissue(String sysOrderId) throws Exception {
         Bill bill = new Bill();
         bill.sysOrderId = sysOrderId;

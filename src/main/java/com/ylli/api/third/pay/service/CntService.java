@@ -1,13 +1,17 @@
 package com.ylli.api.third.pay.service;
 
 import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
+import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,33 +44,49 @@ public class CntService {
     WalletService walletService;
     @Autowired
     AppService appService;
-    @Value("pay.cont.success_code")
+    @Autowired
+    MchKeyService mchKeyService;
+    @Value("${pay.cont.success_code}")
     public String successCode;
+    @Autowired
+    SerializeUtil serializeUtil;
 
     @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
-        Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
+//        Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
+        String sysOrderId = serializeUtil.generateSysOrderId();
         String mz = String.format("%.2f", (money / 100.0));
         String istype = payType.equals(PayService.ALI) ? "0" : "1";
-        return cntClient.createCntOrder(bill.sysOrderId, mchId.toString(), mz, istype);
+        String body = cntClient.createCntOrder(sysOrderId, mchId.toString(), mz, istype);
+        CntRes cntRes = new Gson().fromJson(body, CntRes.class);
+        if (successCode.equals(cntRes.resultCode)) {
+            billService.createCntBill(cntRes.orderId, sysOrderId, mchId, mchOrderId, channelId, payType, tradeType, money, reserve);
+        }
+        return body;
     }
 
-    public String payConfirm(String orderId) {
+    public String payConfirm(String cardId, String orderId, String sign, Long mchId) throws Exception {
+        String key = mchKeyService.getKeyById(mchId);
+        if (!sign.equals(generateCkValue(mchId.toString(), orderId, key))) {
+            return "fail";
+        }
         Bill bill = new Bill();
         bill.sysOrderId = orderId;
         bill = billMapper.selectOne(bill);
         if (bill == null || Strings.isNullOrEmpty(bill.superOrderId)) {
             return "order not found";
         }
-        if("ok".equals(cntClient.confirm(bill.superOrderId))){
-            if (bill.status != Bill.FINISH) {
+        String confirm = cntClient.confirm(bill.superOrderId, cardId);
+        CntRes cntRes = new Gson().fromJson(confirm, CntRes.class);
+        if (successCode.equals(cntRes.resultCode)) {
+           /* if (bill.status != Bill.FINISH) {
                 bill.status = Bill.FINISH;
                 bill.tradeTime = Timestamp.from(Instant.now());
                 bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                 billMapper.updateByPrimaryKeySelective(bill);
                 //钱包金额变动。
                 walletService.incr(bill.mchId, bill.money - bill.payCharge);
-            }
+            }*/
             return "success";
         }
         return "fail";
@@ -88,7 +108,7 @@ public class CntService {
         StringBuffer sb = new StringBuffer();
         sb.append(userId).append("|").append(orderId).append("|").append(userOrder).append("|").append(number).append("|").append(date).append("|")
                 .append(resultCode).append("|").append(resultCode).append("|").append(resultMsg).append("|").append(resultMsg).append("|").append("|").append(secret);
-        String sign = SignUtil.MD5(sb.toString());
+        String sign = SignUtil.MD5(sb.toString()).toLowerCase();
         System.out.println(sign);
         if (successCode.equals(resultCode) && chkValue.equals(sign)) {
             Bill bill = new Bill();
@@ -121,10 +141,42 @@ public class CntService {
 
             payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
 
-            return "ok";
+            return "success";
         } else {
             return "fail";
         }
 
+    }
+
+    @Transactional
+    public Object payCancel(String orderId, Long mchId, String sgin) throws Exception {
+        String key = mchKeyService.getKeyById(mchId);
+        if (!sgin.equals(generateCkValue(mchId.toString(), orderId, key))) {
+            return "fail";
+        }
+        Bill bill = new Bill();
+        bill.sysOrderId = orderId;
+        bill = billMapper.selectOne(bill);
+        if (bill == null || Strings.isNullOrEmpty(bill.superOrderId)) {
+            return "order not found";
+        }
+        String confirm = cntClient.cancel(bill.superOrderId, mchId.toString());
+        CntRes cntRes = new Gson().fromJson(confirm, CntRes.class);
+        if (successCode.equals(cntRes.resultCode)) {
+            bill.status = Bill.FAIL;
+            billMapper.updateByPrimaryKeySelective(bill);
+            return "success";
+        }
+        return "fail";
+    }
+
+    public String generateCkValue(String... arr) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        for (String s : arr) {
+            sb.append(s).append("|");
+        }
+        String substring = sb.substring(0, sb.length() - 1);
+        System.out.println(substring);
+        return SignUtil.MD5(substring).toLowerCase();
     }
 }
