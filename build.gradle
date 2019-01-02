@@ -68,6 +68,8 @@ dependencies {
     // dom4j
     // https://mvnrepository.com/artifact/dom4j/dom4j
     compile group: 'dom4j', name: 'dom4j', version: '1.6.1'
+    //excel导出
+    compile group: 'org.apache.poi', name: 'poi', version: '3.5-FINAL'
 }
 
 

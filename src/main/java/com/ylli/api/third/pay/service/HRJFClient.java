@@ -37,6 +37,7 @@ public class HRJFClient {
                 .queryParam("hrefbackurl", redirectUrl)
                 .queryParam("attach", 1)
                 .queryParam("payuserid", mchId)
+                .queryParam("h5", 2)
                 .queryParam("sign", generateSign(value, sysOrderId, mchId))
                 .build().toUriString();
 

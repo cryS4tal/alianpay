@@ -8,11 +8,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@EnableAsync
 public class PingAnJobs {
 
     @Autowired
@@ -29,7 +30,7 @@ public class PingAnJobs {
      * 自动轮询提现请求（平安代付）
      */
     @Scheduled(cron = "0 0/3 * * * ?")
-    @Transactional
+    //@Transactional
     public void autoQuery() {
         if (!isRunning.compareAndSet(false, true)) {
             LOGGER.info("pingan auto query is running, please waiting");
@@ -37,7 +38,7 @@ public class PingAnJobs {
         }
 
         try {
-            //每分钟查询一次.. 最多查询10次
+            //每3分钟查询一次.. 最多查询10次
             List<SysPaymentLog> logs = sysPaymentLogMapper.selectAll();
             if (logs.size() == 0) {
                 return;
@@ -47,9 +48,12 @@ public class PingAnJobs {
                     sysPaymentLogMapper.delete(item);
                 } else {
                     if (item.type.equals(SysPaymentLog.TYPE_MCH)) {
+                        //mch auto query.
                         pingAnService.payQuery(item);
+                    } else if (item.type.equals(SysPaymentLog.TYPE_SYS)) {
+                        //sys auto query.
+                        pingAnService.payQueryMch(item);
                     } else {
-                        //TODO mch auto query.
                         System.out.println(new Gson().toJson(item));
                         System.out.println("商户自动查询未处理");
                     }

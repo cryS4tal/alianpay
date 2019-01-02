@@ -8,4 +8,7 @@ import tk.mybatis.mapper.common.Mapper;
 public interface BankPayOrderMapper extends Mapper<BankPayOrder> {
     @Select("SELECT * FROM t_bank_pay_order WHERE sys_order_id = #{sys_order_id}")
     BankPayOrder selectBySysOrderId(@Param("sys_order_id") String sysOrderId);
+
+    @Select("SELECT * FROM t_bank_pay_order WHERE mch_order_id = #{mch_order_id}")
+    BankPayOrder selectByMchOrderId(@Param("mch_order_id") String mchOrderId);
 }

@@ -18,6 +18,6 @@ public class PayTest {
 
     @Test
     public void test() {
-        messageService.addNotifyJobs(0L, "testUrl", "testParams");
+        //messageService.addNotifyJobs(0L, "testUrl", "testParams");
     }
 }

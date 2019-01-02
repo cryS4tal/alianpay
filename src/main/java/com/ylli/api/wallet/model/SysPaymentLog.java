@@ -13,8 +13,10 @@ public class SysPaymentLog {
 
     public static final String XIANFEN = "XianFen";
 
+    //平台外部使用
     public static final String TYPE_SYS = "sys";
 
+    //平台内部使用
     public static final String TYPE_MCH = "mch";
 
     @Id

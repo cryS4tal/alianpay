@@ -8,6 +8,7 @@ CREATE TABLE t_wallet (
   recharge INTEGER  DEFAULT 0 COMMENT '交易金额',
   pending INTEGER  DEFAULT 0 COMMENT '待处理金额',
   bonus INTEGER  DEFAULT 0 COMMENT '分润金额',
+  reservoir INTEGER  DEFAULT 0 COMMENT '代付池',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );

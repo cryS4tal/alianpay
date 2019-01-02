@@ -16,6 +16,7 @@ import com.ylli.api.sys.service.BankPaymentService;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.service.PingAnService;
 import com.ylli.api.third.pay.service.WzClient;
+import com.ylli.api.third.pay.service.XianFenService;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
@@ -71,6 +72,9 @@ public class CashService {
     @Autowired
     PingAnService pingAnService;
 
+    @Autowired
+    XianFenService xianFenService;
+
     public Object cashList(Long mchId, String phone, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
@@ -90,7 +94,9 @@ public class CashService {
     }
 
     /**
-     * 后续接入api...
+     * 发起提现请求。
+     * 扣除对应金额进入pending 池，
+     * 若对应通道时网众支付，主动向网众发起代付请求
      */
     @Transactional
     public void cash(CashReq req) {
@@ -136,6 +142,12 @@ public class CashService {
         }
     }
 
+    /**
+     * 手动提现
+     *
+     * @param cashLogId
+     * @param success
+     */
     @Transactional
     public void manualCash(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
@@ -174,6 +186,12 @@ public class CashService {
         }
     }
 
+    /**
+     * 网众 - 提现任务轮询
+     *
+     * @param cashLogId
+     * @param success
+     */
     public void successJobs(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
         if (cashLog == null) {
@@ -202,7 +220,7 @@ public class CashService {
         }
     }
 
-    public void sysCash(Long bankPayId, Long cashLogId) {
+    public void sysCash(Long bankPayId, Long cashLogId) throws Exception {
         BankPayment payment = bankPaymentService.getBankPayment(bankPayId);
         if (payment == null) {
             throw new AwesomeException(Config.ERROR_PAYMENT_NOT_FOUND);
@@ -220,9 +238,11 @@ public class CashService {
         //发起平安代付
         if (payment.code.equals("pingAn")) {
             pingAnService.createPingAnOrder(cashLogId, cashLog.bankcardNumber, cashLog.name, cashLog.openBank, null, cashLog.money);
+        } else if (payment.code.equals("xianFen")) {
+            //TODO 系统代付 - 如何区分对公账户 与私人账户？
+            xianFenService.createXianFenOrder(cashLogId,cashLog.money,cashLog.bankcardNumber,cashLog.name,cashLog.reservedPhone,1,1);
         } else {
             //其他
-            //先锋
 
         }
     }

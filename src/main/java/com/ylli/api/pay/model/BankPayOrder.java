@@ -17,6 +17,9 @@ public class BankPayOrder {
     public static final Integer FINISH = 3;
     public static final Integer FAIL = 4;
 
+    public static final Integer FIX = 1;
+    public static final Integer FLOAT = 2;
+
 
     //对公账户
     public static final Integer PAY_TYPE_COMPANY = 2;
@@ -28,14 +31,14 @@ public class BankPayOrder {
     //贷记卡
     public static final Integer CREDIT_CARD = 2;
 
-    public static List<Integer> payAllows = new ArrayList<Integer>(){
+    public static List<Integer> payAllows = new ArrayList<Integer>() {
         {
             add(PAY_TYPE_PERSON);
             add(PAY_TYPE_COMPANY);
         }
     };
 
-    public static List<Integer> accAllows = new ArrayList<Integer>(){
+    public static List<Integer> accAllows = new ArrayList<Integer>() {
         {
             add(DEBIT_CARD);
             add(CREDIT_CARD);
@@ -118,4 +121,17 @@ public class BankPayOrder {
     public Timestamp createTime;
 
     public Timestamp modifyTime;
+
+    public static String statusToString(Integer status) {
+        if (status == ING) {
+            return "I";
+        }
+        if (status == FINISH) {
+            return "S";
+        }
+        if (status == FAIL) {
+            return "F";
+        }
+        return "N";
+    }
 }

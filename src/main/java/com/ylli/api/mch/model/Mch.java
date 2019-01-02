@@ -12,6 +12,8 @@ public class Mch {
 
     public Integer money;   //商户余额
 
+    public Integer reservoir; //代付余额
+
     public Integer auditState; //审核状态
 
     public String mchState; //账户状态

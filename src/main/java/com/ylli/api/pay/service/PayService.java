@@ -90,7 +90,7 @@ public class PayService {
      * @param baseOrder
      * @return
      */
-    public Object createOrder(BaseOrder baseOrder) throws Exception {
+    public Object createOrderDefault(BaseOrder baseOrder) throws Exception {
 
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
@@ -209,34 +209,37 @@ public class PayService {
 
     public Response hrjfOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
         //华荣聚付  -  和易付宝基本一致
-
+        if (baseOrder.tradeType == null) {
+            //支付方式. 默认wap
+            baseOrder.tradeType = WAP;
+        }
         //不支持微信
-        if (!baseOrder.payType.equals(ALI)) {
-            return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+        if (!baseOrder.payType.equals(ALI) || !baseOrder.tradeType.equals(WAP)) {
+            return new Response("A098", "临时限制：系统暂时只支持支付宝wap（payType=alipay，tradeType=wap）", baseOrder);
         }
 
-        //金额校验  todo  check。
+        //金额校验
         if (baseOrder.money < hrjf_min || baseOrder.money > hrjf_max) {
-            return new Response("A007", "交易金额限制：50 - 9999 元", baseOrder);
+            return new Response("A007", "交易金额限制：500 - 9999 元", baseOrder);
         }
 
         String str = hrjfService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-        /*String str = yfbService.createOrder(baseOrder.mchId, channelId, baseOrder.payType, baseOrder.tradeType, baseOrder.money,
-                baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);*/
-        //return str;
         str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
-        //str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
+        //str = str.replace("/ydpay/Pay.aspx", "http://gateway.iexindex.com/ydpay/Pay.aspx");
         //str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
         //str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
         //TODO temp code. test some mch return url can success.
-        if (baseOrder.mchId == 1033 || baseOrder.mchId == 1008) {
+        /*if (baseOrder.mchId == 1033 || baseOrder.mchId == 1008 || baseOrder.mchId == 1002) {
             str = formToUrl(str);
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
         } else {
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
-        }
+        }*/
+        str = formToUrl(str);
+        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+        //return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
     }
 
     public String formToUrl(String form) {
@@ -416,5 +419,9 @@ public class PayService {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Object createOrderCNT(BaseOrder baseOrder) {
+        return null;
     }
 }

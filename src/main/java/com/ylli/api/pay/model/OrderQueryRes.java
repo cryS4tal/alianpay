@@ -1,6 +1,6 @@
 package com.ylli.api.pay.model;
 
-public class OrderQueryRes extends Response {
+public class OrderQueryRes {
 
     public String sysOrderId;
 
@@ -14,8 +14,13 @@ public class OrderQueryRes extends Response {
 
     public String tradeTime;
 
+    public String code;
+
+    public String message;
+
     public OrderQueryRes(String code, String message) {
-        super(code, message);
+        this.code = code;
+        this.message = message;
     }
 
     public OrderQueryRes() {
