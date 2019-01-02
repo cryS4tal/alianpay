@@ -13,6 +13,7 @@ import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.model.CntCard;
+import com.ylli.api.third.pay.model.CntCardRes;
 import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.wallet.service.WalletService;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @EnableAsync
@@ -58,11 +61,11 @@ public class CntService {
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
         String mz = String.format("%.2f", (money / 100.0));
-        String istype = payType.equals(PayService.ALI) ? "0" : "1";
-        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype, "1");
+        Integer istype = payType.equals(PayService.ALI) ? CntRes.ZFB_PAY : CntRes.WX_PAY;
+        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype.toString(), CntRes.CNT_BUY.toString());
         CntRes cntRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
-            CntCard cntCard = cntRes.data.pays.stream().filter(item -> item.payType == Integer.parseInt(istype)).findFirst().get();
+            CntCard cntCard = cntRes.data.pays.stream().filter(item -> item.payType == istype).findFirst().get();
             bill.superOrderId = cntRes.data.orderId;
             bill.reserve = cntCard.cardId.toString();
             billMapper.updateByPrimaryKeySelective(bill);
@@ -105,7 +108,7 @@ public class CntService {
         String sign = SignUtil.MD5(sb.toString()).toLowerCase();
         System.out.println(sign);
         if (successCode.equals(resultCode) && chkValue.equals(sign)) {
-            if (CntRes.CNT_BUY == Integer.parseInt(isPur)){
+            if (CntRes.CNT_BUY == Integer.parseInt(isPur)) {
                 Bill bill = new Bill();
                 bill.sysOrderId = orderId;
                 bill = billMapper.selectOne(bill);
@@ -137,7 +140,7 @@ public class CntService {
                 payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
 
                 return "success";
-            }else {
+            } else {
                 return "";
             }
         } else {
@@ -170,8 +173,32 @@ public class CntService {
     }
 
     public Object cash(CntCashReq req) throws Exception {
-        String cards = cntClient.findCards(req.mchId.toString());
-        String s = cntClient.addCard(req.mchId.toString(), req.userName, req.payName, req.openBank, req.subbranch);
-        return null;
+        //查询卡列表
+        CntCardRes cntCardRes = new Gson().fromJson(cntClient.findCards(req.mchId.toString()), CntCardRes.class);
+        if (!successCode.equals(cntCardRes.resultCode))
+            return new Response("A099", cntCardRes.resultMsg);
+        List<CntCard> data = cntCardRes.data;
+        if (null != data && data.size() > 0) {
+            for (CntCard card : data) {
+                //删除卡
+                CntCardRes delRes = new Gson().fromJson(cntClient.delCard(card.id.toString()), CntCardRes.class);
+                if (!successCode.equals(delRes.resultCode))
+                    return new Response("A099", delRes.resultCode);
+            }
+        }
+        //添加卡
+        CntRes cntRes = new Gson().fromJson(cntClient.addCard(req.mchId.toString(), req.userName, req.payName, req.openBank, req.subbranch), CntRes.class);
+        if (!successCode.equals(cntRes.resultCode))
+            return new Response("A099", cntCardRes.resultMsg);
+        String cardId = cntRes.data.cardId;
+        //下单
+        String mz = String.format("%.2f", (req.money / 100.0));
+        Bill bill = billService.createBill(req.mchId, null, 5L, CntRes.ZFB_PAY.toString(), "", req.money, cardId, "", "");
+        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, req.mchId.toString(), mz, CntRes.ZFB_PAY.toString(), CntRes.CNT_CASH.toString());
+        CntRes cntOrderRes = new Gson().fromJson(cntOrder, CntRes.class);
+        if (!successCode.equals(cntOrderRes.resultCode)) {
+            return new Response("A099", cntCardRes.resultMsg);
+        }
+        return new Response("A000", cntCardRes.resultMsg);
     }
 }

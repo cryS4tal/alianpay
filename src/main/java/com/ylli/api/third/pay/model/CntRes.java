@@ -13,6 +13,7 @@ public class CntRes {
 
     public class DataMsg {
         public String orderId;
+        public String cardId;
         public String totalPrice;
         public String referenceCode;
         public List<CntCard> pays;

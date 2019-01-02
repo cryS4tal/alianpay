@@ -6,6 +6,7 @@ import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.model.CntCard;
+import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.third.pay.model.ConfirmReq;
 import com.ylli.api.third.pay.service.CntClient;
@@ -56,41 +57,42 @@ public class CntPayTest {
         System.out.println(order);
         String s = "";
     }
-    @Test
-    public void json() throws Exception{
-        String s="{\"data\":{\"date\":1546422897238,\"orderId\":\"O19010217571484\",\"totalPrice\":1.00,\"payPage\":\"https://cntpay.io/\",\"referenceCode\":\"833182\",\"pays\":[{\"payType\":\"0\",\"openBank\":null,\"cardId\":\"154\",\"payUrl\":\"HTTPS://QR.ALIPAY.COM/FKX0009589EIVWZLIUZWE3\",\"subbranch\":null,\"userName\":\"李自由\",\"payName\":\"18957368005\"},{\"payType\":\"1\",\"openBank\":null,\"cardId\":\"155\",\"payUrl\":\"wxp://f2f0Z6zSk0ymkF-W1UB6bLe4A3lrvqcKYK-2\",\"subbranch\":null,\"userName\":\"李自由\",\"payName\":\"ziyou502\"},{\"payType\":\"3\",\"openBank\":\"工商银行\",\"cardId\":\"92\",\"payUrl\":\"\",\"subbranch\":\"嘉兴桐乡支行\",\"userName\":\"自由\",\"payName\":\"6222081204001984016\"}]},\"resultCode\":\"0000\",\"resultMsg\":\"下单成功\"}";
-        CntRes cntRes = new Gson().fromJson(s, CntRes.class);
-        System.out.println(new Gson().toJson(cntRes));
-        CntCard c=new CntCard();
-        c.payUrl="fdasf";
-        c.payType=1;
-        List<CntCard> cs=new ArrayList<>();
-        cs.add(c);
-        cntRes.data.pays=cs;
-        System.out.println(new Gson().toJson(cntRes));
-    }
-    @Test
-    public void cash() throws Exception {
-        String cntOrder = cntClient.createCntOrder(serializeUtil.generateSysOrderId(), "1024", "1.00", "0", "0");
-        System.out.println(cntOrder);
-    }
 
     @Test
-    public void addCard() throws Exception {
-        CashLog cashLog = new CashLog();
+    public void json() throws Exception {
+        String s = "{\"data\":{\"date\":1546422897238,\"orderId\":\"O19010217571484\",\"totalPrice\":1.00,\"payPage\":\"https://cntpay.io/\",\"referenceCode\":\"833182\",\"pays\":[{\"payType\":\"0\",\"openBank\":null,\"cardId\":\"154\",\"payUrl\":\"HTTPS://QR.ALIPAY.COM/FKX0009589EIVWZLIUZWE3\",\"subbranch\":null,\"userName\":\"李自由\",\"payName\":\"18957368005\"},{\"payType\":\"1\",\"openBank\":null,\"cardId\":\"155\",\"payUrl\":\"wxp://f2f0Z6zSk0ymkF-W1UB6bLe4A3lrvqcKYK-2\",\"subbranch\":null,\"userName\":\"李自由\",\"payName\":\"ziyou502\"},{\"payType\":\"3\",\"openBank\":\"工商银行\",\"cardId\":\"92\",\"payUrl\":\"\",\"subbranch\":\"嘉兴桐乡支行\",\"userName\":\"自由\",\"payName\":\"6222081204001984016\"}]},\"resultCode\":\"0000\",\"resultMsg\":\"下单成功\"}";
+        CntRes cntRes = new Gson().fromJson(s, CntRes.class);
+        System.out.println(new Gson().toJson(cntRes));
+        CntCard c = new CntCard();
+        c.payUrl = "fdasf";
+        c.payType = 1;
+        List<CntCard> cs = new ArrayList<>();
+        cs.add(c);
+        cntRes.data.pays = cs;
+        System.out.println(new Gson().toJson(cntRes));
+    }
+
+
+    @Test
+    public void cash() throws Exception {
+        CntCashReq req = new CntCashReq();
 //        cashLog.openBank = "pfyh";//"浦发银行";
-        cashLog.openBank = "浦发银行";//"浦发银行";
-        cashLog.bankcardNumber = "6217920274920375";
-        cashLog.name = "李玉龙";//"李玉龙";
+        req.openBank = "浦发银行";//"浦发银行";
+        req.payName = "6217920274920375";
+        req.userName = "李玉龙";//"李玉龙";
 //        cashLog.name = "chicb";//"李玉龙";
-        cashLog.mchId = 1024L;
-        String s = cntClient.addCard(cashLog.mchId.toString(), cashLog.name, cashLog.bankcardNumber, cashLog.openBank, cashLog.openBank);
-        System.out.println(s);
+        req.mchId = 1024L;
+        req.subbranch = "浦发银行";
+//        String s = cntClient.addCard(cashLog.mchId.toString(), cashLog.name, cashLog.bankcardNumber, cashLog.openBank, cashLog.openBank);
+        req.money = 1000;
+        Object cash = cntService.cash(req);
+
+//        System.out.println(s);
     }
 
     @Test
     public void findCards() throws Exception {
-        String cards = cntClient.findCards("1025");
+        String cards = cntClient.findCards("1024");
         System.out.println(cards);
     }
 
@@ -103,7 +105,7 @@ public class CntPayTest {
     @Test
     public void confirm() throws Exception {
         ConfirmReq req = new ConfirmReq();
-        req.mchOrderId="2019010211131000000133";
+        req.mchOrderId = "2019010211131000000133";
         req.mchId = 1024L;
         String key = "97c8890018a34498bc3ab87484d9778e";
         Map<String, String> map = SignUtil.objectToMap(req);
