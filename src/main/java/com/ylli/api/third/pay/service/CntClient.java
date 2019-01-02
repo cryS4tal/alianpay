@@ -1,27 +1,14 @@
 package com.ylli.api.third.pay.service;
 
-import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.phone.service.JpushSmsClient;
-import com.ylli.api.third.pay.model.CntRes;
-import com.ylli.api.third.pay.model.ConfirmReq;
-import com.ylli.api.third.pay.model.UnknownOrderRes;
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class CntClient {
