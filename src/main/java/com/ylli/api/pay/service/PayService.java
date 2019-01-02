@@ -26,12 +26,14 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -180,7 +182,7 @@ public class PayService {
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
-        }else if (channel.code.equals("CNT")) {
+        } else if (channel.code.equals("CNT")) {
             //支付方式校验
             if (!baseOrder.payType.equals(ALI) || baseOrder.tradeType.equals(APP)) {
                 return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
@@ -196,7 +198,7 @@ public class PayService {
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
-        }  else if (channel.code.equals("HRJF")) {
+        } else if (channel.code.equals("HRJF")) {
             return hrjfOrder(baseOrder, channel.id, secretKey);
         } else {
             //

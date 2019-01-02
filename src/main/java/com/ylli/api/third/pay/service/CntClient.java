@@ -26,17 +26,17 @@ public class CntClient {
     @Autowired
     RestTemplate restTemplate;
 
-    public String createCntOrder(String sysOrderId, String mchId, String mz, String payType) throws Exception {
+    public String createCntOrder(String sysOrderId, String mchId, String mz, String payType, String isPur) throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
         params.add("userId", userId);
         params.add("merchantUserID", mchId);
         params.add("userOrder", sysOrderId);
         params.add("number", mz);
         params.add("payType", payType);
-        params.add("isPur", "1");
+        params.add("isPur", isPur);
         params.add("remark", mchId);
         params.add("appID", appId);
-        params.add("ckValue", generateCkValue(userId, mchId, sysOrderId, mz, payType, "1", mchId, appId));
+        params.add("ckValue", generateCkValue(userId, mchId, sysOrderId, mz, payType, isPur, mchId, appId));
         System.out.println(new Gson().toJson(params));
         return post(params, "https://cntpay.io/trade/placeOrder");
     }
@@ -94,4 +94,34 @@ public class CntClient {
     }
 
 
+    public String addCard(String mchId, String userName, String payName, String openBank, String subbranch) throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        params.add("userId", userId);
+        params.add("merchantUserID", mchId);
+        params.add("userName", userName);
+        params.add("payName", payName);
+        params.add("openBank", openBank);
+        params.add("subbranch", subbranch);
+        params.add("appID", appId);
+        params.add("ckValue", generateCkValue(userId, mchId, userName, payName, openBank, subbranch, appId));
+        return post(params, "https://cntpay.io/trade/addCard");
+    }
+
+    public String delCard(String cardId) throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        params.add("userId", userId);
+        params.add("cardId", cardId);
+        params.add("appID", appId);
+        params.add("ckValue", generateCkValue(userId, cardId, appId));
+        return post(params, "https://cntpay.io/trade/delCard");
+    }
+
+    public String findCards(String mchId) throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        params.add("userId", userId);
+        params.add("merchantUserID", mchId);
+        params.add("appID", appId);
+        params.add("ckValue", generateCkValue(userId, mchId, appId));
+        return post(params, "https://cntpay.io/trade/findCards");
+    }
 }

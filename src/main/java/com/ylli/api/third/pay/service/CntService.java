@@ -53,11 +53,11 @@ public class CntService {
 
     @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
-//        Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
+        Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
         String sysOrderId = serializeUtil.generateSysOrderId();
         String mz = String.format("%.2f", (money / 100.0));
         String istype = payType.equals(PayService.ALI) ? "0" : "1";
-        String body = cntClient.createCntOrder(sysOrderId, mchId.toString(), mz, istype);
+        String body = cntClient.createCntOrder(sysOrderId, mchId.toString() + "_" + mchOrderId, mz, istype, "1");
         CntRes cntRes = new Gson().fromJson(body, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
             billService.createCntBill(cntRes.orderId, sysOrderId, mchId, mchOrderId, channelId, payType, tradeType, money, reserve);
@@ -104,9 +104,9 @@ public class CntService {
      * @return
      */
     @Transactional
-    public String payNotify(Long userId, String orderId, String userOrder, String number, String sn, String date, String resultCode, String resultMsg, String appID, String chkValue) throws Exception {
+    public String payNotify(Long userId, String orderId, String userOrder, String number, String remark, String merPriv, String date, String resultCode, String resultMsg, String appID, String chkValue) throws Exception {
         StringBuffer sb = new StringBuffer();
-        sb.append(userId).append("|").append(orderId).append("|").append(userOrder).append("|").append(number).append("|").append(date).append("|")
+        sb.append(userId).append("|").append(orderId).append("|").append(userOrder).append("|").append(number).append("|").append(remark).append("|").append(merPriv).append("|").append(date).append("|")
                 .append(resultCode).append("|").append(resultCode).append("|").append(resultMsg).append("|").append(resultMsg).append("|").append("|").append(secret);
         String sign = SignUtil.MD5(sb.toString()).toLowerCase();
         System.out.println(sign);
@@ -178,5 +178,10 @@ public class CntService {
         String substring = sb.substring(0, sb.length() - 1);
         System.out.println(substring);
         return SignUtil.MD5(substring).toLowerCase();
+    }
+
+    public Object addCard(Long mchId, String userName, String payName, String openBank, String subbranch) throws Exception {
+        cntClient.addCard(mchId.toString(), userName, payName, openBank, subbranch);
+        return "fail";
     }
 }

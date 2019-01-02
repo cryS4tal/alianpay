@@ -18,6 +18,7 @@ import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
 import com.ylli.api.wallet.service.WalletService;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -255,13 +257,13 @@ public class BillService {
     }
 
     @Transactional
-    public Bill createCntBill(String superOrderId, String sysOrderId,Long mchId, String mchOrderId, Long channelId, String payType, String tradeType, Integer money, String reserve) {
+    public Bill createCntBill(String superOrderId, String sysOrderId, Long mchId, String mchOrderId, Long channelId, String payType, String tradeType, Integer money, String reserve) {
         Bill bill = new Bill();
         bill.mchId = mchId;
         bill.sysOrderId = sysOrderId;
         bill.mchOrderId = mchOrderId;
         bill.channelId = channelId;
-        bill.superOrderId=superOrderId;
+        bill.superOrderId = superOrderId;
         // todo 应用模块 关联.
         bill.appId = appService.getAppId(payType, tradeType);
 
@@ -332,5 +334,15 @@ public class BillService {
             return "success";
         }
         return "fail";
+    }
+
+    public Bill getBillByMchOrderId(String mchOrderId) {
+        Bill bill = new Bill();
+        bill.mchOrderId = mchOrderId;
+        return billMapper.selectOne(bill);
+    }
+
+    public List<Bill> getBillByChannelIdAndStatus(Long mchId, Long channelId, Integer status) {
+        return billMapper.getBillByChannelIdAndStatus(mchId,channelId, status);
     }
 }
