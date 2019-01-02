@@ -10,11 +10,14 @@ import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.model.SignPayOrder;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.sys.mapper.BankPaymentMapper;
+import com.ylli.api.sys.model.BankPayment;
 import com.ylli.api.third.pay.service.PingAnService;
 import com.ylli.api.third.pay.service.XianFenService;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Map;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,9 @@ public class BankPayService {
 
     @Autowired
     BankPayOrderMapper bankPayOrderMapper;
+
+    @Autowired
+    BankPaymentMapper bankPaymentMapper;
 
     @Autowired
     ModelMapper modelMapper;
@@ -110,8 +116,25 @@ public class BankPayService {
             return new Response("A012", "代付余额不足");
         }
 
+        //临时使用bankPayment 开启关闭，代付通道。优先先锋
+        BankPayment payment = new BankPayment();
+        payment.state = Boolean.TRUE;
+        List<BankPayment> list = bankPaymentMapper.select(payment);
+
+        String code = null;
+        if (list.size() == 0) {
+            return new Response("A013","暂无可用代付通道，请联系管理员");
+        } else {
+            if (list.size() == 1) {
+                code = list.get(0).code;
+            } else {
+                //临时逻辑。目前系统只支持 平安 / 先锋
+                code = "xianFen";
+            }
+        }
+
         //代付通道选择（系统统一切换还是可以按商户单独分配）
-        if (true) {
+        if ("pingAn".equals(code)) {
             //TODO 代付订单系统 , 1 - 平安，2先锋 ，
             //平安
             bankPayOrder = insertOrder(bankPayOrder, 1L, BankPayOrder.FIX, bankPayCharge);
@@ -120,13 +143,16 @@ public class BankPayService {
                     bankPayOrder.bankName, bankPayOrder.mobile, bankPayOrder.money, secretKey, bankPayOrder.mchOrderId,
                     bankPayOrder.chargeMoney, bankPayOrder.mchId);
 
-        } else {
+        } else if ("xianFen".equals(code)){
             //先锋
             bankPayOrder = insertOrder(bankPayOrder, 2L, BankPayOrder.FIX, bankPayCharge);
 
             return xianFenService.createXianFenOrder(bankPayOrder.sysOrderId, bankPayOrder.money, bankPayOrder.accNo,
                     bankPayOrder.accName, bankPayOrder.mobile, bankPayOrder.payType, bankPayOrder.accType,
                     bankPayOrder.mchId, secretKey, bankPayOrder.mchOrderId, bankPayOrder.chargeMoney);
+        } else {
+            //temp code.
+            return new Response("A013","暂无可用代付通道，请联系管理员");
         }
     }
 

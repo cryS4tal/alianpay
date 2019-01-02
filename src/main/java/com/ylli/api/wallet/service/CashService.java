@@ -243,7 +243,7 @@ public class CashService {
             xianFenService.createXianFenOrder(cashLogId, cashLog.money, cashLog.bankcardNumber, cashLog.name, cashLog.reservedPhone, 1, 1);
         } else {
             //其他
-
+            throw new AwesomeException(Config.ERROR_PAYMENT_NOT_FOUND);
         }
     }
 }
