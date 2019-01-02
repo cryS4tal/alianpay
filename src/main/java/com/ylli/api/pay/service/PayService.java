@@ -201,7 +201,7 @@ public class PayService {
 
         //金额校验
         if (baseOrder.money < hrjf_min || baseOrder.money > hrjf_max) {
-            return new Response("A007", "交易金额限制：50 - 9999 元", baseOrder);
+            return new Response("A007", "交易金额限制：500 - 9999 元", baseOrder);
         }
 
         String str = hrjfService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
