@@ -260,11 +260,52 @@ public class XianFenService {
                 String decryptData = UcfForOnline.decryptData(JSONObject.toJSONString(params), mer_pri_key);
 
                 Data data = new Gson().fromJson(decryptData, Data.class);
-                Boolean isSys = !data.merchantNo.startsWith(SysPaymentLog.XIANFEN);
+                /**
+                 * flag - true: 系统内部；false - 商户api
+                 */
+                Boolean flag = data.merchantNo.startsWith(SysPaymentLog.XIANFEN);
+
+                Long cashLogId = Long.parseLong(data.merchantNo.replace(SysPaymentLog.XIANFEN, ""));
+                CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
 
                 //服务调用成功
                 if ("99000".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
-                    if (isSys) {
+                    if (flag) {
+
+                        if (cashLog == null) {
+                            LOGGER.error("XianFen notify empty, cashLogId: " + cashLogId);
+                            writer.write(getResStr("404 not found"));
+                            return;
+                        }
+                        //防止重复返回，只处理进行中日志。
+                        if (cashLog.state != CashLog.PROCESS) {
+                            return;
+                        }
+
+                        if (data.status != null && data.status.toUpperCase().equals("S")) {
+                            //更新提现请求状态
+                            cashLog.state = CashLog.FINISH;
+                            cashLogMapper.updateByPrimaryKeySelective(cashLog);
+
+                            writer.write(getResStr("SUCCESS"));
+                        }
+                        if (data.status != null && data.status.toUpperCase().equals("F")) {
+                            cashLog.state = CashLog.FAILED;
+                            cashLog.msg = data.resMessage;
+                            cashLogMapper.updateByPrimaryKeySelective(cashLog);
+                            //回滚金额
+                            walletService.cashFail(cashLog.mchId, cashLog.money);
+
+                            writer.write(getResStr("SUCCESS"));
+                        }
+                        if (data.status != null && data.status.toUpperCase().equals("I")) {
+                            //do nothing.
+
+                            writer.write(data.resCode + "|" + data.resMessage);
+                        }
+
+                    } else {
+
                         BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
 
                         if (payOrder == null) {
@@ -308,9 +349,6 @@ public class XianFenService {
                             writer.write(data.resCode + "|" + data.resMessage);
                         }
 
-                    } else {
-                        //
-
 
                     }
                 } else if ("99001".equals(code) && !StringUtils.isEmpty(params.get("data").toString())) {
@@ -318,7 +356,9 @@ public class XianFenService {
                     decryptData = params.get("code").toString() + "|" + params.get("message").toString();
                     writer.write(decryptData);
                 } else {
-                    if (isSys) {
+                    //当作失败处理.
+
+                    if (!flag) {
                         // 进入商户api
                         BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
                         payOrder.status = BankPayOrder.FAIL;
@@ -338,8 +378,11 @@ public class XianFenService {
 
                     } else {
                         //系统内部
-
-
+                        cashLog.state = CashLog.FAILED;
+                        cashLog.msg = data.resMessage;
+                        cashLogMapper.updateByPrimaryKeySelective(cashLog);
+                        //回滚金额
+                        walletService.cashFail(cashLog.mchId, cashLog.money);
                     }
                     writer.write(getResStr("SUCCESS"));
                 }
