@@ -114,8 +114,8 @@ public class CntPayTest {
         String key = "97c8890018a34498bc3ab87484d9778e";
         Map<String, String> map = SignUtil.objectToMap(req);
         System.out.println(SignUtil.generateSignature(map, key));
-        Response response = (Response) payService.payConfirm(req.mchOrderId,req.mchId);
-        System.out.println(new Gson().toJson(response));
+        //Response response = (Response) payService.payConfirm(req.mchOrderId, req.mchId);
+        //System.out.println(new Gson().toJson(response));
   /*      String confirm = cntClient.confirm(req.mchOrderId,req.mchId.toString());
         System.out.println(confirm);*/
     }
