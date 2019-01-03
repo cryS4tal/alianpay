@@ -15,10 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * 加入版本号..
- * 支付类
- */
 @RestController
 @RequestMapping("/pay")
 public class PayController {
@@ -32,6 +28,10 @@ public class PayController {
     @Autowired
     AccountService accountService;
 
+    /**
+     * 加入了版本控制.
+     * version = 1.1 (CNT支付)
+     */
     @PostMapping("/order")
     public Object createOrder(@RequestBody BaseOrder baseOrder) throws Exception {
 
