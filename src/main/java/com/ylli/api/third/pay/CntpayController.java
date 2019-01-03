@@ -53,35 +53,11 @@ public class CntpayController {
     public Object payConfirm(@RequestBody ConfirmReq req) throws Exception {
         String key = mchKeyService.getKeyById(req.mchId);
         Map<String, String> map = SignUtil.objectToMap(req);
+        //签名判断
         if (!SignUtil.generateSignature(map, key).equals(req.sign.toUpperCase())) {
             return new Response("A001", "签名校验失败", req);
         }
         return cntService.payConfirm(req.mchOrderId, req.mchId);
-    }
-
-    /**
-     * 取消订单
-     *
-     * @param req
-     * @return
-     * @throws Exception
-     */
-    @PostMapping("/cancel")
-    public Object payCancel(@RequestBody ConfirmReq req) throws Exception {
-//        return cntService.payCancel(req);
-        return null;
-    }
-
-    /**
-     * 添加卡片
-     *
-     * @param req
-     * @return
-     * @throws Exception
-     */
-    @PostMapping("/card")
-    public Object addCard(@RequestBody CardReq req) throws Exception {
-        return cntService.addCard(req.mchId, req.userName, req.payName, req.openBank, req.subbranch);
     }
 
     /**
@@ -92,6 +68,7 @@ public class CntpayController {
     @PostMapping("/cash")
     public Object cash(@RequestBody CntCashReq req) throws Exception {
         String key = mchKeyService.getKeyById(req.mchId);
+        //签名判断
         Map<String, String> map = SignUtil.objectToMap(req);
         if (!SignUtil.generateSignature(map, key).equals(req.sign.toUpperCase())) {
             return new Response("A001", "签名校验失败", req);

@@ -59,30 +59,61 @@ public class CntService {
     @Autowired
     SerializeUtil serializeUtil;
 
+    /**
+     * 创建cnt定单
+     * @param mchId
+     * @param channelId
+     * @param money
+     * @param mchOrderId
+     * @param notifyUrl
+     * @param redirectUrl
+     * @param reserve
+     * @param payType
+     * @param tradeType
+     * @param extra
+     * @return
+     * @throws Exception
+     */
     @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
+        //创建定单
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
+        //分变元，保留两位小数，上游要求
         String mz = String.format("%.2f", (money / 100.0));
+        //上游支付宝or微信的标识
         Integer istype = payType.equals(PayService.ALI) ? CntRes.ZFB_PAY : CntRes.WX_PAY;
+        //向上游发起下定请求
         String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype.toString(), CntRes.CNT_BUY.toString());
         CntRes cntRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
+            //记录上游的定单号和卡号
             CntCard cntCard = cntRes.data.pays.stream().filter(item -> item.payType == istype).findFirst().get();
             bill.superOrderId = cntRes.data.orderId;
             bill.reserve = cntCard.cardId.toString();
             billMapper.updateByPrimaryKeySelective(bill);
+            //返回支付链接
             return cntCard.payUrl;
         }
         return null;
     }
 
+    /**
+     * 确认支付
+     *
+     * @param mchOrderId
+     * @param mchId
+     * @return
+     * @throws Exception
+     */
     public Response payConfirm(String mchOrderId, Long mchId) throws Exception {
+        //根据商户定单号查询商户定单，获取上游定单号
         Bill bill = new Bill();
         bill.mchOrderId = mchOrderId;
         bill = billMapper.selectOne(bill);
         if (bill == null || Strings.isNullOrEmpty(bill.superOrderId)) {
             return new Response("A006", "订单不存在");
         }
+        //根据上游定单号通知上游确认支付
         String confirm = cntClient.confirm(bill.superOrderId, bill.reserve);
         CntRes cntRes = new Gson().fromJson(confirm, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
@@ -109,6 +140,7 @@ public class CntService {
                 .append(merPriv).append("|").append(remark).append("|").append(date).append("|")
                 .append(resultCode).append("|").append(resultMsg).append("|").append(appID).append("|").append(secret);
         String sign = SignUtil.MD5(sb.toString()).toLowerCase();
+        //appID,userId和签名交验
         if (app_id.equals(appID) && userId.equals(userId) && successCode.equals(resultCode) && chkValue.equals(sign)) {
             if (CntRes.CNT_BUY == Integer.parseInt(isPur)) {
                 Bill bill = new Bill();
@@ -152,7 +184,7 @@ public class CntService {
         }
     }
 
-    @Transactional
+/*    @Transactional
     public Object payCancel(String orderId, Long mchId, String sgin) throws Exception {
         Bill bill = new Bill();
         bill.sysOrderId = orderId;
@@ -168,14 +200,15 @@ public class CntService {
             return "success";
         }
         return "fail";
-    }
+    }*/
 
-
-    public Object addCard(Long mchId, String userName, String payName, String openBank, String subbranch) throws Exception {
-        cntClient.addCard(mchId.toString(), userName, payName, openBank, subbranch);
-        return "fail";
-    }
-
+    /**
+     * 提现
+     *
+     * @param req
+     * @return
+     * @throws Exception
+     */
     public Object cash(CntCashReq req) throws Exception {
         //查询卡列表
         CntCardRes cntCardRes = new Gson().fromJson(cntClient.findCards(req.mchId.toString()), CntCardRes.class);
