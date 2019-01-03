@@ -9,6 +9,7 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.pay.service.BillService;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/bill")
-@Auth
+//@Auth
 public class BillController {
 
     @Autowired
@@ -63,6 +64,13 @@ public class BillController {
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(), offset, limit);
     }
+
+    @GetMapping("/export")
+    public void exportBills(HttpServletResponse response) {
+        billService.exportBills(response);
+    }
+
+
 
     @GetMapping("/today")
     public Object getTodayDetail(@AwesomeParam(required = false) Long mchId) {

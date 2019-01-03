@@ -18,6 +18,8 @@ import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.YfbClient;
 import com.ylli.api.wallet.service.WalletService;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -26,7 +28,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -314,6 +321,52 @@ public class BillService {
             walletService.rollback(bill.mchId, bill.money - bill.payCharge);
 
             billMapper.rollback(sysOrderId);
+        }
+    }
+
+    public void exportBills(HttpServletResponse response) {
+        Bill bill = new Bill();
+        bill.status = Bill.FINISH;
+        bill.mchId = 1031L;
+        List<Bill> list = billMapper.select(bill);
+
+
+        HSSFWorkbook wb = new HSSFWorkbook();
+        HSSFSheet sheet = wb.createSheet();
+        HSSFRow row1 = sheet.createRow(0);
+        HSSFCell cell1 = row1.createCell(0);
+        HSSFCell cell2 = row1.createCell(1);
+        HSSFCell cell3 = row1.createCell(2);
+        cell1.setCellValue("系统订单号");
+        cell2.setCellValue("商户订单号");
+        cell3.setCellValue("金额/元");
+        for (int i = 1; i <= list.size(); i++) {
+            HSSFRow rowi = sheet.createRow(i);
+            HSSFCell newCell1 = rowi.createCell(0);
+            HSSFCell newCell2 = rowi.createCell(1);
+            HSSFCell newCell3 = rowi.createCell(2);
+            newCell1.setCellValue(list.get(i - 1).sysOrderId);
+            newCell2.setCellValue(list.get(i - 1).mchOrderId);
+            newCell3.setCellValue(list.get(i - 1).msg);
+        }
+        OutputStream output = null;
+        try {
+            output = response.getOutputStream();
+            response.reset();
+            response.setHeader("Content-disposition", "attachment; filename=nameList.xls");
+            response.setContentType("application/msexcel");
+            wb.write(output);
+            output.flush();
+        } catch (IOException ex) {
+            //throw new AwesomeException(Config.ERROR_FAILURE_IOU_EXCEL_EXPORT);
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException ex) {
+                    //logger.info("stream closed failure");
+                }
+            }
         }
     }
 }
