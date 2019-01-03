@@ -437,6 +437,7 @@ public class PayService {
             return response;
         }
 
+        //TODO  CHANNEL 与 VERSION 关联.校验
         SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
         response = sysCheck(baseOrder, channel);
         if (response != null) {

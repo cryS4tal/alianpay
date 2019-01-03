@@ -37,17 +37,14 @@ public class CntClient {
         params.add("remark", mchId);
         params.add("appID", appId);
         params.add("ckValue", generateCkValue(userId, mchId, sysOrderId, mz, payType, isPur, mchId, appId));
-        System.out.println(new Gson().toJson(params));
         return post(params, "https://cntpay.io/trade/placeOrder");
     }
 
     public String post(MultiValueMap<String, String> params, String url) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        System.out.println(new Gson().toJson(params));
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-        System.out.println(response.getBody());
         return response.getBody();
     }
 
