@@ -53,7 +53,7 @@ public class YfbService {
     BillMapper billMapper;
 
     @Transactional(rollbackFor = AwesomeException.class)
-    public String createOrder(Long mchId, Long channelId, String payType, String tradeType, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, Object extra) throws Exception {
+    public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
         //加入商户系统订单.
         if (tradeType == null) {
             //支付方式. 默认扫码

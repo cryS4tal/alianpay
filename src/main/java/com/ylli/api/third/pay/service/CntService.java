@@ -17,16 +17,15 @@ import com.ylli.api.third.pay.model.CntCardRes;
 import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.wallet.service.WalletService;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.List;
 
 @Service
 @EnableAsync
@@ -34,28 +33,40 @@ public class CntService {
 
     @Value("${pay.cnt.secret}")
     public String secret;
+
     @Value("${pay.cnt.appid}")
     public String app_id;
+
     @Value("${pay.cnt.uid}")
     public String user_id;
+
     @Autowired
     BillService billService;
+
     @Autowired
     CntClient cntClient;
+
     @Autowired
     PayClient payClient;
+
     @Autowired
     PayService payService;
+
     @Autowired
     BillMapper billMapper;
+
     @Autowired
     WalletService walletService;
+
     @Autowired
     AppService appService;
+
     @Autowired
     MchKeyService mchKeyService;
+
     @Value("${pay.cont.success_code}")
     public String successCode;
+
     @Autowired
     SerializeUtil serializeUtil;
 
@@ -78,10 +89,12 @@ public class CntService {
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
         //创建定单
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
+
         //分变元，保留两位小数，上游要求
         String mz = String.format("%.2f", (money / 100.0));
         //上游支付宝or微信的标识
         Integer istype = payType.equals(PayService.ALI) ? CntRes.ZFB_PAY : CntRes.WX_PAY;
+
         //向上游发起下定请求
         String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype.toString(), CntRes.CNT_BUY.toString());
         CntRes cntRes = new Gson().fromJson(cntOrder, CntRes.class);
@@ -93,8 +106,12 @@ public class CntService {
             billMapper.updateByPrimaryKeySelective(bill);
             //返回支付链接
             return cntCard.payUrl;
+        } else {
+            //下单失败
+            bill.status = Bill.FAIL;
+            billMapper.updateByPrimaryKeySelective(bill);
+            return null;
         }
-        return null;
     }
 
     /**

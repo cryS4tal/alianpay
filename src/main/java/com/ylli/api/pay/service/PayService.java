@@ -13,6 +13,7 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.NotifyRes;
+import com.ylli.api.third.pay.service.CTService;
 import com.ylli.api.third.pay.service.CntService;
 import com.ylli.api.third.pay.service.HRJFService;
 import com.ylli.api.third.pay.service.UnknownPayService;
@@ -66,6 +67,9 @@ public class PayService {
     @Autowired
     CntService cntService;
 
+    @Autowired
+    CTService ctService;
+
     public static final String ALI = "alipay";
     public static final String WX = "wx";
 
@@ -73,17 +77,11 @@ public class PayService {
     public static final String WAP = "wap";
     public static final String APP = "app";
 
-    @Value("${yfb.ali.min}")
-    public Integer Ali_Min;
+    @Value("${ali.min}")
+    public Integer Ali_MIN;
 
-    @Value("${yfb.ali.max}")
-    public Integer Ali_Max;
-
-    @Value("${hrjf.ali.min}")
-    public Integer hrjf_min;
-
-    @Value("${hrjf.ali.max}")
-    public Integer hrjf_max;
+    @Value("${ali.max}")
+    public Integer Ali_MAX;
 
     /**
      * 中央调度server. 根据情况选择不同通道
@@ -113,67 +111,38 @@ public class PayService {
 
         if (channel.code.equals("YFB")) {
             //易付宝支付
+            return yfbOrder(baseOrder, channel.id, secretKey);
 
-            //订单金额校验.
-            if (baseOrder.payType.equals(ALI)) {
-                //10-9999
-                if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
-                    return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
-                }
-            } else if (baseOrder.payType.equals(WX)) {
-                //20 30 50 100 200 300 500
-                if (!Wx_Allow.contains(baseOrder.money)) {
-                    return new Response("A007", "交易金额限制：微信 20，30，50，100，200，300，500 元", baseOrder);
-                }
-            }
-            String str = yfbService.createOrder(baseOrder.mchId, channel.id, baseOrder.payType, baseOrder.tradeType, baseOrder.money,
-                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.extra);
-            //return str;
-            str = str.replace("/pay/alipay/scanpay.aspx", "http://api.qianyipay.com/pay/alipay/scanpay.aspx");
-            str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
-            str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
-            str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
-            return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
         } else if (channel.code.equals("WZ")) {
-            //暂时只支持支付宝H5
-            if (!ALI.equals(baseOrder.payType) || !WAP.equals(baseOrder.tradeType)) {
-                return new Response("A098", "临时限制：系统暂时只支持支付宝H5（payType=alipay，tradeType=wap）", baseOrder);
-            }
-
-            //金额限制，低于10元 && 费率低于 1% 存在金额精度丢失。（按分计）
-            if (baseOrder.money < Ali_Min) {
-                return new Response("A007", "交易金额限制：当前最低交易金额100元", baseOrder);
-            }
-            if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
-                //兼容网众支付  商户跳转地址必填
-                baseOrder.redirectUrl = "http://www.baidu.com";
-            }
-
-            String str = wzService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
-                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-
-            return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+            //网众支付
+            return wzOrder(baseOrder, channel.id, secretKey);
 
         } else if (channel.code.equals("unknown")) {
-            // ?? unknown 支付
+            //老个码支付
+            return unknownOrder(baseOrder, channel.id, secretKey);
 
-            //支付方式校验
-            if (!baseOrder.payType.equals(ALI) || baseOrder.tradeType.equals(APP)) {
-                return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+        } else if (channel.code.equals("HRJF")) {
+            //华融巨富（新个码） 基本等同于 易付宝
+            return hrjfOrder(baseOrder, channel.id, secretKey);
+
+        } else if (channel.code.equals("CT")) {
+            //畅通支付.
+            if (!baseOrder.payType.equals(ALI)) {
+                return new Response("A098", "临时限制：系统暂时只支持支付宝(pay_type = alipay)", baseOrder);
             }
             //金额校验
-            if (baseOrder.money < Ali_Min || baseOrder.money > Ali_Max) {
-                return new Response("A007", "交易金额限制：支付宝 100 -9999 元", baseOrder);
+            if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
+                return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
             }
-            if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
-                baseOrder.redirectUrl = "http://www.baidu.com";
-            }
-            String str = unknownPayService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+            String str = ctService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-
-            return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
-        } else if (channel.code.equals("HRJF")) {
-            return hrjfOrder(baseOrder, channel.id, secretKey);
+            if (Strings.isNullOrEmpty(str)) {
+                //下单失败
+                return new Response("A010", "下单失败，请联系管理员");
+            } else {
+                //下单成功
+                return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+            }
         } else {
             //
 
@@ -181,6 +150,9 @@ public class PayService {
         }
     }
 
+    /**
+     * 参数合法性校验
+     */
     public Response baseCheck(BaseOrder baseOrder) {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
@@ -196,6 +168,9 @@ public class PayService {
         return null;
     }
 
+    /**
+     * 签名校验
+     */
     public Response signCheck(BaseOrder baseOrder, String secretKey) throws Exception {
         if (secretKey == null) {
             return new Response("A002", "请先上传商户私钥", null);
@@ -206,11 +181,18 @@ public class PayService {
         return null;
     }
 
+    /**
+     * 系统校验
+     * 加入版本校验，目前cnt支付 对应version = 1.1 , channel.code = CNT
+     */
     public Response sysCheck(BaseOrder baseOrder, SysChannel channel) {
+        if (channel.code.equals("CNT") && !baseOrder.version.equals(BaseOrder.CNT)) {
+            return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
+        }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
             return new Response("A005", "订单号重复", baseOrder);
         }
-        // v1.1 新增 通道关闭的话。不允许下单
+        // 通道关闭，不允许下单
         if (channel.state == false) {
             return new Response("A009", "当前通道关闭，请联系管理员切换通道");
         }
@@ -230,8 +212,8 @@ public class PayService {
         }
 
         //金额校验
-        if (baseOrder.money < hrjf_min || baseOrder.money > hrjf_max) {
-            return new Response("A007", "交易金额限制：500 - 9999 元", baseOrder);
+        if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
+            return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
         }
 
         String str = hrjfService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
@@ -242,7 +224,69 @@ public class PayService {
 
         str = formToUrl(str);
         return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
-        //return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+    }
+
+    public Response unknownOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
+
+        //支付方式校验
+        if (!baseOrder.payType.equals(ALI) || baseOrder.tradeType.equals(APP)) {
+            return new Response("A098", "临时限制：系统暂时只支持支付宝H5", baseOrder);
+        }
+        //金额校验
+        if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
+            return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
+        }
+        if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
+            baseOrder.redirectUrl = "http://www.baidu.com";
+        }
+        String str = unknownPayService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+        return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
+    }
+
+    public Response wzOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
+        //暂时只支持支付宝H5
+        if (!ALI.equals(baseOrder.payType) || !WAP.equals(baseOrder.tradeType)) {
+            return new Response("A098", "临时限制：系统暂时只支持支付宝H5（payType=alipay，tradeType=wap）", baseOrder);
+        }
+
+        //金额限制，低于10元 && 费率低于 1% 存在金额精度丢失。（按分计）
+        if (baseOrder.money < Ali_MIN) {
+            return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
+        }
+        if (Strings.isNullOrEmpty(baseOrder.redirectUrl)) {
+            //兼容网众支付  商户跳转地址必填
+            baseOrder.redirectUrl = "http://www.baidu.com";
+        }
+
+        String str = wzService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+    }
+
+    public Response yfbOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
+        //订单金额校验.
+        if (baseOrder.payType.equals(ALI)) {
+            //10-9999
+            if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
+                return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
+            }
+        } else if (baseOrder.payType.equals(WX)) {
+            //20 30 50 100 200 300 500
+            if (!Wx_Allow.contains(baseOrder.money)) {
+                return new Response("A007", "交易金额限制：微信 20，30，50，100，200，300，500 元", baseOrder);
+            }
+        }
+        String str = yfbService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+        //return str;
+        str = str.replace("/pay/alipay/scanpay.aspx", "http://api.qianyipay.com/pay/alipay/scanpay.aspx");
+        str = str.replace("/pay/weixin/scanpay.aspx", "http://api.qianyipay.com/pay/weixin/scanpay.aspx");
+        str = str.replace("/pay/alipay/wap.aspx", "http://api.qianyipay.com/pay/alipay/wap.aspx");
+        str = str.replace("/pay/weixin/wap.aspx", "http://api.qianyipay.com/pay/weixin/wap.aspx");
+        return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
     }
 
     public String formToUrl(String form) {
@@ -437,17 +481,22 @@ public class PayService {
             return response;
         }
 
-        //TODO  CHANNEL 与 VERSION 关联.校验
         SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
         response = sysCheck(baseOrder, channel);
         if (response != null) {
             return response;
         }
 
+        if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
+            return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN, Ali_MAX), baseOrder);
+        }
+        //TODO 支付方式校验,pay_type / trade_type
+        //??
+
         String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
         if (Strings.isNullOrEmpty(str)) {
-            return new Response("A099", "下单失败");
+            return new Response("A010", "下单失败，请联系管理员");
         }
         return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
     }

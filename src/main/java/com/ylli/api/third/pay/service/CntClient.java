@@ -3,7 +3,11 @@ package com.ylli.api.third.pay.service;
 import com.ylli.api.pay.util.SignUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -11,14 +15,19 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class CntClient {
+
     @Value("${pay.cnt.notify}")
     public String notifyUrl;
+
     @Value("${pay.cnt.appid}")
     public String appId;
+
     @Value("${pay.cnt.uid}")
     public String userId;
+
     @Value("${pay.cnt.secret}")
     public String secret;
+
     @Value("${pay.cont.success_code}")
     public String successCode;
 
