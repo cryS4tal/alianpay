@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ylli.api.mch.model.MchKey;
 import com.ylli.api.mch.service.MchKeyService;
+import com.ylli.api.pay.enums.Version;
+import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.OrderQueryReq;
@@ -69,6 +71,9 @@ public class PayService {
 
     @Autowired
     CTService ctService;
+
+    @Autowired
+    BillMapper billMapper;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -186,7 +191,7 @@ public class PayService {
      * 加入版本校验，目前cnt支付 对应version = 1.1 , channel.code = CNT
      */
     public Response sysCheck(BaseOrder baseOrder, SysChannel channel) {
-        if (channel.code.equals("CNT") && !baseOrder.version.equals(BaseOrder.CNT)) {
+        if (channel.code.equals("CNT") && !(Version.CNT.getVersion()).equals(baseOrder.version)) {
             return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
         }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
@@ -219,11 +224,28 @@ public class PayService {
         String str = hrjfService.createOrder(baseOrder.mchId, channelId, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-        str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
-        //str = str.replace("/ydpay/Pay.aspx", "http://gateway.iexindex.com/ydpay/Pay.aspx");
+        if (str.startsWith("error")) {
+            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
+            bill.status = Bill.FAIL;
+            billMapper.updateByPrimaryKeySelective(bill);
 
-        str = formToUrl(str);
-        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+            return new Response("A010", String.format("下单失败: %s", str));
+
+        } else if (str.startsWith("目前网关拥堵,请稍后再试")) {
+            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
+            bill.status = Bill.FAIL;
+            billMapper.updateByPrimaryKeySelective(bill);
+
+            return new Response("A010", "下单失败: 目前网关拥堵,请稍后再试");
+
+        } else {
+            str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
+            //str = str.replace("/ydpay/Pay.aspx", "http://gateway.iexindex.com/ydpay/Pay.aspx");
+
+            str = formToUrl(str);
+            return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+
+        }
     }
 
     public Response unknownOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {

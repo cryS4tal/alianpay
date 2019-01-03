@@ -2,12 +2,10 @@ package com.ylli.api.pay.model;
 
 /**
  * 用于己方系统商户下单基础类
+ * <p>
+ * 签名函数：导致不能再此类中加入静态变量（会参与签名）
  */
 public class BaseOrder {
-
-    public static final String DEFAULT = "1.0";
-    //单独开放给cnt通道支付.
-    public static final String CNT = "1.1";
 
     public Long mchId;        //商户id  →  accountId】
 
