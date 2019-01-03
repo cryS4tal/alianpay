@@ -13,6 +13,7 @@ import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
 import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.WzQueryRes;
 import com.ylli.api.third.pay.service.WzClient;
@@ -25,6 +26,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -324,12 +326,10 @@ public class BillService {
         }
     }
 
-    public void exportBills(HttpServletResponse response) {
-        Bill bill = new Bill();
-        bill.status = Bill.FINISH;
-        bill.mchId = 1031L;
-        List<Bill> list = billMapper.select(bill);
+    public void exportBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
+                            String tradeType, Date tradeTime, Date startTime, Date endTime, HttpServletResponse response) {
 
+        List<Bill> list = billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
 
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet();
@@ -337,28 +337,63 @@ public class BillService {
         HSSFCell cell1 = row1.createCell(0);
         HSSFCell cell2 = row1.createCell(1);
         HSSFCell cell3 = row1.createCell(2);
-        cell1.setCellValue("系统订单号");
-        cell2.setCellValue("商户订单号");
-        cell3.setCellValue("金额/元");
+        HSSFCell cell4 = row1.createCell(3);
+        HSSFCell cell5 = row1.createCell(4);
+        HSSFCell cell6 = row1.createCell(5);
+        HSSFCell cell7 = row1.createCell(6);
+        HSSFCell cell8 = row1.createCell(7);
+        HSSFCell cell9 = row1.createCell(8);
+        HSSFCell cell10 = row1.createCell(9);
+        HSSFCell cell11 = row1.createCell(10);
+        cell1.setCellValue("id");
+        cell2.setCellValue("商户号");
+        cell3.setCellValue("系统订单号");
+        cell4.setCellValue("商户订单号");
+        cell5.setCellValue("上游订单号");
+        cell6.setCellValue("是否手动补单");
+        cell7.setCellValue("通道");
+        cell8.setCellValue("订单状态");
+        cell9.setCellValue("手续费/分");
+        cell10.setCellValue("金额/元");
+        cell11.setCellValue("创建时间(北京时间)");
         for (int i = 1; i <= list.size(); i++) {
             HSSFRow rowi = sheet.createRow(i);
             HSSFCell newCell1 = rowi.createCell(0);
             HSSFCell newCell2 = rowi.createCell(1);
             HSSFCell newCell3 = rowi.createCell(2);
-            newCell1.setCellValue(list.get(i - 1).sysOrderId);
-            newCell2.setCellValue(list.get(i - 1).mchOrderId);
-            newCell3.setCellValue(list.get(i - 1).msg);
+            HSSFCell newCell4 = rowi.createCell(3);
+            HSSFCell newCell5 = rowi.createCell(4);
+            HSSFCell newCell6 = rowi.createCell(5);
+            HSSFCell newCell7 = rowi.createCell(6);
+            HSSFCell newCell8 = rowi.createCell(7);
+            HSSFCell newCell9 = rowi.createCell(8);
+            HSSFCell newCell10 = rowi.createCell(9);
+            HSSFCell newCell11 = rowi.createCell(10);
+            newCell1.setCellValue(list.get(i - 1).id);
+            newCell2.setCellValue(list.get(i - 1).mchId);
+            newCell3.setCellValue(list.get(i - 1).sysOrderId);
+            newCell4.setCellValue(list.get(i - 1).mchOrderId);
+            newCell5.setCellValue(list.get(i - 1).superOrderId);
+
+            if (!Strings.isNullOrEmpty(list.get(i - 1).superOrderId)) {
+                newCell6.setCellValue(list.get(i - 1).superOrderId.startsWith("unknown") ? "是" : "否");
+            }
+            newCell7.setCellValue(SysChannel.getName(list.get(i - 1).channelId));
+            newCell8.setCellValue(Bill.getStatus(list.get(i - 1).status));
+            newCell9.setCellValue(Optional.ofNullable(list.get(i - 1).payCharge).map(j -> j.toString()).orElse(""));
+            newCell10.setCellValue(list.get(i - 1).msg);
+            newCell11.setCellValue(convertZ8(list.get(i - 1).createTime));
         }
         OutputStream output = null;
         try {
             output = response.getOutputStream();
             response.reset();
-            response.setHeader("Content-disposition", "attachment; filename=nameList.xls");
+            response.setHeader("Content-disposition", "attachment; filename=orders.xls");
             response.setContentType("application/msexcel");
             wb.write(output);
             output.flush();
         } catch (IOException ex) {
-            //throw new AwesomeException(Config.ERROR_FAILURE_IOU_EXCEL_EXPORT);
+            throw new AwesomeException(Config.ERROR_FAILURE_BILL_EXCEL_EXPORT);
         } finally {
             if (output != null) {
                 try {
@@ -368,5 +403,15 @@ public class BillService {
                 }
             }
         }
+    }
+
+    /**
+     * Z0 to Z8
+     */
+    public String convertZ8(Timestamp ts) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(ts);
+        calendar.add(Calendar.HOUR, 8);
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
     }
 }

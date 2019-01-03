@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 @Table(name = "t_bill")
 public class Bill {
@@ -69,4 +70,23 @@ public class Bill {
     public Timestamp createTime;
 
     public Timestamp modifyTime;
+
+    public static String getStatus(@NotNull Integer status) {
+        if (status == NEW) {
+            return "未支付";
+        }
+        if (status == ING) {
+            return "进行中";
+        }
+        if (status == FINISH) {
+            return "交易成功";
+        }
+        if (status == FAIL) {
+            return "交易失败";
+        }
+        if (status == AUTO_CLOSE) {
+            return "超时关闭";
+        }
+        return "异常";
+    }
 }

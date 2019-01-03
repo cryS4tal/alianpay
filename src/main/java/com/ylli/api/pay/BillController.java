@@ -66,10 +66,22 @@ public class BillController {
     }
 
     @GetMapping("/export")
-    public void exportBills(HttpServletResponse response) {
-        billService.exportBills(response);
+    public void exportBills(@AwesomeParam(required = false) Long mchId,
+                            @AwesomeParam(required = false) Integer status,
+                            @AwesomeParam(required = false) String mchOrderId,
+                            @AwesomeParam(required = false) String sysOrderId,
+                            @AwesomeParam(required = false) String payType,
+                            @AwesomeParam(required = false) String tradeType,
+                            @AwesomeParam(required = false) AwesomeDateTime tradeTime,
+                            @AwesomeParam(required = false) AwesomeDateTime startTime,
+                            @AwesomeParam(required = false) AwesomeDateTime endTime,
+                            HttpServletResponse response) {
+        billService.exportBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType,
+                tradeTime == null ? null : tradeTime.getDate(),
+                startTime == null ? null : startTime.getDate(),
+                endTime == null ? null : endTime.getDate(),
+                response);
     }
-
 
 
     @GetMapping("/today")

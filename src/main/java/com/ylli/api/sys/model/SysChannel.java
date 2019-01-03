@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 @Table(name = "t_sys_channel")
 public class SysChannel {
@@ -22,4 +23,22 @@ public class SysChannel {
     public Timestamp createTime;
 
     public Timestamp modifyTime;
+
+    public static String getName(@NotNull Long channelId) {
+        //不修改数据库的情况下直接本地读取
+        //db修改记得增加解析
+        if (channelId == 1) {
+            return "易付宝";
+        }
+        if (channelId == 2) {
+            return "网众";
+        }
+        if (channelId == 3) {
+            return "个码";
+        }
+        if (channelId == 4) {
+            return "个码-风控";
+        }
+        return "未知";
+    }
 }
