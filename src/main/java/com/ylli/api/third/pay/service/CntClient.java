@@ -34,6 +34,17 @@ public class CntClient {
     @Autowired
     RestTemplate restTemplate;
 
+    /**
+     * 创建定单
+     *
+     * @param sysOrderId 系统定单号
+     * @param mchId      系统商户号，这里是系统商户号+"_"+系统定单号
+     * @param mz         金额
+     * @param payType    支付类型
+     * @param isPur      下单or提现
+     * @return
+     * @throws Exception
+     */
     public String createCntOrder(String sysOrderId, String mchId, String mz, String payType, String isPur) throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
         params.add("userId", userId);
@@ -48,19 +59,12 @@ public class CntClient {
         return post(params, "https://cntpay.io/trade/placeOrder");
     }
 
-    public String post(MultiValueMap<String, String> params, String url) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-        return response.getBody();
-    }
 
     /**
      * 确认下单
      *
-     * @param orderId
-     * @param cardId
+     * @param orderId 上游定单号
+     * @param cardId  上游卡id 对应t_bill中的reverse
      * @return
      * @throws Exception
      */
@@ -76,6 +80,11 @@ public class CntClient {
 
     /**
      * 取消订单
+     *
+     * @param orderid 上游定单号
+     * @param mchId   这里应该是系统商户号+“_”+系统定单号
+     * @return
+     * @throws Exception
      */
     public String cancel(String orderid, String mchId) throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
@@ -88,6 +97,13 @@ public class CntClient {
 
     }
 
+    /**
+     * 加密
+     *
+     * @param arr
+     * @return
+     * @throws Exception
+     */
     public String generateCkValue(String... arr) throws Exception {
         StringBuffer sb = new StringBuffer();
         for (String s : arr) {
@@ -98,7 +114,17 @@ public class CntClient {
         return SignUtil.MD5(sb.toString()).toLowerCase();
     }
 
-
+    /**
+     * 添加卡，体现时上游是根据现在这个绑定的卡转账
+     *
+     * @param mchId     系统商户号
+     * @param userName  银行卡所有者的姓名
+     * @param payName   银行卡号
+     * @param openBank  总行
+     * @param subbranch 支行
+     * @return
+     * @throws Exception
+     */
     public String addCard(String mchId, String userName, String payName, String openBank, String subbranch) throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
         params.add("userId", userId);
@@ -112,6 +138,13 @@ public class CntClient {
         return post(params, "https://cntpay.io/trade/addCard");
     }
 
+    /**
+     * 删除卡
+     *
+     * @param cardId 上游卡号
+     * @return
+     * @throws Exception
+     */
     public String delCard(String cardId) throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
         params.add("userId", userId);
@@ -121,6 +154,13 @@ public class CntClient {
         return post(params, "https://cntpay.io/trade/delCard");
     }
 
+    /**
+     * 查询已经绑定的卡列表
+     *
+     * @param mchId 系统商户号
+     * @return
+     * @throws Exception
+     */
     public String findCards(String mchId) throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
         params.add("userId", userId);
@@ -128,5 +168,13 @@ public class CntClient {
         params.add("appID", appId);
         params.add("ckValue", generateCkValue(userId, mchId, appId));
         return post(params, "https://cntpay.io/trade/findCards");
+    }
+
+    public String post(MultiValueMap<String, String> params, String url) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<MultiValueMap<String, String>>(params, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        return response.getBody();
     }
 }
