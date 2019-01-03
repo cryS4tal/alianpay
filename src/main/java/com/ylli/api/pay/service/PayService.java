@@ -13,8 +13,11 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.NotifyRes;
-import com.ylli.api.third.pay.service.*;
-
+import com.ylli.api.third.pay.service.CntService;
+import com.ylli.api.third.pay.service.HRJFService;
+import com.ylli.api.third.pay.service.UnknownPayService;
+import com.ylli.api.third.pay.service.WzService;
+import com.ylli.api.third.pay.service.YfbService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,14 +29,12 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -92,16 +93,23 @@ public class PayService {
      */
     public Object createOrderDefault(BaseOrder baseOrder) throws Exception {
 
-        Response response = keyValid(baseOrder);
-        if (!response.code.equals("A000"))
+        Response response = baseCheck(baseOrder);
+        if (response != null) {
             return response;
-        String secretKey = response.message;
+        }
 
-        response = channelValid(baseOrder);
-        if (!response.code.equals("A000"))
+        //sign 前置校验
+        String secretKey = userKeyService.getKeyById(baseOrder.mchId);
+        response = signCheck(baseOrder, secretKey);
+        if (response != null) {
             return response;
+        }
 
-        SysChannel channel = (SysChannel) response.data;
+        SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
+        response = sysCheck(baseOrder, channel);
+        if (response != null) {
+            return response;
+        }
 
         if (channel.code.equals("YFB")) {
             //易付宝支付
@@ -173,29 +181,11 @@ public class PayService {
         }
     }
 
-    private Response channelValid(BaseOrder baseOrder) {
-        SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
-        // v1.1 新增 通道关闭的话。不允许下单
-        if (channel.state == false) {
-            return new Response("A009", "当前通道关闭，请联系管理员切换通道");
-        }
-        if (billService.mchOrderExist(baseOrder.mchOrderId)) {
-            return new Response("A005", "订单号重复", baseOrder);
-        }
-        return new Response("A000", "", channel);
-    }
-
-    private Response keyValid(BaseOrder baseOrder) throws Exception {
+    public Response baseCheck(BaseOrder baseOrder) {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
                 || Strings.isNullOrEmpty(baseOrder.sign)) {
             return new Response("A003", "非法的请求参数", baseOrder);
-        }
-
-        //sign 前置校验
-        String secretKey = userKeyService.getKeyById(baseOrder.mchId);
-        if (secretKey == null) {
-            return new Response("A002", "请先上传商户私钥", null);
         }
         if (!payTypes.contains(baseOrder.payType)) {
             return new Response("A004", "不支持的支付类型", baseOrder);
@@ -203,11 +193,30 @@ public class PayService {
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
             return new Response("A008", "不支持的支付方式", baseOrder);
         }
+        return null;
+    }
+
+    public Response signCheck(BaseOrder baseOrder, String secretKey) throws Exception {
+        if (secretKey == null) {
+            return new Response("A002", "请先上传商户私钥", null);
+        }
         if (isSignValid(baseOrder, secretKey)) {
             return new Response("A001", "签名校验失败", baseOrder);
         }
-        return new Response("A000", secretKey, null);
+        return null;
     }
+
+    public Response sysCheck(BaseOrder baseOrder, SysChannel channel) {
+        if (billService.mchOrderExist(baseOrder.mchOrderId)) {
+            return new Response("A005", "订单号重复", baseOrder);
+        }
+        // v1.1 新增 通道关闭的话。不允许下单
+        if (channel.state == false) {
+            return new Response("A009", "当前通道关闭，请联系管理员切换通道");
+        }
+        return null;
+    }
+
 
     public Response hrjfOrder(BaseOrder baseOrder, Long channelId, String secretKey) throws Exception {
         //华荣聚付  -  和易付宝基本一致
@@ -416,15 +425,23 @@ public class PayService {
     }
 
     public Object createOrderCNT(BaseOrder baseOrder) throws Exception {
-        Response response = keyValid(baseOrder);
-        if (!response.code.equals("A000"))
+        Response response = baseCheck(baseOrder);
+        if (response != null) {
             return response;
-        String secretKey = response.message;
+        }
 
-        response = channelValid(baseOrder);
-        if (!response.code.equals("A000"))
+        //sign 前置校验
+        String secretKey = userKeyService.getKeyById(baseOrder.mchId);
+        response = signCheck(baseOrder, secretKey);
+        if (response != null) {
             return response;
-        SysChannel channel = (SysChannel) response.data;
+        }
+
+        SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
+        response = sysCheck(baseOrder, channel);
+        if (response != null) {
+            return response;
+        }
 
         String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
