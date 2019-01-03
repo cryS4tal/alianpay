@@ -12,6 +12,7 @@ import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.third.pay.enums.CNTEnum;
 import com.ylli.api.third.pay.model.CntCard;
 import com.ylli.api.third.pay.model.CntCardRes;
 import com.ylli.api.third.pay.model.CntCashReq;
@@ -61,7 +62,6 @@ public class CntService {
     @Autowired
     MchKeyService mchKeyService;
 
-    //@Value("${pay.cnt.success}")
     public static String successCode = "0000";
 
     @Autowired
@@ -94,7 +94,7 @@ public class CntService {
         Integer istype = payType.equals(PayService.ALI) ? CntRes.ZFB_PAY : CntRes.WX_PAY;
 
         //向上游发起下定请求
-        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype.toString(), CntRes.CNT_BUY.toString());
+        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype.toString(), CNTEnum.BUY.getValue());
         CntRes cntRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
             //记录上游的定单号和卡号
@@ -125,54 +125,95 @@ public class CntService {
      */
     @Transactional
     public String payNotify(String userId, String orderId, String userOrder, String number, String remark, String merPriv, String date, String resultCode, String resultMsg, String appID, String isPur, String chkValue) throws Exception {
-        StringBuffer sb = new StringBuffer();
-        sb.append(userId).append("|").append(orderId).append("|").append(userOrder).append("|").append(number).append("|")
-                .append(merPriv).append("|").append(remark).append("|").append(date).append("|")
-                .append(resultCode).append("|").append(resultMsg).append("|").append(appID).append("|").append(secret);
-        String sign = SignUtil.MD5(sb.toString()).toLowerCase();
-        //appID,userId和签名交验
-        if (appId.equals(appID) && userId.equals(userId) && successCode.equals(resultCode) && chkValue.equals(sign)) {
-            if (CntRes.CNT_BUY == Integer.parseInt(isPur)) {
-                Bill bill = new Bill();
-                bill.sysOrderId = userOrder;
-                bill = billMapper.selectOne(bill);
+
+        String sign = generateSign(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID);
+
+        //
+        if (chkValue.equals(sign)) {
+            //支付回调
+            if (CNTEnum.BUY.getValue().equals(isPur)) {
+                Bill bill = billService.selectBySysOrderId(userOrder);
                 if (bill == null) {
                     return "order not found";
                 }
-                if (bill.status != Bill.FINISH) {
-                    bill.status = Bill.FINISH;
-                    bill.tradeTime = Timestamp.from(Instant.now());
-                    bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
-                    bill.superOrderId = userOrder;
-                    bill.msg = resultMsg;
-                    billMapper.updateByPrimaryKeySelective(bill);
+                if (successCode.equals(resultCode)) {
+                    //交易成功
+                    if (bill.status != Bill.FINISH) {
+                        bill.status = Bill.FINISH;
 
-                    //钱包金额变动。
-                    walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                        //TODO data format
+                        bill.tradeTime = Timestamp.from(Instant.now());
+
+                        bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                        bill.superOrderId = userOrder;
+                        bill.msg = resultMsg;
+                        billMapper.updateByPrimaryKeySelective(bill);
+
+                        //钱包金额变动。
+                        walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                    }
+
+                } else {
+                    //交易失败
+                    if (bill.status != Bill.FAIL) {
+                        bill.status = Bill.FAIL;
+
+                        bill.tradeTime = Timestamp.from(Instant.now());
+                        bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                        bill.superOrderId = userOrder;
+                        bill.msg = resultMsg;
+                        billMapper.updateByPrimaryKeySelective(bill);
+                    }
                 }
 
                 //加入异步通知下游商户系统
                 //params jsonStr.
-                if (Strings.isNullOrEmpty(bill.notifyUrl))
-                    return "success";
-                String params = payService.generateRes(
-                        bill.money.toString(),
-                        bill.mchOrderId,
-                        bill.sysOrderId,
-                        bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
-                        bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
-                        bill.reserve);
+                if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
+                    String params = payService.generateRes(
+                            bill.money.toString(),
+                            bill.mchOrderId,
+                            bill.sysOrderId,
+                            bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
+                            bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
+                            bill.reserve);
 
-                payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
-
+                    payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+                }
                 return "success";
-            } else {
+            } else if (CNTEnum.CASH.getValue().equals(isPur)) {
+                //提现回调
+                //TODO
+
+
                 return "";
+            } else {
+                //返回类型错误
+                return "isPur error.";
             }
         } else {
-            return "fail";
+            //签名校验失败
+            return "sign error.";
         }
     }
+
+    public String generateSign(String userId, String orderId, String userOrder, String number, String remark,
+                               String merPriv, String date, String resultCode, String resultMsg, String appID) throws Exception {
+        String str = new StringBuffer()
+                .append(userId).append("|")
+                .append(orderId).append("|")
+                .append(userOrder).append("|")
+                .append(number).append("|")
+                .append(merPriv).append("|")
+                .append(remark).append("|")
+                .append(date).append("|")
+                .append(resultCode).append("|")
+                .append(resultMsg).append("|")
+                .append(appID).append("|").append(secret).toString();
+        String sign = SignUtil.MD5(str).toLowerCase();
+
+        return sign;
+    }
+
 
     /**
      * 提现
