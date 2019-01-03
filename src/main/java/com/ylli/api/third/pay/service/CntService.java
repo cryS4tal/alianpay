@@ -27,7 +27,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @EnableAsync
@@ -35,7 +34,10 @@ public class CntService {
 
     @Value("${pay.cnt.secret}")
     public String secret;
-
+    @Value("${pay.cnt.appid}")
+    public String app_id;
+    @Value("${pay.cnt.uid}")
+    public String user_id;
     @Autowired
     BillService billService;
     @Autowired
@@ -103,12 +105,11 @@ public class CntService {
     @Transactional
     public String payNotify(String userId, String orderId, String userOrder, String number, String remark, String merPriv, String date, String resultCode, String resultMsg, String appID, String isPur, String chkValue) throws Exception {
         StringBuffer sb = new StringBuffer();
-        sb.append(userId).append("|").append(orderId).append("|").append(userOrder).append("|").append(number).append("|").append(isPur).append("|")
+        sb.append(userId).append("|").append(orderId).append("|").append(userOrder).append("|").append(number).append("|")
                 .append(merPriv).append("|").append(remark).append("|").append(date).append("|")
                 .append(resultCode).append("|").append(resultMsg).append("|").append(appID).append("|").append(secret);
         String sign = SignUtil.MD5(sb.toString()).toLowerCase();
-        System.out.println(sign);
-        if (successCode.equals(resultCode) && chkValue.equals(sign)) {
+        if (app_id.equals(appID) && userId.equals(userId) && successCode.equals(resultCode) && chkValue.equals(sign)) {
             if (CntRes.CNT_BUY == Integer.parseInt(isPur)) {
                 Bill bill = new Bill();
                 bill.sysOrderId = userOrder;
@@ -130,6 +131,8 @@ public class CntService {
 
                 //加入异步通知下游商户系统
                 //params jsonStr.
+                if (Strings.isNullOrEmpty(bill.notifyUrl))
+                    return "success";
                 String params = payService.generateRes(
                         bill.money.toString(),
                         bill.mchOrderId,

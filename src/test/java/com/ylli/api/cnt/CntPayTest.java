@@ -53,8 +53,8 @@ public class CntPayTest {
         String s1 = SignUtil.generateSignature(map, secretKey);
         System.out.println("key: " + s1);
         System.out.println(new Gson().toJson(baseOrder));
-        String order = cntService.createOrder(baseOrder.mchId, 5L, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-        System.out.println(order);
+    /*    String order = cntService.createOrder(baseOrder.mchId, 5L, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+        System.out.println(order);*/
         String s = "";
     }
 
@@ -118,7 +118,7 @@ public class CntPayTest {
 
     @Test
     public void cancel() throws Exception {
-        String cancel = cntClient.cancel("O18122919380920", "1024");
+        String cancel = cntClient.cancel("O19010315521558", "1024");
         System.out.println(cancel);
     }
 
