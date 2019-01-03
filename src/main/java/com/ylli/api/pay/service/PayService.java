@@ -181,6 +181,9 @@ public class PayService {
         }
     }
 
+    /**
+     * 参数合法性校验
+     */
     public Response baseCheck(BaseOrder baseOrder) {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
@@ -196,6 +199,9 @@ public class PayService {
         return null;
     }
 
+    /**
+     * 签名校验
+     */
     public Response signCheck(BaseOrder baseOrder, String secretKey) throws Exception {
         if (secretKey == null) {
             return new Response("A002", "请先上传商户私钥", null);
@@ -206,6 +212,9 @@ public class PayService {
         return null;
     }
 
+    /**
+     * 系统校验
+     */
     public Response sysCheck(BaseOrder baseOrder, SysChannel channel) {
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
             return new Response("A005", "订单号重复", baseOrder);
