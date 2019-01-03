@@ -111,7 +111,7 @@ public class CntService {
         if (successCode.equals(resultCode) && chkValue.equals(sign)) {
             if (CntRes.CNT_BUY == Integer.parseInt(isPur)) {
                 Bill bill = new Bill();
-                bill.sysOrderId = orderId;
+                bill.sysOrderId = userOrder;
                 bill = billMapper.selectOne(bill);
                 if (bill == null) {
                     return "order not found";
