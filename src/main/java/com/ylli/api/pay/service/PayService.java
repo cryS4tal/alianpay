@@ -183,12 +183,16 @@ public class PayService {
 
     /**
      * 系统校验
+     * 加入版本校验，目前cnt支付 对应version = 1.1 , channel.code = CNT
      */
     public Response sysCheck(BaseOrder baseOrder, SysChannel channel) {
+        if (channel.code.equals("CNT") && !baseOrder.version.equals(BaseOrder.CNT)) {
+            return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
+        }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
             return new Response("A005", "订单号重复", baseOrder);
         }
-        // v1.1 新增 通道关闭的话。不允许下单
+        // 通道关闭，不允许下单
         if (channel.state == false) {
             return new Response("A009", "当前通道关闭，请联系管理员切换通道");
         }
@@ -477,13 +481,12 @@ public class PayService {
             return response;
         }
 
-        //TODO  CHANNEL 与 VERSION 关联.校验
         SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
         response = sysCheck(baseOrder, channel);
         if (response != null) {
             return response;
         }
-        //TODO 金额校验
+
         if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
             return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN, Ali_MAX), baseOrder);
         }
@@ -493,7 +496,7 @@ public class PayService {
         String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
         if (Strings.isNullOrEmpty(str)) {
-            return new Response("A099", "下单失败");
+            return new Response("A010", "下单失败，请联系管理员");
         }
         return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
     }

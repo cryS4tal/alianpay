@@ -39,6 +39,12 @@ public class SysChannel {
         if (channelId == 4) {
             return "个码-风控";
         }
+        if (channelId == 5) {
+            return "CNT支付";
+        }
+        if (channelId == 6) {
+            return "畅通支付";
+        }
         return "未知";
     }
 }
