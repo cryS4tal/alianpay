@@ -3,10 +3,8 @@ package com.ylli.api.pay.mapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
 import com.ylli.api.sys.model.Data;
-
 import java.util.Date;
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -44,7 +42,4 @@ public interface BillMapper extends Mapper<Bill> {
 
     @Update("UPDATE t_bill SET `status` = 1,trade_time = NULL,pay_charge = NULL,super_order_id = NULL,msg = NULL,is_success = NULL WHERE sys_order_id = #{sys_order_id}")
     void rollback(@Param("sys_order_id") String sysOrderId);
-
-    @Select("select * from t_bill where mch_id = #{mch_id} and channel_id = #{channel_id} and status= #{status} ")
-    List<Bill> getBillByChannelIdAndStatus(@Param("mch_id") Long mchId, @Param("channel_id") Long id, @Param("status") Integer status);
 }

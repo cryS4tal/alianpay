@@ -348,7 +348,6 @@ public class BillService {
 
     public void exportBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
                             String tradeType, Date tradeTime, Date startTime, Date endTime, HttpServletResponse response) {
-
         List<Bill> list = billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
 
         HSSFWorkbook wb = new HSSFWorkbook();
