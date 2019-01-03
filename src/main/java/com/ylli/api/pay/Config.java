@@ -30,6 +30,11 @@ public class Config {
             4, "此订单不是手工补单，不能回滚");
 
 
+    public static final ErrorCode ERROR_FAILURE_BILL_EXCEL_EXPORT
+            = new ErrorCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, MODEL_CODE,
+            5, "导出excel异常");
+
+
     /**
      * 权限
      */
