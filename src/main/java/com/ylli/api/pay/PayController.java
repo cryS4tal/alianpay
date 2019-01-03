@@ -7,6 +7,7 @@ import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.service.PayService;
+import com.ylli.api.third.pay.model.OrderConfirm;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,5 +65,16 @@ public class PayController {
     @PostMapping("/notify/test")
     public void payNotify(HttpServletRequest request, HttpServletResponse response) {
         payService.paynotify(request, response);
+    }
+
+    /**
+     * 用于 version = 1.1 (cnt支付) 手动确认支付状态。
+     */
+    @PostMapping("/confirm")
+    public Object payConfirm(@RequestBody OrderConfirm confirm) throws Exception {
+        if (!accountService.isActive(confirm.mchId)) {
+            return new Response("A100", "商户被冻结，请联系管理员");
+        }
+        return payService.payConfirm(confirm);
     }
 }

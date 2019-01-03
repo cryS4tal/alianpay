@@ -14,7 +14,9 @@ import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
+import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.third.pay.model.NotifyRes;
+import com.ylli.api.third.pay.model.OrderConfirm;
 import com.ylli.api.third.pay.service.CTService;
 import com.ylli.api.third.pay.service.CntService;
 import com.ylli.api.third.pay.service.HRJFService;
@@ -49,7 +51,7 @@ public class PayService {
     YfbService yfbService;
 
     @Autowired
-    MchKeyService userKeyService;
+    MchKeyService mchKeyService;
 
     @Autowired
     ChannelService channelService;
@@ -88,6 +90,9 @@ public class PayService {
     @Value("${ali.max}")
     public Integer Ali_MAX;
 
+    //@Value("${pay.cnt.success}")
+    public static String successCode = "0000";
+
     /**
      * 中央调度server. 根据情况选择不同通道
      *
@@ -102,7 +107,7 @@ public class PayService {
         }
 
         //sign 前置校验
-        String secretKey = userKeyService.getKeyById(baseOrder.mchId);
+        String secretKey = mchKeyService.getKeyById(baseOrder.mchId);
         response = signCheck(baseOrder, secretKey);
         if (response != null) {
             return response;
@@ -375,6 +380,11 @@ public class PayService {
         return !SignUtil.generateSignature(map, secretKey).equals(order.sign.toUpperCase());
     }
 
+    public boolean isSignValid(OrderConfirm confirm, String secretKey) throws Exception {
+        Map<String, String> map = SignUtil.objectToMap(confirm);
+        return !SignUtil.generateSignature(map, secretKey).equals(confirm.sign.toUpperCase());
+    }
+
     public String successSign(String code, String message, String type, Object data, String key) throws Exception {
         Response response = new Response(code, message, data);
         response.type = type;
@@ -385,7 +395,7 @@ public class PayService {
 
     @Transactional
     public Object orderQuery(OrderQueryReq orderQuery) throws Exception {
-        String key = userKeyService.getKeyById(orderQuery.mchId);
+        String key = mchKeyService.getKeyById(orderQuery.mchId);
         Map<String, String> map = SignUtil.objectToMap(orderQuery);
         String sign = SignUtil.generateSignature(map, key);
         if (sign.equals(orderQuery.sign.toUpperCase())) {
@@ -438,7 +448,7 @@ public class PayService {
         res.tradeTime = tradeTime;
         res.reserve = reserve;
         Bill bill = billService.selectBySysOrderId(sysOrderId);
-        MchKey key = userKeyService.getKeyByUserId(bill.mchId);
+        MchKey key = mchKeyService.getKeyByUserId(bill.mchId);
 
         Map<String, String> map = SignUtil.objectToMap(res);
         res.sign = SignUtil.generateSignature(map, key.secretKey);
@@ -497,7 +507,7 @@ public class PayService {
         }
 
         //sign 前置校验
-        String secretKey = userKeyService.getKeyById(baseOrder.mchId);
+        String secretKey = mchKeyService.getKeyById(baseOrder.mchId);
         response = signCheck(baseOrder, secretKey);
         if (response != null) {
             return response;
@@ -521,5 +531,28 @@ public class PayService {
             return new Response("A010", "下单失败，请联系管理员");
         }
         return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+    }
+
+    public Object payConfirm(OrderConfirm confirm) throws Exception {
+
+        String secretKey = mchKeyService.getKeyById(confirm.mchId);
+
+        if (isSignValid(confirm, secretKey)) {
+            return new Response("A001", "签名校验失败", confirm);
+        }
+
+        //根据商户定单号查询商户定单，获取上游定单号
+        Bill bill = billService.selectByMchOrderId(confirm.mchOrderId);
+        if (bill == null) {
+            return new Response("A006", "订单不存在");
+        }
+        //根据上游定单号通知上游确认支付
+        String str = cntService.confirm(bill.superOrderId, bill.reserve);
+
+        CntRes cntRes = new Gson().fromJson(str, CntRes.class);
+        if (successCode.equals(cntRes.resultCode)) {
+            return new Response("A000", "确认成功");
+        }
+        return new Response("A010", "下单失败:" + cntRes.resultMsg);
     }
 }

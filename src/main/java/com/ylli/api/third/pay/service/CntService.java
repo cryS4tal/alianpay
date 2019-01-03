@@ -35,10 +35,7 @@ public class CntService {
     public String secret;
 
     @Value("${pay.cnt.appid}")
-    public String app_id;
-
-    @Value("${pay.cnt.uid}")
-    public String user_id;
+    public String appId;
 
     @Autowired
     BillService billService;
@@ -64,14 +61,15 @@ public class CntService {
     @Autowired
     MchKeyService mchKeyService;
 
-    @Value("${pay.cont.success_code}")
-    public String successCode;
+    //@Value("${pay.cnt.success}")
+    public static String successCode = "0000";
 
     @Autowired
     SerializeUtil serializeUtil;
 
     /**
      * 创建cnt定单
+     *
      * @param mchId
      * @param channelId
      * @param money
@@ -115,31 +113,6 @@ public class CntService {
     }
 
     /**
-     * 确认支付
-     *
-     * @param mchOrderId
-     * @param mchId
-     * @return
-     * @throws Exception
-     */
-    public Response payConfirm(String mchOrderId, Long mchId) throws Exception {
-        //根据商户定单号查询商户定单，获取上游定单号
-        Bill bill = new Bill();
-        bill.mchOrderId = mchOrderId;
-        bill = billMapper.selectOne(bill);
-        if (bill == null || Strings.isNullOrEmpty(bill.superOrderId)) {
-            return new Response("A006", "订单不存在");
-        }
-        //根据上游定单号通知上游确认支付
-        String confirm = cntClient.confirm(bill.superOrderId, bill.reserve);
-        CntRes cntRes = new Gson().fromJson(confirm, CntRes.class);
-        if (successCode.equals(cntRes.resultCode)) {
-            return new Response("A000", "确认成功");
-        }
-        return new Response("A099", cntRes.resultMsg);
-    }
-
-    /**
      * @param userId     商户号
      * @param orderId    订单号
      * @param userOrder  用户系统订单号
@@ -158,7 +131,7 @@ public class CntService {
                 .append(resultCode).append("|").append(resultMsg).append("|").append(appID).append("|").append(secret);
         String sign = SignUtil.MD5(sb.toString()).toLowerCase();
         //appID,userId和签名交验
-        if (app_id.equals(appID) && userId.equals(userId) && successCode.equals(resultCode) && chkValue.equals(sign)) {
+        if (appId.equals(appID) && userId.equals(userId) && successCode.equals(resultCode) && chkValue.equals(sign)) {
             if (CntRes.CNT_BUY == Integer.parseInt(isPur)) {
                 Bill bill = new Bill();
                 bill.sysOrderId = userOrder;
@@ -201,24 +174,6 @@ public class CntService {
         }
     }
 
-/*    @Transactional
-    public Object payCancel(String orderId, Long mchId, String sgin) throws Exception {
-        Bill bill = new Bill();
-        bill.sysOrderId = orderId;
-        bill = billMapper.selectOne(bill);
-        if (bill == null || Strings.isNullOrEmpty(bill.superOrderId)) {
-            return "order not found";
-        }
-        String confirm = cntClient.cancel(bill.superOrderId, mchId.toString());
-        CntRes cntRes = new Gson().fromJson(confirm, CntRes.class);
-        if (successCode.equals(cntRes.resultCode)) {
-            bill.status = Bill.FAIL;
-            billMapper.updateByPrimaryKeySelective(bill);
-            return "success";
-        }
-        return "fail";
-    }*/
-
     /**
      * 提现
      *
@@ -254,5 +209,9 @@ public class CntService {
             return new Response("A099", cntCardRes.resultMsg);
         }
         return new Response("A000", cntCardRes.resultMsg);
+    }
+
+    public String confirm(String superOrderId, String reserve) throws Exception {
+        return cntClient.confirm(superOrderId, reserve);
     }
 }

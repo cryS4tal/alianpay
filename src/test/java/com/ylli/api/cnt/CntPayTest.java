@@ -1,17 +1,21 @@
 package com.ylli.api.cnt;
 
 import com.google.gson.Gson;
+import com.ylli.api.pay.enums.Version;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.model.CntCard;
 import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
-import com.ylli.api.third.pay.model.ConfirmReq;
+import com.ylli.api.third.pay.model.OrderConfirm;
 import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.third.pay.service.CntService;
-import com.ylli.api.wallet.model.CashLog;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,19 +23,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Ignore
+@Ignore
 public class CntPayTest {
+
     @Autowired
     CntService cntService;
+
     @Autowired
     CntClient cntClient;
+
+    @Autowired
+    PayService payService;
 
     @Autowired
     SerializeUtil serializeUtil;
@@ -47,7 +51,7 @@ public class CntPayTest {
         baseOrder.reserve = "";
         baseOrder.payType = "alipay";
         baseOrder.tradeType = "native";
-        baseOrder.version = BaseOrder.CNT;
+        baseOrder.version = Version.CNT.getVersion();
         Map<String, String> map = SignUtil.objectToMap(baseOrder);
         String secretKey = "97c8890018a34498bc3ab87484d9778e";
         String s1 = SignUtil.generateSignature(map, secretKey);
@@ -104,13 +108,13 @@ public class CntPayTest {
 
     @Test
     public void confirm() throws Exception {
-        ConfirmReq req = new ConfirmReq();
+        OrderConfirm req = new OrderConfirm();
         req.mchOrderId = "2019010211131000000133";
         req.mchId = 1024L;
         String key = "97c8890018a34498bc3ab87484d9778e";
         Map<String, String> map = SignUtil.objectToMap(req);
         System.out.println(SignUtil.generateSignature(map, key));
-        Response response = cntService.payConfirm(req.mchOrderId, req.mchId);
+        Response response = (Response) payService.payConfirm(req.mchOrderId,req.mchId);
         System.out.println(new Gson().toJson(response));
   /*      String confirm = cntClient.confirm(req.mchOrderId,req.mchId.toString());
         System.out.println(confirm);*/

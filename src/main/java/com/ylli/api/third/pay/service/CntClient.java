@@ -28,9 +28,6 @@ public class CntClient {
     @Value("${pay.cnt.secret}")
     public String secret;
 
-    @Value("${pay.cont.success_code}")
-    public String successCode;
-
     @Autowired
     RestTemplate restTemplate;
 
@@ -61,7 +58,7 @@ public class CntClient {
 
 
     /**
-     * 确认下单
+     * 确认付款
      *
      * @param orderId 上游定单号
      * @param cardId  上游卡id 对应t_bill中的reverse
@@ -74,7 +71,7 @@ public class CntClient {
         params.add("appID", appId);
         params.add("orderId", orderId);
         params.add("cardId", cardId);
-        params.add("ckValue", generateCkValue(userId, orderId, cardId, appId));
+        //params.add("ckValue", generateCkValue(userId, orderId, cardId, appId));
         return post(params, "https://cntpay.io/trade/payment");
     }
 
