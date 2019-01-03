@@ -68,37 +68,24 @@ public class CntService {
     SerializeUtil serializeUtil;
 
     /**
-     * 创建cnt定单
-     *
-     * @param mchId
-     * @param channelId
-     * @param money
-     * @param mchOrderId
-     * @param notifyUrl
-     * @param redirectUrl
-     * @param reserve
-     * @param payType
-     * @param tradeType
-     * @param extra
-     * @return
-     * @throws Exception
+     * 创建cnt订单
      */
     @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
-        //创建定单
+        //创建订单
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
-        //分变元，保留两位小数，上游要求
+        //分转换元
         String mz = String.format("%.2f", (money / 100.0));
         //上游支付宝or微信的标识
-        Integer istype = payType.equals(PayService.ALI) ? CntRes.ZFB_PAY : CntRes.WX_PAY;
+        String istype = payType.equals(PayService.ALI) ? CNTEnum.ALIPAY.getValue() : CNTEnum.WX.getValue();
 
         //向上游发起下定请求
-        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype.toString(), CNTEnum.BUY.getValue());
+        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype, CNTEnum.BUY.getValue());
         CntRes cntRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
             //记录上游的定单号和卡号
-            CntCard cntCard = cntRes.data.pays.stream().filter(item -> item.payType == istype).findFirst().get();
+            CntCard cntCard = cntRes.data.pays.stream().filter(item -> String.valueOf(item.payType).equals(istype)).findFirst().get();
             bill.superOrderId = cntRes.data.orderId;
             bill.reserve = cntCard.cardId.toString();
             billMapper.updateByPrimaryKeySelective(bill);
@@ -243,8 +230,8 @@ public class CntService {
         String cardId = cntRes.data.cardId;
         //下单
         String mz = String.format("%.2f", (req.money / 100.0));
-        Bill bill = billService.createBill(req.mchId, null, 5L, CntRes.ZFB_PAY.toString(), "", req.money, cardId, "", "");
-        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, req.mchId.toString(), mz, CntRes.ZFB_PAY.toString(), CntRes.CNT_CASH.toString());
+        Bill bill = billService.createBill(req.mchId, null, 5L, CNTEnum.ALIPAY.getValue(), "", req.money, cardId, "", "");
+        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, req.mchId.toString(), mz, CNTEnum.ALIPAY.getValue(), CNTEnum.CASH.getValue());
         CntRes cntOrderRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (!successCode.equals(cntOrderRes.resultCode)) {
             return new Response("A099", cntCardRes.resultMsg);
