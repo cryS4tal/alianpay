@@ -71,7 +71,7 @@ public class CntClient {
         params.add("appID", appId);
         params.add("orderId", orderId);
         params.add("cardId", cardId);
-        //params.add("ckValue", generateCkValue(userId, orderId, cardId, appId));
+        params.add("ckValue", generateCkValue(userId, orderId, cardId, appId));
         return post(params, "https://cntpay.io/trade/payment");
     }
 

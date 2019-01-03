@@ -7,7 +7,7 @@ import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.service.PayService;
-import com.ylli.api.third.pay.model.OrderConfirm;
+import com.ylli.api.pay.model.OrderConfirm;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -8,15 +8,15 @@ import com.ylli.api.pay.enums.Version;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Bill;
+import com.ylli.api.pay.model.ConfirmResponse;
+import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.third.pay.model.NotifyRes;
-import com.ylli.api.third.pay.model.OrderConfirm;
 import com.ylli.api.third.pay.service.CTService;
 import com.ylli.api.third.pay.service.CntService;
 import com.ylli.api.third.pay.service.HRJFService;
@@ -90,7 +90,6 @@ public class PayService {
     @Value("${ali.max}")
     public Integer Ali_MAX;
 
-    //@Value("${pay.cnt.success}")
     public static String successCode = "0000";
 
     /**
@@ -549,10 +548,14 @@ public class PayService {
         //根据上游定单号通知上游确认支付
         String str = cntService.confirm(bill.superOrderId, bill.reserve);
 
-        CntRes cntRes = new Gson().fromJson(str, CntRes.class);
-        if (successCode.equals(cntRes.resultCode)) {
-            return new Response("A000", "确认成功");
+        ConfirmResponse response = new Gson().fromJson(str, ConfirmResponse.class);
+        //TODO 无论支付都会返回付款成功？
+
+        if (successCode.equals(response.resultCode)) {
+            return new Response("A000", "成功");
+        } else {
+            //TODO 确认失败. 是否需要更改订单状态？
+            return new Response("A010", "下单失败:" + response.resultMsg);
         }
-        return new Response("A010", "下单失败:" + cntRes.resultMsg);
     }
 }
