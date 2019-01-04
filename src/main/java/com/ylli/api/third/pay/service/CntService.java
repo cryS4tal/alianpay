@@ -22,10 +22,8 @@ import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,7 +71,20 @@ public class CntService {
     SerializeUtil serializeUtil;
 
     /**
-     * 创建cnt订单
+     * cnt下单
+     *
+     * @param mchId       商户订单号
+     * @param channelId   通道id
+     * @param money       金额
+     * @param mchOrderId  系统订单号
+     * @param notifyUrl
+     * @param redirectUrl
+     * @param reserve
+     * @param payType     支付类型
+     * @param tradeType   支付方式
+     * @param extra
+     * @return
+     * @throws Exception
      */
     @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
@@ -82,14 +93,14 @@ public class CntService {
 
         //分转换元
         String mz = String.format("%.2f", (money / 100.0));
-        //上游支付宝or微信的标识
+        //支付类型转为上游类型
         String istype = payType.equals(PayService.ALI) ? CNTEnum.ALIPAY.getValue() : CNTEnum.WX.getValue();
 
-        //向上游发起下定请求
+        //向上游发起下單请求
         String cntOrder = cntClient.createCntOrder(bill.sysOrderId, mchId.toString() + "_" + bill.id, mz, istype, CNTEnum.BUY.getValue());
         CntRes cntRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
-            //记录上游的定单号和卡号
+            //记录上游的订单号和卡号
             CntCard cntCard = cntRes.data.pays.stream().filter(item -> String.valueOf(item.payType).equals(istype)).findFirst().get();
             bill.superOrderId = cntRes.data.orderId;
             bill.reserve = cntCard.cardId.toString();
@@ -120,7 +131,7 @@ public class CntService {
 
         String sign = generateSign(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID);
 
-        //
+        //签名验证
         if (chkValue.equals(sign)) {
             //支付回调
             if (CNTEnum.BUY.getValue().equals(isPur)) {
@@ -134,7 +145,7 @@ public class CntService {
                     if (bill.status != Bill.FINISH) {
                         bill.status = Bill.FINISH;
 
-                        bill.tradeTime = convertZ8(date);
+                        bill.tradeTime = string2Timestamp(date);
 
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.superOrderId = userOrder;
@@ -150,7 +161,7 @@ public class CntService {
                     if (bill.status != Bill.FAIL) {
                         bill.status = Bill.FAIL;
 
-                        bill.tradeTime = convertZ8(date);
+                        bill.tradeTime = string2Timestamp(date);
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.superOrderId = userOrder;
                         bill.msg = resultMsg;
@@ -188,13 +199,9 @@ public class CntService {
         }
     }
 
-    //TODO . 是否Z8
-    public Timestamp convertZ8(String date) throws ParseException {
+    public Timestamp string2Timestamp(String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(sdf.parse(date));
-        calendar.add(Calendar.HOUR, -8);
-        return  new Timestamp(calendar.getTime().getTime());
+        return new Timestamp( sdf.parse(date).getTime());
     }
 
     public String generateSign(String userId, String orderId, String userOrder, String number, String remark,
