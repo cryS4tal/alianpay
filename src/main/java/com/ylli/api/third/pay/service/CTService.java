@@ -13,8 +13,6 @@ import com.ylli.api.third.pay.model.CTOrderResponse;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +93,7 @@ public class CTService {
             if ("1".equals(resultCode)) {
                 if (bill.status != Bill.FINISH) {
                     //不返回上游订单号
-                    bill.tradeTime = z8ts();
+                    bill.tradeTime = new Timestamp(System.currentTimeMillis());
                     bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                     bill.status = Bill.FINISH;
                     //msg暂时先记录实际交易金额/元
@@ -106,7 +104,7 @@ public class CTService {
                     walletService.incr(bill.mchId, bill.money - bill.payCharge);
                 }
             } else {
-                bill.tradeTime = z8ts();
+                bill.tradeTime = new Timestamp(System.currentTimeMillis());
                 bill.status = Bill.FAIL;
                 //msg暂时先记录实际交易金额/元
                 bill.msg = totalFee;
@@ -135,16 +133,5 @@ public class CTService {
     public Boolean signVerify(String resultCode, String attach, String totalFee, String sign) throws Exception {
         String str = new StringBuffer().append(resultCode).append(attach).append(totalFee).append(secret).toString();
         return SignUtil.MD5(str).equals(sign.toUpperCase());
-    }
-
-    /**
-     * return Z8 ts.
-     */
-    public Timestamp z8ts() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.HOUR, 8);
-        Date date = calendar.getTime();
-        return new Timestamp(date.getTime());
     }
 }
