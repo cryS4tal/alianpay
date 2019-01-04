@@ -18,10 +18,15 @@ import com.ylli.api.third.pay.model.CntCardRes;
 import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.wallet.service.WalletService;
+
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -123,13 +128,13 @@ public class CntService {
                 if (bill == null) {
                     return "order not found";
                 }
+                bill.money = (int) Double.parseDouble(number) * 100;
                 if (successCode.equals(resultCode)) {
                     //交易成功
                     if (bill.status != Bill.FINISH) {
                         bill.status = Bill.FINISH;
 
-                        //TODO data format
-                        bill.tradeTime = Timestamp.from(Instant.now());
+                        bill.tradeTime = convertZ8(date);
 
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.superOrderId = userOrder;
@@ -145,7 +150,7 @@ public class CntService {
                     if (bill.status != Bill.FAIL) {
                         bill.status = Bill.FAIL;
 
-                        bill.tradeTime = Timestamp.from(Instant.now());
+                        bill.tradeTime = convertZ8(date);
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.superOrderId = userOrder;
                         bill.msg = resultMsg;
@@ -181,6 +186,14 @@ public class CntService {
             //签名校验失败
             return "sign error.";
         }
+    }
+
+    public Timestamp convertZ8(String date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(sdf.parse(date));
+        calendar.add(Calendar.HOUR, -8);
+        return  new Timestamp(calendar.getTime().getTime());
     }
 
     public String generateSign(String userId, String orderId, String userOrder, String number, String remark,
