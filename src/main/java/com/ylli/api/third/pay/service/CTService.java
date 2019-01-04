@@ -124,7 +124,7 @@ public class CTService {
 
                 payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
             }
-            return null;
+            return "success";
         } else {
             return "sign error.";
         }
