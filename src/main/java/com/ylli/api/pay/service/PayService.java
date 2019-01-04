@@ -13,6 +13,7 @@ import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.model.TempResponse;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
@@ -166,13 +167,13 @@ public class PayService {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
                 || Strings.isNullOrEmpty(baseOrder.sign)) {
-            return Response.A003(null, baseOrder);
+            return TempResponse.A003(null, baseOrder);
         }
         if (!payTypes.contains(baseOrder.payType)) {
-            return Response.A003("不支持的支付类型", baseOrder);
+            return TempResponse.A003("不支持的支付类型", baseOrder);
         }
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
-            return Response.A003("不支持的支付方式", baseOrder);
+            return TempResponse.A003("不支持的支付方式", baseOrder);
         }
         return null;
     }
@@ -182,10 +183,10 @@ public class PayService {
      */
     public Response signCheck(BaseOrder baseOrder, String secretKey) throws Exception {
         if (secretKey == null) {
-            return Response.A002(null, null);
+            return TempResponse.A002(null, null);
         }
         if (isSignValid(baseOrder, secretKey)) {
-            return Response.A001(null, baseOrder);
+            return TempResponse.A001(null, baseOrder);
         }
         return null;
     }
@@ -204,7 +205,7 @@ public class PayService {
             return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
         }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
-            return Response.A004(null, baseOrder);
+            return TempResponse.A004(null, baseOrder);
         }
         // 通道关闭，不允许下单
         if (channel.state == false) {
@@ -542,7 +543,7 @@ public class PayService {
         String secretKey = mchKeyService.getKeyById(confirm.mchId);
 
         if (isSignValid(confirm, secretKey)) {
-            return Response.A001(null, confirm);
+            return TempResponse.A001(null, confirm);
         }
 
         //根据商户定单号查询商户定单，获取上游定单号
