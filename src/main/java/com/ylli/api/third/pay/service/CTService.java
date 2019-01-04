@@ -56,19 +56,27 @@ public class CTService {
 
         String total_fee = (new BigDecimal(money).divide(new BigDecimal(100))).toString();
 
-        String str = ctClient.createOrder(total_fee, bill.sysOrderId);
-        CTOrderResponse response = new Gson().fromJson(str, CTOrderResponse.class);
+        try {
+            String str = ctClient.createOrder(total_fee, bill.sysOrderId);
+            CTOrderResponse response = new Gson().fromJson(str, CTOrderResponse.class);
 
-        if (!response.result) {
-            LOGGER.error("ct order fail: "
-                    + "\n mch_order_id : " + mchOrderId + "  sys_order_id : " + bill.sysOrderId
-                    + "\n res : " + str);
+            if (!response.result) {
+                LOGGER.error("ct order fail: "
+                        + "\n mch_order_id : " + mchOrderId + "  sys_order_id : " + bill.sysOrderId
+                        + "\n res : " + str);
+                //更新订单为失败。
+                bill.status = Bill.FAIL;
+                billMapper.updateByPrimaryKeySelective(bill);
+                return null;
+            }
+            return response.data;
+        } catch (Exception e) {
             //更新订单为失败。
             bill.status = Bill.FAIL;
             billMapper.updateByPrimaryKeySelective(bill);
+
             return null;
         }
-        return response.data;
     }
 
     @Transactional

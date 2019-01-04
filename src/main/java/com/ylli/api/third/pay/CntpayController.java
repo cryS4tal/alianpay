@@ -40,6 +40,7 @@ public class CntpayController {
 
     /**
      * 提现
+     * TODO 接口移除.
      *
      * @return
      */
