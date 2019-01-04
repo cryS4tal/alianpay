@@ -11,7 +11,6 @@ import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.model.CTOrderResponse;
 import com.ylli.api.wallet.service.WalletService;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import org.slf4j.Logger;
@@ -54,10 +53,9 @@ public class CTService {
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
-        String total_fee = (new BigDecimal(money).divide(new BigDecimal(100))).toString();
-
+        String totalFee = String.format("%.2f", (money / 100.0));
         try {
-            String str = ctClient.createOrder(total_fee, bill.sysOrderId);
+            String str = ctClient.createOrder(totalFee, bill.sysOrderId);
             CTOrderResponse response = new Gson().fromJson(str, CTOrderResponse.class);
 
             if (!response.result) {

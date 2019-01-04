@@ -198,7 +198,7 @@ public class PayService {
         //反向校验，控制 商户传入version。而通道不对应cnt支付
         //暂时只支持 version = 1.1 , channel = cnt
         if (!Strings.isNullOrEmpty(baseOrder.version) && !channel.code.equals("CNT")) {
-            return new Response("A011", "版本校验错误，请联系管理员切换对应通道");
+            return new Response("A011", "版本校验错误，当前系统通道not need version = 1.1");
         }
         if (channel.code.equals("CNT") && !(Version.CNT.getVersion()).equals(baseOrder.version)) {
             return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
