@@ -326,7 +326,7 @@ public class BillService {
         } else {
             throw new AwesomeException(Config.ERROR_BILL_STATUS);
         }
-        return convert(bill);
+        return convert(bill, true);
     }
 
     @Transactional
