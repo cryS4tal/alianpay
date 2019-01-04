@@ -23,18 +23,18 @@ public class CntpayController {
     MchKeyService mchKeyService;
 
     @PostMapping("/notify")
-    public String payNotify(@RequestParam String userId,
-                            @RequestParam String orderId,
-                            @RequestParam String userOrder,
-                            @RequestParam String number,
-                            @RequestParam String date,
-                            @RequestParam String resultCode,
-                            @RequestParam String resultMsg,
-                            @RequestParam String appID,
-                            @RequestParam String chkValue,
-                            @RequestParam String remark,
-                            @RequestParam String merPriv,
-                            @RequestParam String isPur) throws Exception {
+    public String payNotify(@RequestParam(required = false) String userId,
+                            @RequestParam(required = false) String orderId,
+                            @RequestParam(required = false) String userOrder,
+                            @RequestParam(required = false) String number,
+                            @RequestParam(required = false) String date,
+                            @RequestParam(required = false) String resultCode,
+                            @RequestParam(required = false) String resultMsg,
+                            @RequestParam(required = false) String appID,
+                            @RequestParam(required = false) String chkValue,
+                            @RequestParam(required = false) String remark,
+                            @RequestParam(required = false) String merPriv,
+                            @RequestParam(required = false) String isPur) throws Exception {
         return cntService.payNotify(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID, isPur, chkValue);
     }
 

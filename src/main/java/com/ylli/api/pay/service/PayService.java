@@ -195,6 +195,11 @@ public class PayService {
      * 加入版本校验，目前cnt支付 对应version = 1.1 , channel.code = CNT
      */
     public Response sysCheck(BaseOrder baseOrder, SysChannel channel) {
+        //反向校验，控制 商户传入version。而通道不对应cnt支付
+        //暂时只支持 version = 1.1 , channel = cnt
+        if (!Strings.isNullOrEmpty(baseOrder.version) && !channel.code.equals("CNT")) {
+            //TODO
+        }
         if (channel.code.equals("CNT") && !(Version.CNT.getVersion()).equals(baseOrder.version)) {
             return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
         }
