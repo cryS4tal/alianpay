@@ -162,6 +162,8 @@ public class PayService {
 
     /**
      * 参数合法性校验
+     *
+     * 兼容初版设计. 默认 NATIVE
      */
     public Response baseCheck(BaseOrder baseOrder) {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
@@ -174,6 +176,9 @@ public class PayService {
         }
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
             return TempResponse.A003("不支持的支付方式", baseOrder);
+        }
+        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
+            baseOrder.tradeType = NATIVE;
         }
         return null;
     }
