@@ -134,7 +134,6 @@ public class CntService {
         String sign = generateSign(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID);
 
         //签名验证
-        //TODO PARAMS check.
         if (chkValue.equals(sign)) {
             //支付回调
             if (CNTEnum.BUY.getValue().equals(isPur)) {
@@ -142,6 +141,11 @@ public class CntService {
                 if (bill == null) {
                     return "order not found";
                 }
+                //fix cnt 异步回调多次返回状态不一致.... 暂时以第一次为准。
+                if (bill.status == Bill.FINISH || bill.status == Bill.FAIL) {
+                    return "repeat notify";
+                }
+
                 bill.money = (int) Double.parseDouble(number) * 100;
                 if (successCode.equals(resultCode)) {
                     //交易成功
