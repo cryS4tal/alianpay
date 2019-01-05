@@ -567,7 +567,7 @@ public class PayService {
                 return new Response("A010", "失败:" + response.resultMsg);
             }
         } catch (Exception e) {
-            return new Response("A010", "失败,当前网络不可用。");
+            return new Response("A010", "失败,当前服务状态异常。");
         }
     }
 }
