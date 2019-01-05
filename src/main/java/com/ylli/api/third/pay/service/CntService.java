@@ -17,13 +17,13 @@ import com.ylli.api.third.pay.model.CNTCard;
 import com.ylli.api.third.pay.model.CntCardRes;
 import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
+import com.ylli.api.wallet.mapper.CashLogMapper;
+import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.service.WalletService;
-
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -54,6 +54,9 @@ public class CntService {
 
     @Autowired
     BillMapper billMapper;
+
+    @Autowired
+    CashLogMapper cashLogMapper;
 
     @Autowired
     WalletService walletService;
@@ -186,9 +189,27 @@ public class CntService {
             } else if (CNTEnum.CASH.getValue().equals(isPur)) {
                 //提现回调
                 //TODO
+                CashLog log = cashLogMapper.selectByPrimaryKey(Long.parseLong(userOrder));
+                if (log == null) {
+                    return "cash log 404 not found";
+                }
+                if (log.state == CashLog.PROCESS) {
 
+                    if (successCode.equals(resultCode)) {
+                        //提现成功
+                        log.state = CashLog.FINISH;
+                        cashLogMapper.updateByPrimaryKeySelective(log);
 
-                return "";
+                        walletService.cashSuc(log.mchId, log.money);
+                    } else {
+                        //提现失败
+                        log.state = CashLog.FAILED;
+                        cashLogMapper.updateByPrimaryKeySelective(log);
+
+                        walletService.cashFail(log.mchId, log.money);
+                    }
+                }
+                return "success";
             } else {
                 //返回类型错误
                 return "isPur error.";
@@ -233,7 +254,7 @@ public class CntService {
     public Object cash(CntCashReq req) throws Exception {
         //查询卡列表
         CntCardRes cntCardRes = new Gson().fromJson(cntClient.findCards(req.mchId.toString()), CntCardRes.class);
-        if (!successCode.equals(cntCardRes.resultCode)){
+        if (!successCode.equals(cntCardRes.resultCode)) {
 
             return new Response("A099", cntCardRes.resultMsg);
         }

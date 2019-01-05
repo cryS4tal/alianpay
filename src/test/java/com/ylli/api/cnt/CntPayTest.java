@@ -7,14 +7,15 @@ import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
+import com.ylli.api.third.pay.enums.CNTEnum;
 import com.ylli.api.third.pay.model.CNTCard;
-import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
 import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.third.pay.service.CntService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//@Ignore
+@Ignore
 public class CntPayTest {
 
     @Autowired
@@ -77,19 +78,9 @@ public class CntPayTest {
 
     @Test
     public void cash() throws Exception {
-        CntCashReq req = new CntCashReq();
-//        cashLog.openBank = "pfyh";//"浦发银行";
-        req.openBank = "浦发银行";//"浦发银行";
-        req.payName = "6217920274920375";
-        req.userName = "李玉龙";//"李玉龙";
-//        cashLog.name = "chicb";//"李玉龙";
-        req.mchId = 1024L;
-        req.subbranch = "浦发银行";
-//        String s = cntClient.addCard(cashLog.mchId.toString(), cashLog.name, cashLog.bankcardNumber, cashLog.openBank, cashLog.openBank);
-        req.money = 1000;
-        Object cash = cntService.cash(req);
+        String cntOrder = cntClient.createCntOrder("20190105ylli002", "1024", "1", CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
 
-//        System.out.println(s);
+        System.out.println(cntOrder);
     }
 
 

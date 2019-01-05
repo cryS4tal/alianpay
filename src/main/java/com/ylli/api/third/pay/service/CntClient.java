@@ -37,8 +37,8 @@ public class CntClient {
      * @param sysOrderId 系统定单号
      * @param mchId      系统商户号，这里是系统商户号+"_"+系统定单号
      * @param mz         金额
-     * @param payType    支付类型
-     * @param isPur      1：下单；0：提现
+     * @param payType    支付类型:0:支付宝 1:微信 2 Paypal 3 银行卡
+     * @param isPur      交易或者提现 0 为提现 1 为购买
      * @return
      * @throws Exception
      */

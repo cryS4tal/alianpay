@@ -22,10 +22,12 @@ public class CashLog {
      * 1 - 手工
      * 2 - 平安
      * 3 - 先锋
+     * 4 - CNT
      */
     public static final Integer MANUAL = 1;
     public static final Integer PINGAN = 2;
     public static final Integer XIANFENG = 3;
+    public static final Integer CNT = 4;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

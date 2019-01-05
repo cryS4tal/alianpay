@@ -185,12 +185,11 @@ public class CashService {
                             CNTResponse response = gson.fromJson(delete, CNTResponse.class);
                             if (!"0000".equals(response.resultCode)) {
                                 //提现失败：%s
-                                //throw new AwesomeException(Config.);
+                                throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(response.resultMsg));
                             }
                         } catch (Exception e) {
                             //提现失败.
-                            //throw new AwesomeException()
-                            //e.printStackTrace();
+                            throw new AwesomeException(Config.ERROR_REQUEST_FAIL);
                         }
                     });
                     //绑定新卡
@@ -198,23 +197,32 @@ public class CashService {
                     CNTResponse response = gson.fromJson(add, CNTResponse.class);
                     if (!"0000".equals(response.resultCode)) {
                         //提现失败：%S message
-                        //throw new AwesomeException();
+                        throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(response.resultMsg));
                     }
                     //提现下单
-                    //cntClient.createCntOrder(bill.sysOrderId, req.mchId.toString(), mz, CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
+                    //分转换元
+                    String mz = String.format("%.2f", (req.money / 100.0));
 
+                    //使用提现日志作为系统订单号。
+                    String cntOrder = cntClient.createCntOrder(log.id.toString(), req.mchId.toString(), mz, CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
+                    CNTResponse cntResponse = gson.fromJson(cntOrder, CNTResponse.class);
 
-
-
+                    if (true) {
+                        // 更新日志状态为处理中
+                        log.state = CashLog.PROCESS;
+                        log.type = CashLog.CNT;
+                        cashLogMapper.updateByPrimaryKeySelective(log);
+                        //等待 cnt 回调确认状态.
+                    } else {
+                        throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(cntCards.resultMsg));
+                    }
                 } else {
                     //提现失败：%s
-                    //throw new AwesomeException();
+                    throw new AwesomeException(Config.ERROR_REQUEST_FAIL);
                 }
             } catch (Exception e) {
-
                 //体现失败：%S
-                //throw new AwesomeException(Config)
-                e.printStackTrace();
+                throw new AwesomeException(Config.ERROR_REQUEST_FAIL);
             }
 
 
