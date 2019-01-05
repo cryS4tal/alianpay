@@ -13,6 +13,7 @@ import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.model.TempResponse;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
@@ -175,9 +176,6 @@ public class PayService {
         }
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
             return TempResponse.A003("不支持的支付方式", baseOrder);
-        }
-        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
-            baseOrder.tradeType = NATIVE;
         }
         return null;
     }
@@ -527,9 +525,11 @@ public class PayService {
         if (response != null) {
             return response;
         }
-
         if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
             return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN, Ali_MAX), baseOrder);
+        }
+        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
+            baseOrder.tradeType = WAP;
         }
         if (baseOrder.tradeType.equals(APP)) {
             return TempResponse.A003("支付方式暂不支持 app.", baseOrder);

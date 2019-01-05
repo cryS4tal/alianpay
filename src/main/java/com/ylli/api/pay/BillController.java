@@ -53,7 +53,8 @@ public class BillController {
                            @AwesomeParam(required = false) AwesomeDateTime endTime,
                            @AwesomeParam(defaultValue = "0") int offset,
                            @AwesomeParam(defaultValue = "20") int limit) {
-        if (mchId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
+        Boolean admin = permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL);
+        if (mchId == null && !admin) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         return billService.getBills(mchId, status,
@@ -63,7 +64,7 @@ public class BillController {
                 Strings.isNullOrEmpty(tradeType) ? null : tradeType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
-                endTime == null ? null : endTime.getDate(), offset, limit);
+                endTime == null ? null : endTime.getDate(), admin, offset, limit);
     }
 
     @GetMapping("/export")

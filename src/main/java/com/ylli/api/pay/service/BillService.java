@@ -87,7 +87,7 @@ public class BillService {
      */
 
     public Object getBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
-                           String tradeType, Date tradeTime, Date startTime, Date endTime, int offset, int limit) {
+                           String tradeType, Date tradeTime, Date startTime, Date endTime, Boolean admin, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
         Page<Bill> page = (Page<Bill>) billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
@@ -98,7 +98,7 @@ public class BillService {
         dataList.totalCount = page.getTotal();
         List<BaseBill> list = new ArrayList();
         for (Bill bill : page) {
-            BaseBill object = convert(bill);
+            BaseBill object = convert(bill, admin);
             list.add(object);
         }
         dataList.dataList = list;
@@ -106,7 +106,7 @@ public class BillService {
 
     }
 
-    private BaseBill convert(Bill bill) {
+    private BaseBill convert(Bill bill, Boolean admin) {
         BaseBill baseBill = new BaseBill();
         baseBill.mchId = bill.mchId;
         baseBill.mchName = Optional.ofNullable(userBaseMapper.selectByMchId(bill.mchId)).map(i -> i.mchName).orElse(null);
@@ -121,7 +121,9 @@ public class BillService {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
         }
         baseBill.createTime = bill.createTime;
-        baseBill.channel = channelService.getChannelName(bill.channelId);
+        if (admin) {
+            baseBill.channel = channelService.getChannelName(bill.channelId);
+        }
         return baseBill;
     }
 
@@ -324,7 +326,7 @@ public class BillService {
         } else {
             throw new AwesomeException(Config.ERROR_BILL_STATUS);
         }
-        return convert(bill);
+        return convert(bill, true);
     }
 
     @Transactional
