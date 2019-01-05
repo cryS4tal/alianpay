@@ -24,6 +24,7 @@ import com.ylli.api.third.pay.service.HRJFService;
 import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -533,8 +535,10 @@ public class PayService {
             return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN, Ali_MAX), baseOrder);
         }
         //TODO 支付方式校验,pay_type / trade_type
-        //??
-
+        //现阶段cnt只支持扫码支付
+        if (!baseOrder.tradeType.equals(NATIVE)) {
+            return new Response("A008", "不支持的支付方式", baseOrder);
+        }
         String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
         if (Strings.isNullOrEmpty(str)) {

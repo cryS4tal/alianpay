@@ -38,7 +38,7 @@ public class CntClient {
      * @param mchId      系统商户号，这里是系统商户号+"_"+系统定单号
      * @param mz         金额
      * @param payType    支付类型
-     * @param isPur      下单or提现
+     * @param isPur      1：下单；0：提现
      * @return
      * @throws Exception
      */
