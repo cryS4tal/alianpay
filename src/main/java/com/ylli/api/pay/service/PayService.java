@@ -168,13 +168,13 @@ public class PayService {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
                 || Strings.isNullOrEmpty(baseOrder.sign)) {
-            return new Response("A003", "非法的请求参数", baseOrder);
+            return Response.A003(null, baseOrder);
         }
         if (!payTypes.contains(baseOrder.payType)) {
-            return new Response("A004", "不支持的支付类型", baseOrder);
+            return Response.A003("不支持的支付类型", baseOrder);
         }
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
-            return new Response("A008", "不支持的支付方式", baseOrder);
+            return Response.A003("不支持的支付方式", baseOrder);
         }
         return null;
     }
@@ -184,10 +184,10 @@ public class PayService {
      */
     public Response signCheck(BaseOrder baseOrder, String secretKey) throws Exception {
         if (secretKey == null) {
-            return new Response("A002", "请先上传商户私钥", null);
+            return Response.A002(null, null);
         }
         if (isSignValid(baseOrder, secretKey)) {
-            return new Response("A001", "签名校验失败", baseOrder);
+            return Response.A001(null, baseOrder);
         }
         return null;
     }
@@ -200,13 +200,13 @@ public class PayService {
         //反向校验，控制 商户传入version。而通道不对应cnt支付
         //暂时只支持 version = 1.1 , channel = cnt
         if (!Strings.isNullOrEmpty(baseOrder.version) && !channel.code.equals("CNT")) {
-            //TODO
+            return new Response("A011", "版本校验错误，当前系统通道not need version = 1.1");
         }
         if (channel.code.equals("CNT") && !(Version.CNT.getVersion()).equals(baseOrder.version)) {
             return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
         }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
-            return new Response("A005", "订单号重复", baseOrder);
+            return Response.A004(null, baseOrder);
         }
         // 通道关闭，不允许下单
         if (channel.state == false) {
@@ -546,7 +546,7 @@ public class PayService {
         String secretKey = mchKeyService.getKeyById(confirm.mchId);
 
         if (isSignValid(confirm, secretKey)) {
-            return new Response("A001", "签名校验失败", confirm);
+            return Response.A001(null, confirm);
         }
 
         //根据商户定单号查询商户定单，获取上游定单号

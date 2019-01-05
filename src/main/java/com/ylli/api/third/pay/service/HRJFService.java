@@ -60,10 +60,7 @@ public class HRJFService {
         }
         boolean flag = hrjfClient.signVerify(orderid, opstate, ovalue, sign);
         if (flag) {
-            Bill bill = new Bill();
-            //bill.orderNo = orderid;
-            bill.sysOrderId = orderid;
-            bill = billMapper.selectOne(bill);
+            Bill bill = billService.selectBySysOrderId(orderid);
             if (bill == null) {
                 return "opstate=-1";
             }

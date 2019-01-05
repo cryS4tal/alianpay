@@ -24,7 +24,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -132,6 +131,7 @@ public class CntService {
         String sign = generateSign(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID);
 
         //签名验证
+        //TODO PARAMS check.
         if (chkValue.equals(sign)) {
             //支付回调
             if (CNTEnum.BUY.getValue().equals(isPur)) {
@@ -144,12 +144,12 @@ public class CntService {
                     //交易成功
                     if (bill.status != Bill.FINISH) {
                         bill.status = Bill.FINISH;
-
                         bill.tradeTime = string2Timestamp(date);
+                        bill.superOrderId = orderId;
 
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.superOrderId = userOrder;
-                        bill.msg = resultMsg;
+                        bill.msg = number;
                         billMapper.updateByPrimaryKeySelective(bill);
 
                         //钱包金额变动。
@@ -160,11 +160,11 @@ public class CntService {
                     //交易失败
                     if (bill.status != Bill.FAIL) {
                         bill.status = Bill.FAIL;
-
                         bill.tradeTime = string2Timestamp(date);
+                        bill.superOrderId = orderId;
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.superOrderId = userOrder;
-                        bill.msg = resultMsg;
+                        bill.msg = number;
                         billMapper.updateByPrimaryKeySelective(bill);
                     }
                 }
@@ -201,7 +201,7 @@ public class CntService {
 
     public Timestamp string2Timestamp(String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return new Timestamp( sdf.parse(date).getTime());
+        return new Timestamp(sdf.parse(date).getTime());
     }
 
     public String generateSign(String userId, String orderId, String userOrder, String number, String remark,

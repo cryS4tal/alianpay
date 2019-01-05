@@ -8,6 +8,7 @@ import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.AwesomeDateTime;
+import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/bill")
-//@Auth
+@Auth
 public class BillController {
 
     @Autowired
@@ -67,7 +68,7 @@ public class BillController {
 
     @GetMapping("/export")
     public void exportBills(@AwesomeParam(required = false) Long mchId,
-                            @AwesomeParam(required = false) Integer status,
+                            //@AwesomeParam(required = false) Integer status,
                             @AwesomeParam(required = false) String mchOrderId,
                             @AwesomeParam(required = false) String sysOrderId,
                             @AwesomeParam(required = false) String payType,
@@ -76,7 +77,7 @@ public class BillController {
                             @AwesomeParam(required = false) AwesomeDateTime startTime,
                             @AwesomeParam(required = false) AwesomeDateTime endTime,
                             HttpServletResponse response) {
-        billService.exportBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType,
+        billService.exportBills(mchId, Bill.FINISH, mchOrderId, sysOrderId, payType, tradeType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(),

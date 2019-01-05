@@ -223,6 +223,10 @@ public class BillService {
             }
             return bill;
 
+        } else if (code.equals("CNT")) {
+            //TODO 接入cnt订单查询。
+
+            return bill;
         } else {
             return bill;
         }

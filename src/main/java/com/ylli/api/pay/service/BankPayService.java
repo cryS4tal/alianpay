@@ -66,50 +66,50 @@ public class BankPayService {
     public Object createOrder(BankPayOrder bankPayOrder) throws Exception {
         //参数校验
         if (bankPayOrder.mchId == null) {
-            return new Response("A003", "商户号为空", bankPayOrder);
+            return Response.A003("商户号为空", bankPayOrder);
         }
         if (Strings.isNullOrEmpty(bankPayOrder.mchOrderId)) {
-            return new Response("A003", "商户订单号为空", bankPayOrder);
+            return Response.A003("商户订单号为空", bankPayOrder);
         }
         if (mchOrderExist(bankPayOrder.mchOrderId)) {
-            return new Response("A003", "商户订单号重复", bankPayOrder);
+            return Response.A004(null, bankPayOrder);
         }
         //金额校验
         if (bankPayOrder.money == null || bankPayMin > bankPayOrder.money || bankPayMax < bankPayOrder.money) {
-            return new Response("A003", "金额错误", bankPayOrder);
+            return Response.A003(String.format("交易金额限制: %s - %s 元", bankPayMin / 100, bankPayMax / 100), bankPayOrder);
         }
         if (Strings.isNullOrEmpty(bankPayOrder.accNo)) {
-            return new Response("A003", "银行卡号为空", bankPayOrder);
+            return Response.A003("银行卡号为空", bankPayOrder);
         }
         if (Strings.isNullOrEmpty(bankPayOrder.accName)) {
-            return new Response("A003", "姓名为空", bankPayOrder);
+            return Response.A003("姓名为空", bankPayOrder);
         }
         //代付类型转换 & 校验
         if (bankPayOrder.payType == null) {
             bankPayOrder.payType = BankPayOrder.PAY_TYPE_PERSON;
         }
         if (!BankPayOrder.payAllows.contains(bankPayOrder.payType)) {
-            return new Response("A003", "代付类型不正确", bankPayOrder);
+            return Response.A003("代付类型不正确", bankPayOrder);
         }
         //默认值
         if (bankPayOrder.payType == BankPayOrder.PAY_TYPE_PERSON &&
                 (bankPayOrder.accType != null && !BankPayOrder.accAllows.contains(bankPayOrder.accType))) {
-            return new Response("A003", "账户类型不正确", bankPayOrder);
+            return Response.A003("账户类型不正确", bankPayOrder);
         }
         //联行号校验
         if (bankPayOrder.payType == BankPayOrder.PAY_TYPE_COMPANY && Strings.isNullOrEmpty(bankPayOrder.issuer)) {
-            return new Response("A003", "联行号不能为空", bankPayOrder);
+            return Response.A003("联行号不能为空", bankPayOrder);
         }
         //sign 校验.
         if (Strings.isNullOrEmpty(bankPayOrder.sign)) {
-            return new Response("A001", "签名校验失败", bankPayOrder);
+            return Response.A001(null, bankPayOrder);
         }
         String secretKey = mchKeyService.getKeyById(bankPayOrder.mchId);
         if (secretKey == null) {
-            return new Response("A002", "请先上传商户私钥", null);
+            return Response.A002(null, null);
         }
         if (isSignValid(formatParams(bankPayOrder), secretKey)) {
-            return new Response("A001", "签名校验失败", bankPayOrder);
+            return Response.A001(null, bankPayOrder);
         }
         Wallet wallet = walletService.getOwnWallet(bankPayOrder.mchId);
         if (wallet.reservoir < (bankPayOrder.money + bankPayCharge)) {
@@ -123,7 +123,7 @@ public class BankPayService {
 
         String code = null;
         if (list.size() == 0) {
-            return new Response("A013","暂无可用代付通道，请联系管理员");
+            return new Response("A013", "暂无可用代付通道，请联系管理员");
         } else {
             if (list.size() == 1) {
                 code = list.get(0).code;
@@ -143,7 +143,7 @@ public class BankPayService {
                     bankPayOrder.bankName, bankPayOrder.mobile, bankPayOrder.money, secretKey, bankPayOrder.mchOrderId,
                     bankPayOrder.chargeMoney, bankPayOrder.mchId);
 
-        } else if ("xianFen".equals(code)){
+        } else if ("xianFen".equals(code)) {
             //先锋
             bankPayOrder = insertOrder(bankPayOrder, 2L, BankPayOrder.FIX, bankPayCharge);
 
@@ -152,7 +152,7 @@ public class BankPayService {
                     bankPayOrder.mchId, secretKey, bankPayOrder.mchOrderId, bankPayOrder.chargeMoney);
         } else {
             //temp code.
-            return new Response("A013","暂无可用代付通道，请联系管理员");
+            return new Response("A013", "暂无可用代付通道，请联系管理员");
         }
     }
 
