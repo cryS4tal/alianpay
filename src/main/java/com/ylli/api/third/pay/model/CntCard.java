@@ -1,7 +1,6 @@
 package com.ylli.api.third.pay.model;
 
-public class CntCard {
-    public Long cardId;
+public class CNTCard {
     public Long id;
     public String userId;
     public String userName;
@@ -11,4 +10,5 @@ public class CntCard {
     public String subbranch;
     public Integer payType;
     public Integer openStatus;
+    public Long cardId;
 }

@@ -4,7 +4,8 @@ public enum CNTEnum {
     BUY("1"), //下单
     CASH("0"),    //提现
     ALIPAY("0"),  //支付宝
-    WX("1");  //微信
+    WX("1"),  //微信
+    UNIONPAY("3");  //银联（银行卡）
 
     private String value;
 

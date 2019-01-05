@@ -3,19 +3,18 @@ package com.ylli.api.cnt;
 import com.google.gson.Gson;
 import com.ylli.api.pay.enums.Version;
 import com.ylli.api.pay.model.BaseOrder;
+import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.third.pay.model.CntCard;
+import com.ylli.api.third.pay.model.CNTCard;
 import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
-import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.third.pay.service.CntService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Ignore
+//@Ignore
 public class CntPayTest {
 
     @Autowired
@@ -66,10 +65,10 @@ public class CntPayTest {
         String s = "{\"data\":{\"date\":1546422897238,\"orderId\":\"O19010217571484\",\"totalPrice\":1.00,\"payPage\":\"https://cntpay.io/\",\"referenceCode\":\"833182\",\"pays\":[{\"payType\":\"0\",\"openBank\":null,\"cardId\":\"154\",\"payUrl\":\"HTTPS://QR.ALIPAY.COM/FKX0009589EIVWZLIUZWE3\",\"subbranch\":null,\"userName\":\"李自由\",\"payName\":\"18957368005\"},{\"payType\":\"1\",\"openBank\":null,\"cardId\":\"155\",\"payUrl\":\"wxp://f2f0Z6zSk0ymkF-W1UB6bLe4A3lrvqcKYK-2\",\"subbranch\":null,\"userName\":\"李自由\",\"payName\":\"ziyou502\"},{\"payType\":\"3\",\"openBank\":\"工商银行\",\"cardId\":\"92\",\"payUrl\":\"\",\"subbranch\":\"嘉兴桐乡支行\",\"userName\":\"自由\",\"payName\":\"6222081204001984016\"}]},\"resultCode\":\"0000\",\"resultMsg\":\"下单成功\"}";
         CntRes cntRes = new Gson().fromJson(s, CntRes.class);
         System.out.println(new Gson().toJson(cntRes));
-        CntCard c = new CntCard();
+        CNTCard c = new CNTCard();
         c.payUrl = "fdasf";
         c.payType = 1;
-        List<CntCard> cs = new ArrayList<>();
+        List<CNTCard> cs = new ArrayList<>();
         cs.add(c);
         cntRes.data.pays = cs;
         System.out.println(new Gson().toJson(cntRes));
@@ -93,17 +92,34 @@ public class CntPayTest {
 //        System.out.println(s);
     }
 
+
+    /**
+     * 获取绑卡列表。
+     */
     @Test
     public void findCards() throws Exception {
         String cards = cntClient.findCards("1024");
         System.out.println(cards);
     }
 
+    /**
+     * 删除银行卡.
+     */
     @Test
     public void delCard() throws Exception {
-        String cards = cntClient.delCard("376");
+        String cards = cntClient.delCard("390");
         System.out.println(cards);
     }
+
+    /**
+     * 添加银行卡
+     */
+    @Test
+    public void addCard() throws Exception {
+        String add = cntClient.addCard("1024", "李煜", "6217920274920375", "", "");
+        System.out.println(add);
+    }
+
 
     @Test
     public void confirm() throws Exception {

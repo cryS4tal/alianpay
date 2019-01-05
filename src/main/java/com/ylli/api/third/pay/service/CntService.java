@@ -13,7 +13,7 @@ import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.enums.CNTEnum;
-import com.ylli.api.third.pay.model.CntCard;
+import com.ylli.api.third.pay.model.CNTCard;
 import com.ylli.api.third.pay.model.CntCardRes;
 import com.ylli.api.third.pay.model.CntCashReq;
 import com.ylli.api.third.pay.model.CntRes;
@@ -100,7 +100,7 @@ public class CntService {
         CntRes cntRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (successCode.equals(cntRes.resultCode)) {
             //记录上游的订单号和卡号
-            CntCard cntCard = cntRes.data.pays.stream().filter(item -> String.valueOf(item.payType).equals(istype)).findFirst().get();
+            CNTCard cntCard = cntRes.data.pays.stream().filter(item -> String.valueOf(item.payType).equals(istype)).findFirst().get();
             bill.superOrderId = cntRes.data.orderId;
             bill.reserve = cntCard.cardId.toString();
             billMapper.updateByPrimaryKeySelective(bill);
@@ -233,11 +233,15 @@ public class CntService {
     public Object cash(CntCashReq req) throws Exception {
         //查询卡列表
         CntCardRes cntCardRes = new Gson().fromJson(cntClient.findCards(req.mchId.toString()), CntCardRes.class);
-        if (!successCode.equals(cntCardRes.resultCode))
+        if (!successCode.equals(cntCardRes.resultCode)){
+
             return new Response("A099", cntCardRes.resultMsg);
-        List<CntCard> data = cntCardRes.data;
+        }
+
+
+        List<CNTCard> data = cntCardRes.data;
         if (null != data && data.size() > 0) {
-            for (CntCard card : data) {
+            for (CNTCard card : data) {
                 //删除卡
                 CntCardRes delRes = new Gson().fromJson(cntClient.delCard(card.id.toString()), CntCardRes.class);
                 if (!successCode.equals(delRes.resultCode))
@@ -251,8 +255,9 @@ public class CntService {
         String cardId = cntRes.data.cardId;
         //下单
         String mz = String.format("%.2f", (req.money / 100.0));
+        // ????
         Bill bill = billService.createBill(req.mchId, null, 5L, CNTEnum.ALIPAY.getValue(), "", req.money, cardId, "", "");
-        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, req.mchId.toString(), mz, CNTEnum.ALIPAY.getValue(), CNTEnum.CASH.getValue());
+        String cntOrder = cntClient.createCntOrder(bill.sysOrderId, req.mchId.toString(), mz, CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
         CntRes cntOrderRes = new Gson().fromJson(cntOrder, CntRes.class);
         if (!successCode.equals(cntOrderRes.resultCode)) {
             return new Response("A099", cntCardRes.resultMsg);

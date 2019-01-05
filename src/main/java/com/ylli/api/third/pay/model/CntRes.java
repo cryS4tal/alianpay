@@ -4,7 +4,6 @@ import java.util.List;
 
 public class CntRes {
 
-    public static final Integer ZFB_PAY = 0;//支付宝
     public String resultCode;
     public String resultMsg;
     public DataMsg data;
@@ -14,6 +13,6 @@ public class CntRes {
         public String cardId;
         public String totalPrice;
         public String referenceCode;
-        public List<CntCard> pays;
+        public List<CNTCard> pays;
     }
 }

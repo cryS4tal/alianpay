@@ -23,7 +23,6 @@ import com.ylli.api.third.pay.service.HRJFService;
 import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,18 +161,23 @@ public class PayService {
 
     /**
      * 参数合法性校验
+     * <p>
+     * 兼容初版设计. 默认 NATIVE
      */
     public Response baseCheck(BaseOrder baseOrder) {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
                 || baseOrder.money == null || Strings.isNullOrEmpty(baseOrder.payType)
                 || Strings.isNullOrEmpty(baseOrder.sign)) {
-            return Response.A003(null, baseOrder);
+            return TempResponse.A003(null, baseOrder);
         }
         if (!payTypes.contains(baseOrder.payType)) {
-            return Response.A003("不支持的支付类型", baseOrder);
+            return TempResponse.A003("不支持的支付类型", baseOrder);
         }
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
-            return Response.A003("不支持的支付方式", baseOrder);
+            return TempResponse.A003("不支持的支付方式", baseOrder);
+        }
+        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
+            baseOrder.tradeType = NATIVE;
         }
         return null;
     }
@@ -184,10 +187,10 @@ public class PayService {
      */
     public Response signCheck(BaseOrder baseOrder, String secretKey) throws Exception {
         if (secretKey == null) {
-            return Response.A002(null, null);
+            return TempResponse.A002(null, null);
         }
         if (isSignValid(baseOrder, secretKey)) {
-            return Response.A001(null, baseOrder);
+            return TempResponse.A001(null, baseOrder);
         }
         return null;
     }
@@ -206,7 +209,7 @@ public class PayService {
             return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
         }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
-            return Response.A004(null, baseOrder);
+            return TempResponse.A004(null, baseOrder);
         }
         // 通道关闭，不允许下单
         if (channel.state == false) {
@@ -528,10 +531,8 @@ public class PayService {
         if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
             return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN, Ali_MAX), baseOrder);
         }
-        //TODO 支付方式校验,pay_type / trade_type
-        //现阶段cnt只支持扫码支付
-        if (!baseOrder.tradeType.equals(NATIVE)) {
-            return new Response("A008", "不支持的支付方式", baseOrder);
+        if (baseOrder.tradeType.equals(APP)) {
+            return TempResponse.A003("支付方式暂不支持 app.", baseOrder);
         }
         String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                 baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
@@ -546,7 +547,7 @@ public class PayService {
         String secretKey = mchKeyService.getKeyById(confirm.mchId);
 
         if (isSignValid(confirm, secretKey)) {
-            return Response.A001(null, confirm);
+            return TempResponse.A001(null, confirm);
         }
 
         //根据商户定单号查询商户定单，获取上游定单号

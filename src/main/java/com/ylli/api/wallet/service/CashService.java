@@ -14,6 +14,10 @@ import com.ylli.api.sys.model.BankPayment;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.BankPaymentService;
 import com.ylli.api.sys.service.ChannelService;
+import com.ylli.api.third.pay.enums.CNTEnum;
+import com.ylli.api.third.pay.model.CNTCards;
+import com.ylli.api.third.pay.model.CNTResponse;
+import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.third.pay.service.PingAnService;
 import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.XianFenService;
@@ -75,6 +79,9 @@ public class CashService {
     @Autowired
     XianFenService xianFenService;
 
+    @Autowired
+    CntClient cntClient;
+
     public Object cashList(Long mchId, String phone, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
@@ -97,6 +104,7 @@ public class CashService {
      * 发起提现请求。
      * 扣除对应金额进入pending 池，
      * 若对应通道时网众支付，主动向网众发起代付请求
+     * 若通道为CNT支付，自动向CNT发起代付请求并更新结果。
      */
     @Transactional
     public void cash(CashReq req) {
@@ -122,6 +130,11 @@ public class CashService {
         walletService.pendingSuc(wallet, req.money, cashCharge);
 
         SysChannel channel = channelService.getCurrentChannel(req.mchId);
+
+        /**
+         * 存在商户通道切换。商户若是历史钱包余额未体现会导致走以下体现会失败。
+         * TODO 切换通道时加入判断。在切换通道时，要求商户余额体现完毕。？ WZ 和 CNT
+         */
         if (channel.code.equals("WZ")) {
             //自动发起提现请求；
 
@@ -139,6 +152,72 @@ public class CashService {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else if (channel.code.equals("CNT")) {
+            //自动发起体现请求。
+            Gson gson = new Gson();
+            //获取商户绑卡列表
+
+            try {
+                String cards = cntClient.findCards(req.mchId.toString());
+                if (Strings.isNullOrEmpty(cards)) {
+                    //当前提现服务不可用。请联系管理员
+                    //throw new AwesomeException(C)
+                }
+                CNTCards cntCards = gson.fromJson(cards, CNTCards.class);
+                if ("0000".equals(cntCards.resultCode)) {
+                    /**
+                     * {"data":[{   "id":390,
+                     *              "userId":"M1812281125570284",
+                     *              "userName":"李玉龙",
+                     *              "payName":"6217920274920375",
+                     *              "payUrl":null,
+                     *              "openBank":"浦发银行",
+                     *              "subbranch":"浦发银行",
+                     *              "payType":3,
+                     *              "openStatus":0}],
+                     *   "resultCode":"0000",
+                     *   "resultMsg":"查询成功"}
+                     */
+                    cntCards.data.stream().forEach(item -> {
+                        //删除历史银行卡
+                        try {
+                            String delete = cntClient.delCard(item.id.toString());
+                            CNTResponse response = gson.fromJson(delete, CNTResponse.class);
+                            if (!"0000".equals(response.resultCode)) {
+                                //提现失败：%s
+                                //throw new AwesomeException(Config.);
+                            }
+                        } catch (Exception e) {
+                            //提现失败.
+                            //throw new AwesomeException()
+                            //e.printStackTrace();
+                        }
+                    });
+                    //绑定新卡
+                    String add = cntClient.addCard(req.mchId.toString(), req.name, req.bankcardNumber, req.openBank, req.subBank);
+                    CNTResponse response = gson.fromJson(add, CNTResponse.class);
+                    if (!"0000".equals(response.resultCode)) {
+                        //提现失败：%S message
+                        //throw new AwesomeException();
+                    }
+                    //提现下单
+                    //cntClient.createCntOrder(bill.sysOrderId, req.mchId.toString(), mz, CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
+
+
+
+
+                } else {
+                    //提现失败：%s
+                    //throw new AwesomeException();
+                }
+            } catch (Exception e) {
+
+                //体现失败：%S
+                //throw new AwesomeException(Config)
+                e.printStackTrace();
+            }
+
+
         }
     }
 
