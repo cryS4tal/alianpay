@@ -526,7 +526,7 @@ public class PayService {
             return response;
         }
         if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
-            return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN, Ali_MAX), baseOrder);
+            return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
         }
         if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
             baseOrder.tradeType = WAP;
