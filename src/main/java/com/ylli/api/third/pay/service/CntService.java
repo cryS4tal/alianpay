@@ -151,7 +151,6 @@ public class CntService {
                         bill.superOrderId = orderId;
 
                         bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
-                        bill.superOrderId = userOrder;
                         bill.msg = number;
                         billMapper.updateByPrimaryKeySelective(bill);
 
@@ -165,8 +164,7 @@ public class CntService {
                         bill.status = Bill.FAIL;
                         bill.tradeTime = string2Timestamp(date);
                         bill.superOrderId = orderId;
-                        bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
-                        bill.superOrderId = userOrder;
+                        //bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.msg = number;
                         billMapper.updateByPrimaryKeySelective(bill);
                     }
