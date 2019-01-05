@@ -207,7 +207,7 @@ public class CashService {
                     String cntOrder = cntClient.createCntOrder(log.id.toString(), req.mchId.toString(), mz, CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
                     CNTResponse cntResponse = gson.fromJson(cntOrder, CNTResponse.class);
 
-                    if (true) {
+                    if ("0000".equals(cntResponse.resultCode)) {
                         // 更新日志状态为处理中
                         log.state = CashLog.PROCESS;
                         log.type = CashLog.CNT;
