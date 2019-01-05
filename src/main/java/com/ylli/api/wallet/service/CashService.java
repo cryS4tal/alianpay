@@ -154,6 +154,7 @@ public class CashService {
             }
         } else if (channel.code.equals("CNT")) {
             //自动发起体现请求。
+            //cnt 提现10元起
             Gson gson = new Gson();
             //获取商户绑卡列表
 
