@@ -556,16 +556,18 @@ public class PayService {
             return new Response("A006", "订单不存在");
         }
         //根据上游定单号通知上游确认支付
-        String str = cntService.confirm(bill.superOrderId, bill.reserve);
-
-        ConfirmResponse response = new Gson().fromJson(str, ConfirmResponse.class);
-        //TODO 无论支付都会返回付款成功？
-
-        if (successCode.equals(response.resultCode)) {
-            return new Response("A000", "成功");
-        } else {
-            //TODO 确认失败. 是否需要更改订单状态？
-            return new Response("A010", "下单失败:" + response.resultMsg);
+        try {
+            String str = cntService.confirm(bill.superOrderId, bill.reserve);
+            ConfirmResponse response = new Gson().fromJson(str, ConfirmResponse.class);
+            //TODO 无论支付都会返回付款成功？
+            if (successCode.equals(response.resultCode)) {
+                return new Response("A000", "成功");
+            } else {
+                //TODO 确认失败. 是否需要更改订单状态？
+                return new Response("A010", "失败:" + response.resultMsg);
+            }
+        } catch (Exception e) {
+            return new Response("A010", "失败,当前网络不可用。");
         }
     }
 }
