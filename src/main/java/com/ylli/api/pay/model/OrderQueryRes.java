@@ -1,5 +1,6 @@
 package com.ylli.api.pay.model;
 
+// TODO 整合至response。
 public class OrderQueryRes {
 
     public String sysOrderId;

@@ -47,6 +47,12 @@ public class ResponseEnum {
         return new Response("A005", new StringBuffer("金额限制：").append(message).toString(), data);
     }
 
+    /**
+     * A006 - 订单不存在
+     */
+    public static Response A006(String message, Object data) {
+        return new Response("A006", Strings.isNullOrEmpty(message) ? "订单不存在" : message, data);
+    }
 
     /**
      * A099 - 下单失败：%s

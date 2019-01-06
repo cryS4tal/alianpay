@@ -439,7 +439,7 @@ public class PayService {
 
             Bill bill = billService.selectByMchOrderId(orderQuery.mchOrderId);
             if (bill == null) {
-                return new OrderQueryRes("A006", "订单不存在");
+                return ResponseEnum.A006(null, null);
             }
             if (bill.status == Bill.FINISH || bill.status == Bill.FAIL) {
 
@@ -546,7 +546,7 @@ public class PayService {
         //根据商户定单号查询商户定单，获取上游定单号
         Bill bill = billService.selectByMchOrderId(confirm.mchOrderId);
         if (bill == null) {
-            return new Response("A006", "订单不存在");
+            return ResponseEnum.A006(null, null);
         }
         //根据上游定单号通知上游确认支付
         try {

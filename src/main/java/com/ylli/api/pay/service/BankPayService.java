@@ -197,7 +197,7 @@ public class BankPayService {
 
             BankPayOrder order = bankPayOrderMapper.selectByMchOrderId(orderQuery.mchOrderId);
             if (order == null) {
-                return new OrderQueryRes("A006", "订单不存在");
+                return ResponseEnum.A006(null, null);
             }
             if (order.status == BankPayOrder.FINISH || order.status == BankPayOrder.FAIL) {
 
@@ -232,6 +232,6 @@ public class BankPayService {
             res.sign = SignUtil.generateSignature(map1, key);
             return res;
         }
-        return new OrderQueryRes("A001", "签名校验失败");
+        return ResponseEnum.A001(null, null);
     }
 }
