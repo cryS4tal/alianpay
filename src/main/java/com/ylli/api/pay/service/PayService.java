@@ -552,7 +552,7 @@ public class PayService {
         try {
             String str = cntService.confirm(bill.superOrderId, bill.reserve);
             ConfirmResponse response = new Gson().fromJson(str, ConfirmResponse.class);
-            //TODO 无论支付都会返回付款成功？
+            //TODO 无论支付都会返回付款成功
             if (successCode.equals(response.resultCode)) {
                 return new Response("A000", "成功");
             } else {

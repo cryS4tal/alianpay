@@ -2,6 +2,8 @@ package com.ylli.api.third.pay;
 
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.third.pay.service.CntService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/pay/cnt")
 public class CntpayController {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(CntpayController.class);
+
     @Autowired
     CntService cntService;
 
@@ -30,6 +35,8 @@ public class CntpayController {
                             @RequestParam(required = false) String remark,
                             @RequestParam(required = false) String merPriv,
                             @RequestParam(required = false) String isPur) throws Exception {
+        LOGGER.info("received cnt notify: userId" + userId);
+
         return cntService.payNotify(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID, isPur, chkValue);
     }
 }
