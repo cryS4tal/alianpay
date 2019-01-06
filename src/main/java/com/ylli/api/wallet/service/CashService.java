@@ -107,7 +107,7 @@ public class CashService {
      * 若通道为CNT支付，自动向CNT发起代付请求并更新结果。
      */
     @Transactional
-    public void cash(CashReq req) {
+    public void cash(CashReq req) throws Exception {
 
         Password password = passwordMapper.selectByPrimaryKey(req.mchId);
         if (Strings.isNullOrEmpty(req.password) || !BCrypt.checkpw(req.password, password.password)) {
@@ -158,72 +158,68 @@ public class CashService {
             Gson gson = new Gson();
             //获取商户绑卡列表
 
-            try {
-                String cards = cntClient.findCards(req.mchId.toString());
-                if (Strings.isNullOrEmpty(cards)) {
-                    //当前提现服务不可用。请联系管理员
-                    //throw new AwesomeException(C)
-                }
-                CNTCards cntCards = gson.fromJson(cards, CNTCards.class);
-                if ("0000".equals(cntCards.resultCode)) {
-                    /**
-                     * {"data":[{   "id":390,
-                     *              "userId":"M1812281125570284",
-                     *              "userName":"李玉龙",
-                     *              "payName":"6217920274920375",
-                     *              "payUrl":null,
-                     *              "openBank":"浦发银行",
-                     *              "subbranch":"浦发银行",
-                     *              "payType":3,
-                     *              "openStatus":0}],
-                     *   "resultCode":"0000",
-                     *   "resultMsg":"查询成功"}
-                     */
-                    cntCards.data.stream().forEach(item -> {
-                        //删除历史银行卡
-                        try {
-                            String delete = cntClient.delCard(item.id.toString());
-                            CNTResponse response = gson.fromJson(delete, CNTResponse.class);
-                            if (!"0000".equals(response.resultCode)) {
-                                //提现失败：%s
-                                throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(response.resultMsg));
-                            }
-                        } catch (Exception e) {
-                            //提现失败.
-                            throw new AwesomeException(Config.ERROR_REQUEST_FAIL);
+            //try {
+            String cards = cntClient.findCards(req.mchId.toString());
+            if (Strings.isNullOrEmpty(cards)) {
+                //当前提现服务不可用。请联系管理员
+                //throw new AwesomeException(C)
+            }
+            CNTCards cntCards = gson.fromJson(cards, CNTCards.class);
+            if ("0000".equals(cntCards.resultCode)) {
+                /**
+                 * {"data":[{   "id":390,
+                 *              "userId":"M1812281125570284",
+                 *              "userName":"李玉龙",
+                 *              "payName":"6217920274920375",
+                 *              "payUrl":null,
+                 *              "openBank":"浦发银行",
+                 *              "subbranch":"浦发银行",
+                 *              "payType":3,
+                 *              "openStatus":0}],
+                 *   "resultCode":"0000",
+                 *   "resultMsg":"查询成功"}
+                 */
+                cntCards.data.stream().forEach(item -> {
+                    //删除历史银行卡
+                    try {
+                        String delete = cntClient.delCard(item.id.toString());
+                        CNTResponse response = gson.fromJson(delete, CNTResponse.class);
+                        if (!"0000".equals(response.resultCode)) {
+                            //提现失败：%s
+                            throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(response.resultMsg));
                         }
-                    });
-                    //绑定新卡
-                    String add = cntClient.addCard(req.mchId.toString(), req.name, req.bankcardNumber, req.openBank, req.subBank);
-                    CNTResponse response = gson.fromJson(add, CNTResponse.class);
-                    if (!"0000".equals(response.resultCode)) {
-                        //提现失败：%S message
-                        throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(response.resultMsg));
+                    } catch (Exception e) {
+                        //提现失败.
+                        throw new AwesomeException(Config.ERROR_REQUEST_FAIL);
                     }
-                    //提现下单
-                    //分转换元
-                    String mz = String.format("%.2f", (req.money / 100.0));
-
-                    //使用提现日志作为系统订单号。
-                    String cntOrder = cntClient.createCntOrder(log.id.toString(), req.mchId.toString(), mz, CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
-                    CNTResponse cntResponse = gson.fromJson(cntOrder, CNTResponse.class);
-
-                    if ("0000".equals(cntResponse.resultCode)) {
-                        // 更新日志状态为处理中
-                        log.state = CashLog.PROCESS;
-                        log.type = CashLog.CNT;
-                        cashLogMapper.updateByPrimaryKeySelective(log);
-                        //等待 cnt 回调确认状态.
-                    } else {
-                        throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(cntCards.resultMsg));
-                    }
-                } else {
-                    //提现失败：%s
-                    throw new AwesomeException(Config.ERROR_REQUEST_FAIL);
+                });
+                //绑定新卡
+                String add = cntClient.addCard(req.mchId.toString(), req.name, req.bankcardNumber, req.openBank, req.subBank);
+                CNTResponse response = gson.fromJson(add, CNTResponse.class);
+                if (!"0000".equals(response.resultCode)) {
+                    //提现失败：%S message
+                    throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(response.resultMsg));
                 }
-            } catch (Exception e) {
-                //体现失败：%S
-                throw new AwesomeException(Config.ERROR_REQUEST_FAIL);
+                //提现下单
+                //分转换元
+                String mz = String.format("%.2f", (req.money / 100.0));
+
+                //使用提现日志作为系统订单号。
+                String cntOrder = cntClient.createCntOrder(log.id.toString(), req.mchId.toString(), mz, CNTEnum.UNIONPAY.getValue(), CNTEnum.CASH.getValue());
+                CNTResponse cntResponse = gson.fromJson(cntOrder, CNTResponse.class);
+
+                if ("0000".equals(cntResponse.resultCode)) {
+                    // 更新日志状态为处理中
+                    log.state = CashLog.PROCESS;
+                    log.type = CashLog.CNT;
+                    cashLogMapper.updateByPrimaryKeySelective(log);
+                    //等待 cnt 回调确认状态.
+                } else {
+                    throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(cntResponse.resultMsg));
+                }
+            } else {
+                //提现失败：%s
+                throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(cntCards.resultMsg));
             }
 
 
