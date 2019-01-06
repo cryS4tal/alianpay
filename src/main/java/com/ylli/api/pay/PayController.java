@@ -43,11 +43,7 @@ public class PayController {
         if (!accountService.isActive(baseOrder.mchId)) {
             return new Response("A100", "商户被冻结，请联系管理员");
         }
-        if (!Strings.isNullOrEmpty(baseOrder.version) && baseOrder.version.equals(Version.CNT.getVersion())) {
-            return payService.createOrderCNT(baseOrder);
-        } else {
-            return payService.createOrderDefault(baseOrder);
-        }
+        return payService.createOrder(baseOrder);
     }
 
     @PostMapping("/order/query")

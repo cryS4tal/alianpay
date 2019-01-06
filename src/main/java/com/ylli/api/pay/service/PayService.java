@@ -99,7 +99,7 @@ public class PayService {
      * @param baseOrder
      * @return
      */
-    public Object createOrderDefault(BaseOrder baseOrder) throws Exception {
+    public Object createOrder(BaseOrder baseOrder) throws Exception {
 
         Response response = baseCheck(baseOrder);
         if (response != null) {
@@ -153,6 +153,25 @@ public class PayService {
                 //下单成功
                 return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
             }
+        } else if (channel.code.equals("CNT")) {
+            //cnt 支付.
+            //cnt 加入版本 version = 1.1 。因为不会发起主动回调，需要商户主动确认。。
+            if (!(Version.CNT.getVersion()).equals(baseOrder.version)) {
+                return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
+            }
+            if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
+                return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
+            }
+            if (baseOrder.tradeType.equals(APP)) {
+                return TempResponse.A003("支付方式暂不支持 app.", baseOrder);
+            }
+            String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+            if (Strings.isNullOrEmpty(str)) {
+                return new Response("A010", "下单失败，请联系管理员");
+            }
+            return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+
         } else {
             //
 
@@ -177,6 +196,10 @@ public class PayService {
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
             return TempResponse.A003("不支持的支付方式", baseOrder);
         }
+        //默认 wap.
+        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
+            baseOrder.tradeType = WAP;
+        }
         return null;
     }
 
@@ -195,17 +218,8 @@ public class PayService {
 
     /**
      * 系统校验
-     * 加入版本校验，目前cnt支付 对应version = 1.1 , channel.code = CNT
      */
     public Response sysCheck(BaseOrder baseOrder, SysChannel channel) {
-        //反向校验，控制 商户传入version。而通道不对应cnt支付
-        //暂时只支持 version = 1.1 , channel = cnt
-        if (!Strings.isNullOrEmpty(baseOrder.version) && !channel.code.equals("CNT")) {
-            return new Response("A011", "版本校验错误，当前系统通道not need version = 1.1");
-        }
-        if (channel.code.equals("CNT") && !(Version.CNT.getVersion()).equals(baseOrder.version)) {
-            return new Response("A011", "版本校验错误，当前通道对应支付版本version=1.1", baseOrder);
-        }
         if (billService.mchOrderExist(baseOrder.mchOrderId)) {
             return TempResponse.A004(null, baseOrder);
         }
@@ -505,41 +519,6 @@ public class PayService {
                 e.printStackTrace();
             }
         }
-    }
-
-    public Object createOrderCNT(BaseOrder baseOrder) throws Exception {
-        Response response = baseCheck(baseOrder);
-        if (response != null) {
-            return response;
-        }
-
-        //sign 前置校验
-        String secretKey = mchKeyService.getKeyById(baseOrder.mchId);
-        response = signCheck(baseOrder, secretKey);
-        if (response != null) {
-            return response;
-        }
-
-        SysChannel channel = channelService.getCurrentChannel(baseOrder.mchId);
-        response = sysCheck(baseOrder, channel);
-        if (response != null) {
-            return response;
-        }
-        if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
-            return new Response("A007", String.format("交易金额限制：支付宝 %s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
-        }
-        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
-            baseOrder.tradeType = WAP;
-        }
-        if (baseOrder.tradeType.equals(APP)) {
-            return TempResponse.A003("支付方式暂不支持 app.", baseOrder);
-        }
-        String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
-                baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-        if (Strings.isNullOrEmpty(str)) {
-            return new Response("A010", "下单失败，请联系管理员");
-        }
-        return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
     }
 
     public Object payConfirm(OrderConfirm confirm) throws Exception {
