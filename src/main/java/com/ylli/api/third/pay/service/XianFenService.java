@@ -440,7 +440,6 @@ public class XianFenService {
 
             //兼容status 没有返回值.
             //具体情况未知
-            //return getResJson("A999", data.resCode + data.resMessage, null);
 
             return null;
         } else if (response.code.equals("99001")) {

@@ -65,7 +65,6 @@ public class XfpayTests {
                 }
             }
             //应答失败，返回先锋的业务返回码 + 描述
-            //return getResJson("A999", data.resCode + data.resMessage, null);
 
         } else if (response.code.equals("99001")) {
 

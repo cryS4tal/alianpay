@@ -4,7 +4,7 @@ import com.ylli.api.auth.service.AccountService;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.model.OrderQueryReq;
-import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.service.PayService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,10 +36,10 @@ public class PayController {
     public Object createOrder(@RequestBody BaseOrder baseOrder) throws Exception {
 
         if (!enable) {
-            return new Response("A999", "系统维护，请稍后再试.");
+            return ResponseEnum.A999(null, null);
         }
         if (!accountService.isActive(baseOrder.mchId)) {
-            return new Response("A100", "商户被冻结，请联系管理员");
+            return ResponseEnum.A100(null, null);
         }
         return payService.createOrder(baseOrder);
     }
@@ -47,7 +47,7 @@ public class PayController {
     @PostMapping("/order/query")
     public Object orderQuery(@RequestBody OrderQueryReq orderQuery) throws Exception {
         if (!accountService.isActive(orderQuery.mchId)) {
-            return new Response("A100", "商户被冻结，请联系管理员");
+            return ResponseEnum.A100(null, null);
         }
         return payService.orderQuery(orderQuery);
     }
@@ -67,7 +67,7 @@ public class PayController {
     @PostMapping("/confirm")
     public Object payConfirm(@RequestBody OrderConfirm confirm) throws Exception {
         if (!accountService.isActive(confirm.mchId)) {
-            return new Response("A100", "商户被冻结，请联系管理员");
+            return ResponseEnum.A100(null, null);
         }
         return payService.payConfirm(confirm);
     }

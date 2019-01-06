@@ -7,8 +7,8 @@ import com.ylli.api.pay.model.BankPayOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
+import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.model.SignPayOrder;
-import com.ylli.api.pay.model.TempResponse;
 import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.mapper.BankPaymentMapper;
@@ -67,50 +67,50 @@ public class BankPayService {
     public Object createOrder(BankPayOrder bankPayOrder) throws Exception {
         //参数校验
         if (bankPayOrder.mchId == null) {
-            return TempResponse.A003("商户号为空", bankPayOrder);
+            return ResponseEnum.A003("商户号为空", bankPayOrder);
         }
         if (Strings.isNullOrEmpty(bankPayOrder.mchOrderId)) {
-            return TempResponse.A003("商户订单号为空", bankPayOrder);
+            return ResponseEnum.A003("商户订单号为空", bankPayOrder);
         }
         if (mchOrderExist(bankPayOrder.mchOrderId)) {
-            return TempResponse.A004(null, bankPayOrder);
+            return ResponseEnum.A004(null, bankPayOrder);
         }
         //金额校验
         if (bankPayOrder.money == null || bankPayMin > bankPayOrder.money || bankPayMax < bankPayOrder.money) {
-            return TempResponse.A003(String.format("交易金额限制: %s - %s 元", bankPayMin / 100, bankPayMax / 100), bankPayOrder);
+            return ResponseEnum.A005(String.format("%s - %s 元", bankPayMin / 100, bankPayMax / 100), bankPayOrder);
         }
         if (Strings.isNullOrEmpty(bankPayOrder.accNo)) {
-            return TempResponse.A003("银行卡号为空", bankPayOrder);
+            return ResponseEnum.A003("银行卡号为空", bankPayOrder);
         }
         if (Strings.isNullOrEmpty(bankPayOrder.accName)) {
-            return TempResponse.A003("姓名为空", bankPayOrder);
+            return ResponseEnum.A003("姓名为空", bankPayOrder);
         }
         //代付类型转换 & 校验
         if (bankPayOrder.payType == null) {
             bankPayOrder.payType = BankPayOrder.PAY_TYPE_PERSON;
         }
         if (!BankPayOrder.payAllows.contains(bankPayOrder.payType)) {
-            return TempResponse.A003("代付类型不正确", bankPayOrder);
+            return ResponseEnum.A003("代付类型不正确", bankPayOrder);
         }
         //默认值
         if (bankPayOrder.payType == BankPayOrder.PAY_TYPE_PERSON &&
                 (bankPayOrder.accType != null && !BankPayOrder.accAllows.contains(bankPayOrder.accType))) {
-            return TempResponse.A003("账户类型不正确", bankPayOrder);
+            return ResponseEnum.A003("账户类型不正确", bankPayOrder);
         }
         //联行号校验
         if (bankPayOrder.payType == BankPayOrder.PAY_TYPE_COMPANY && Strings.isNullOrEmpty(bankPayOrder.issuer)) {
-            return TempResponse.A003("联行号不能为空", bankPayOrder);
+            return ResponseEnum.A003("联行号不能为空", bankPayOrder);
         }
         //sign 校验.
         if (Strings.isNullOrEmpty(bankPayOrder.sign)) {
-            return TempResponse.A001(null, bankPayOrder);
+            return ResponseEnum.A001(null, bankPayOrder);
         }
         String secretKey = mchKeyService.getKeyById(bankPayOrder.mchId);
         if (secretKey == null) {
-            return TempResponse.A002(null, null);
+            return ResponseEnum.A002(null, null);
         }
         if (isSignValid(formatParams(bankPayOrder), secretKey)) {
-            return TempResponse.A001(null, bankPayOrder);
+            return ResponseEnum.A001(null, bankPayOrder);
         }
         Wallet wallet = walletService.getOwnWallet(bankPayOrder.mchId);
         if (wallet.reservoir < (bankPayOrder.money + bankPayCharge)) {

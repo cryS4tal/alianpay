@@ -2,7 +2,7 @@ package com.ylli.api.pay.model;
 
 import com.google.common.base.Strings;
 
-public class TempResponse {
+public class ResponseEnum {
 
     /**
      * A000 - 成功。
@@ -38,5 +38,34 @@ public class TempResponse {
      */
     public static Response A004(String message, Object data) {
         return new Response("A004", Strings.isNullOrEmpty(message) ? "订单号重复" : message, data);
+    }
+
+    /**
+     * A005 - 金额限制：%s
+     */
+    public static Response A005(String message, Object data) {
+        return new Response("A005", new StringBuffer("金额限制：").append(message).toString(), data);
+    }
+
+
+    /**
+     * A099 - 下单失败：%s
+     */
+    public static Response A099(String message, Object data) {
+        return new Response("A099", new StringBuffer("下单失败：").append(message).toString(), data);
+    }
+
+    /**
+     * A100 - 商户被冻结，请联系管理员
+     */
+    public static Response A100(String message, Object data) {
+        return new Response("A100", Strings.isNullOrEmpty(message) ? "商户被冻结，请联系管理员" : message, data);
+    }
+
+    /**
+     * A999 - 系统维护
+     */
+    public static Response A999(String message, Object data) {
+        return new Response("A999", Strings.isNullOrEmpty(message) ? "系统维护" : message, data);
     }
 }
