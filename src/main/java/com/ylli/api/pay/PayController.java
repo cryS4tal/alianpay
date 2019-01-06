@@ -1,13 +1,11 @@
 package com.ylli.api.pay;
 
-import com.google.common.base.Strings;
 import com.ylli.api.auth.service.AccountService;
-import com.ylli.api.pay.enums.Version;
 import com.ylli.api.pay.model.BaseOrder;
+import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.service.PayService;
-import com.ylli.api.pay.model.OrderConfirm;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

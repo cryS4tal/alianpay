@@ -182,7 +182,7 @@ public class PayService {
     /**
      * 参数合法性校验
      * <p>
-     * 兼容初版设计. 默认 NATIVE
+     * 兼容初版设计. 默认 WAP
      */
     public Response baseCheck(BaseOrder baseOrder) {
         if (baseOrder.mchId == null || Strings.isNullOrEmpty(baseOrder.mchOrderId)
