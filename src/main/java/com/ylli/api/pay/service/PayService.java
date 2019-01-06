@@ -20,6 +20,7 @@ import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.service.CTService;
 import com.ylli.api.third.pay.service.CntService;
+import com.ylli.api.third.pay.service.GPayService;
 import com.ylli.api.third.pay.service.HRJFService;
 import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
@@ -74,6 +75,9 @@ public class PayService {
 
     @Autowired
     CTService ctService;
+
+    @Autowired
+    GPayService gPayService;
 
     @Autowired
     PayClient payClient;
@@ -174,6 +178,27 @@ public class PayService {
             }
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
 
+        } else if (channel.code.equals("GP")) {
+            //Gpay
+
+            //微信只支持扫码  支付宝走 H5
+            //暂时强制给商户转换。不去报错，免去切换通道带来的参数不兼容.....后续有问题再修改
+            if (baseOrder.payType.equals(WX) && !baseOrder.tradeType.equals(NATIVE)) {
+                baseOrder.tradeType = NATIVE;
+            }
+            if (baseOrder.payType.equals(ALI) && !baseOrder.tradeType.equals(WAP)) {
+                baseOrder.tradeType = WAP;
+            }
+            String str = gPayService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            if (str.startsWith("message")) {
+                Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
+                bill.status = Bill.FAIL;
+                billMapper.updateByPrimaryKeySelective(bill);
+                return ResponseEnum.A099(str, null);
+            }
+            return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);

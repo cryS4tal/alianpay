@@ -352,6 +352,7 @@ public class BillService {
         }
     }
 
+    //TODO 分段下载.过多会内存溢出
     public void exportBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
                             String tradeType, Date tradeTime, Date startTime, Date endTime, HttpServletResponse response) {
         List<Bill> list = billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
@@ -438,5 +439,11 @@ public class BillService {
         calendar.setTime(ts);
         calendar.add(Calendar.HOUR, 8);
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
+    }
+
+    public Bill selectBySuperOrderId(String superOrderId) {
+        Bill bill = new Bill();
+        bill.superOrderId = superOrderId;
+        return billMapper.selectOne(bill);
     }
 }
