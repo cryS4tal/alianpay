@@ -70,6 +70,10 @@ dependencies {
     compile group: 'dom4j', name: 'dom4j', version: '1.6.1'
     //excel导出
     compile group: 'org.apache.poi', name: 'poi', version: '3.5-FINAL'
+    //base64
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
+
 }
 
 
