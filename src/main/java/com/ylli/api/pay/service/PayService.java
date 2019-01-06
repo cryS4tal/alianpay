@@ -76,6 +76,9 @@ public class PayService {
     CTService ctService;
 
     @Autowired
+    PayClient payClient;
+
+    @Autowired
     BillMapper billMapper;
 
     public static final String ALI = "alipay";
@@ -562,5 +565,25 @@ public class PayService {
         } catch (Exception e) {
             return new Response("A010", "失败,当前服务状态异常。");
         }
+    }
+
+    public Object manualNotify(String mchOrderId) throws Exception {
+        Bill bill = billService.selectByMchOrderId(mchOrderId);
+        if (bill == null) {
+            return "bill not found";
+        }
+        if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
+            String params = generateRes(
+                    bill.money.toString(),
+                    bill.mchOrderId,
+                    bill.sysOrderId,
+                    bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
+                    bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
+                    bill.reserve);
+
+            payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+        }
+
+        return "ok";
     }
 }
