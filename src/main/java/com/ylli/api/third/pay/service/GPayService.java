@@ -89,7 +89,7 @@ public class GPayService {
                 bill.superOrderId = jsonObject.getString("orderId");
                 billMapper.updateByPrimaryKeySelective(bill);
             }
-            return jsonObject.getString("payUrl");
+            return map.get("payUrl").toString();
         }
         LOGGER.error("create gpay order fail: mchOrderId = " + mchOrderId + jsonObject.getString("message"));
         return new StringBuffer("message").append(jsonObject.getString("message")).toString();
