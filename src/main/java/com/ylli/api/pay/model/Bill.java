@@ -45,6 +45,8 @@ public class Bill {
 
     public String reserve;     //not required
 
+    public String reserveWord;     //系统保留字段。用来记录各种额外信息
+
     public String notifyUrl;
 
     public String redirectUrl;

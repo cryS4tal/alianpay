@@ -103,6 +103,7 @@ public class CntService {
             CNTCard cntCard = cntRes.data.pays.stream().filter(item -> String.valueOf(item.payType).equals(istype)).findFirst().get();
             bill.superOrderId = cntRes.data.orderId;
             bill.reserve = cntCard.cardId.toString();
+            bill.reserveWord = cntRes.data.referenceCode;
             billMapper.updateByPrimaryKeySelective(bill);
             //返回支付链接
             return cntCard.payUrl;

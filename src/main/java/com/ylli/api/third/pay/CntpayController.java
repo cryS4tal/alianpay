@@ -35,7 +35,7 @@ public class CntpayController {
                             @RequestParam(required = false) String remark,
                             @RequestParam(required = false) String merPriv,
                             @RequestParam(required = false) String isPur) throws Exception {
-        LOGGER.info("received cnt notify: userId" + userId);
+        LOGGER.info("received cnt notify: userId = [" + userId + "] orderId = [ " + orderId + "] userOrder = [" + userOrder);
 
         return cntService.payNotify(userId, orderId, userOrder, number, remark, merPriv, date, resultCode, resultMsg, appID, isPur, chkValue);
     }
