@@ -151,8 +151,8 @@ public class CntService {
                         bill.superOrderId = orderId;
 
                         //以实际成交金额计算。
-                        bill.payCharge = ((Integer.parseInt(Optional.ofNullable(bill.msg).orElse("0")) * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.msg = number;
+                        bill.payCharge = ((Integer.parseInt(Optional.ofNullable(number).orElse("0")) * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         billMapper.updateByPrimaryKeySelective(bill);
 
                         //钱包金额变动。
