@@ -150,7 +150,7 @@ public class GPayService {
         Boolean success = verifyMap(map, sign);
 
         if (success) {
-            Bill bill = billService.selectBySuperOrderId("");
+            Bill bill = billService.selectBySuperOrderId(notify.data.orderId);
             if (bill == null) {
                 throw new RuntimeException("order 404 not found");
             }
@@ -163,7 +163,7 @@ public class GPayService {
                     bill.tradeTime = new Timestamp(System.currentTimeMillis());
                     bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                     bill.status = Bill.FINISH;
-                    bill.msg = notify.data.actualMoney;
+                    bill.msg = String.valueOf(Integer.parseInt(notify.data.actualMoney) / 100);
                     billMapper.updateByPrimaryKeySelective(bill);
 
                     //钱包金额变动。
