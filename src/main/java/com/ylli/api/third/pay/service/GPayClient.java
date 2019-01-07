@@ -2,8 +2,10 @@ package com.ylli.api.third.pay.service;
 
 import com.google.gson.Gson;
 import com.ylli.api.third.pay.model.GPayOrder;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,8 +27,25 @@ public class GPayClient {
     public static final String ALIPAY = "alipay";
     public static final String WX = "wechat";
 
-    @Autowired
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
+
+    @PostConstruct
+    private void initRestTemplate() {
+        restTemplate = new RestTemplate();
+        setTimeout(restTemplate);
+    }
+
+    private void setTimeout(RestTemplate restTemplate) {
+        if (restTemplate.getRequestFactory() instanceof SimpleClientHttpRequestFactory) {
+            ((SimpleClientHttpRequestFactory) restTemplate.getRequestFactory()).setConnectTimeout(2 * 1000);
+            ((SimpleClientHttpRequestFactory) restTemplate.getRequestFactory()).setReadTimeout(2 * 1000);
+        } else if (restTemplate.getRequestFactory() instanceof HttpComponentsClientHttpRequestFactory) {
+            ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory()).setReadTimeout(2 * 1000);
+            ((HttpComponentsClientHttpRequestFactory) restTemplate.getRequestFactory()).setConnectTimeout(2 * 1000);
+        }
+    }
+
+    //
 
     /**
      * @param money   金额(分)

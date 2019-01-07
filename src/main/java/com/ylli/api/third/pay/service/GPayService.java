@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
+import org.springframework.web.client.ResourceAccessException;
 
 @Service
 public class GPayService {
@@ -65,34 +66,36 @@ public class GPayService {
 
         //创建订单
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
+        try {
+            String result = gPayClient.createOrder(bill.money, payType);
+            /**
+             * { "code": 5,
+             *   "data": {},
+             *   "message": "设备1389忙碌 设备1397不在线 设备1379忙碌 设备1386忙碌 ",
+             *   "sign": ""}
+             */
+            JSONObject jsonObject = JSON.parseObject(result);
 
-        String result = gPayClient.createOrder(bill.money, payType);
+            String code = jsonObject.getString("code");
 
-        /**
-         * { "code": 5,
-         *   "data": {},
-         *   "message": "设备1389忙碌 设备1397不在线 设备1379忙碌 设备1386忙碌 ",
-         *   "sign": ""}
-         */
-        JSONObject jsonObject = JSON.parseObject(result);
-
-        String code = jsonObject.getString("code");
-
-        if ("1".equals(code)) {
-            //下单成功
-            String data = jsonObject.getString("data");
-            Map<String, Object> map = JSON.parseObject(data);
-            String sign = jsonObject.getString("sign");
-            Boolean success = verifyMap(map, sign);
-            if (success) {
-                //更新上游订单号。
-                bill.superOrderId = jsonObject.getString("orderId");
-                billMapper.updateByPrimaryKeySelective(bill);
+            if ("1".equals(code)) {
+                //下单成功
+                String data = jsonObject.getString("data");
+                Map<String, Object> map = JSON.parseObject(data);
+                String sign = jsonObject.getString("sign");
+                Boolean success = verifyMap(map, sign);
+                if (success) {
+                    //更新上游订单号。
+                    bill.superOrderId = jsonObject.getString("orderId");
+                    billMapper.updateByPrimaryKeySelective(bill);
+                }
+                return map.get("payUrl").toString();
             }
-            return map.get("payUrl").toString();
+            LOGGER.error("create gpay order fail: mchOrderId = " + mchOrderId + jsonObject.getString("message"));
+            return new StringBuffer("message").append(jsonObject.getString("message")).toString();
+        } catch (ResourceAccessException exception) {
+            return new StringBuffer("message").append("请求超时").toString();
         }
-        LOGGER.error("create gpay order fail: mchOrderId = " + mchOrderId + jsonObject.getString("message"));
-        return new StringBuffer("message").append(jsonObject.getString("message")).toString();
     }
 
 
