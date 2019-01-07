@@ -95,7 +95,8 @@ public class CTService {
                 if (bill.status != Bill.FINISH) {
                     //不返回上游订单号
                     bill.tradeTime = new Timestamp(System.currentTimeMillis());
-                    bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                    //以实际成交金额计算
+                    bill.payCharge = ((Integer.parseInt(Optional.ofNullable(bill.msg).orElse("0")) * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
                     bill.status = Bill.FINISH;
                     //msg暂时先记录实际交易金额/元
                     bill.msg = totalFee;

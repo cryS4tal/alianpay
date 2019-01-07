@@ -143,7 +143,6 @@ public class CntService {
                     return "repeat notify";
                 }
 
-                bill.money = (int) Double.parseDouble(number) * 100;
                 if (successCode.equals(resultCode)) {
                     //交易成功
                     if (bill.status != Bill.FINISH) {
@@ -151,7 +150,8 @@ public class CntService {
                         bill.tradeTime = string2Timestamp(date);
                         bill.superOrderId = orderId;
 
-                        bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                        //以实际成交金额计算。
+                        bill.payCharge = ((Integer.parseInt(Optional.ofNullable(bill.msg).orElse("0")) * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         bill.msg = number;
                         billMapper.updateByPrimaryKeySelective(bill);
 
