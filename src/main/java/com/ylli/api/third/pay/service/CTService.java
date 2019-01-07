@@ -98,7 +98,7 @@ public class CTService {
                     //msg暂时先记录实际交易金额/元
                     bill.msg = totalFee;
                     //以实际成交金额计算
-                    bill.payCharge = ((Integer.parseInt(Optional.ofNullable(totalFee).orElse("0")) * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                    bill.payCharge = ((Double.valueOf(Optional.ofNullable(totalFee).orElse("0")).intValue() * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
                     bill.status = Bill.FINISH;
                     billMapper.updateByPrimaryKeySelective(bill);
 

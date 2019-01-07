@@ -153,7 +153,7 @@ public class CntService {
 
                         //以实际成交金额计算。
                         bill.msg = number;
-                        bill.payCharge = ((Integer.parseInt(Optional.ofNullable(number).orElse("0")) * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                        bill.payCharge = ((Double.valueOf(Optional.ofNullable(number).orElse("0")).intValue() * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
                         billMapper.updateByPrimaryKeySelective(bill);
 
                         //钱包金额变动。
