@@ -86,7 +86,7 @@ public class GPayService {
                 Boolean success = verifyMap(map, sign);
                 if (success) {
                     //更新上游订单号。
-                    bill.superOrderId = jsonObject.getString("orderId");
+                    bill.superOrderId = map.get("orderId").toString();
                     billMapper.updateByPrimaryKeySelective(bill);
                 }
                 return map.get("payUrl").toString();
