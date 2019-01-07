@@ -13,6 +13,7 @@ import com.ylli.api.third.pay.model.CTOrderResponse;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +116,9 @@ public class CTService {
             //params jsonStr.
             if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
                 String params = payService.generateRes(
-                        bill.money.toString(),
+                        //fix 用户手动输入金额会导致  实际交易金额和下单金额不一致
+                        String.valueOf(Integer.parseInt(Optional.ofNullable(bill.msg).orElse("0")) * 100),
+                        //bill.money.toString(),
                         bill.mchOrderId,
                         bill.sysOrderId,
                         bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
