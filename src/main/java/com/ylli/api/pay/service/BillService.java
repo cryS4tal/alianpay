@@ -124,6 +124,7 @@ public class BillService {
         if (admin) {
             baseBill.channel = channelService.getChannelName(bill.channelId);
         }
+        baseBill.msg = bill.msg;
         return baseBill;
     }
 

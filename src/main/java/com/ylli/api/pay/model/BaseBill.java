@@ -7,8 +7,11 @@ import java.sql.Timestamp;
  */
 public class BaseBill {
 
-    //交易金额
+    //下单金额/分
     public Integer money;
+
+    //实际成交金额/元
+    public String msg;
 
     //手续费
     public Integer mchCharge;
