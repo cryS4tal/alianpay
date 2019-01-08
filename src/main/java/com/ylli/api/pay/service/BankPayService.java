@@ -1,7 +1,10 @@
 package com.ylli.api.pay.service;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.mch.service.MchKeyService;
+import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.BankPayOrderMapper;
 import com.ylli.api.pay.mapper.MchBankPayRateMapper;
 import com.ylli.api.pay.model.BankPayOrder;
@@ -20,6 +23,7 @@ import com.ylli.api.third.pay.service.XianFenService;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.modelmapper.ModelMapper;
@@ -246,5 +250,17 @@ public class BankPayService {
             return res;
         }
         return ResponseEnum.A001(null, null);
+    }
+
+    public DataList<BankPayOrder> getOrders(Long mchId, Integer status, String mchOrderId, String sysOrderId, String accName, Integer payType, Date tradeTime, Date startTime, Date endTime, int offset, int limit) {
+
+        PageHelper.offsetPage(offset, limit);
+        Page<BankPayOrder> page = (Page<BankPayOrder>) bankPayOrderMapper.getOrders(mchId, status, mchOrderId, sysOrderId, accName, payType, tradeTime, startTime, endTime);
+        DataList<BankPayOrder> dataList = new DataList<>();
+        dataList.offset = page.getStartRow();
+        dataList.count = page.size();
+        dataList.totalCount = page.getTotal();
+        dataList.dataList = page;
+        return dataList;
     }
 }
