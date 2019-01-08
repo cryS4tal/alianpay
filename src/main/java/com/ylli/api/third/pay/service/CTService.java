@@ -97,8 +97,7 @@ public class CTService {
                     bill.tradeTime = new Timestamp(System.currentTimeMillis());
                     //msg暂时先记录实际交易金额/元
                     bill.msg = totalFee;
-                    //以实际成交金额计算
-                    bill.payCharge = ((Double.valueOf(Optional.ofNullable(totalFee).orElse("0")).intValue() * 100) * appService.getRate(bill.mchId, bill.appId)) / 10000;
+                    bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                     bill.status = Bill.FINISH;
                     billMapper.updateByPrimaryKeySelective(bill);
 
@@ -117,9 +116,7 @@ public class CTService {
             //params jsonStr.
             if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
                 String params = payService.generateRes(
-                        //fix 用户手动输入金额会导致  实际交易金额和下单金额不一致
-                        String.valueOf(Integer.parseInt(Optional.ofNullable(bill.msg).orElse("0")) * 100),
-                        //bill.money.toString(),
+                        bill.money.toString(),
                         bill.mchOrderId,
                         bill.sysOrderId,
                         bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
