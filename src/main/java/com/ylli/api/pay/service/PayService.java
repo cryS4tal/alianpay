@@ -582,7 +582,7 @@ public class PayService {
             ConfirmResponse response = new Gson().fromJson(str, ConfirmResponse.class);
             //TODO 无论支付都会返回付款成功
             if (successCode.equals(response.resultCode)) {
-                return new Response("A000", "成功");
+                return new Response("A000", "成功", bill.reserveWord);
             } else {
                 //TODO 确认失败. 是否需要更改订单状态？
                 return new Response("A010", "失败:" + response.resultMsg);
