@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/bankpay")
 public class BankPayController {
 
-    @Value("${order.enable}")
+    @Value("${bank.pay.enable}")
     public Boolean enable;
 
     @Autowired

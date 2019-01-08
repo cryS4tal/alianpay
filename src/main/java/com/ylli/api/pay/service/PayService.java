@@ -98,6 +98,9 @@ public class PayService {
     @Value("${ali.max}")
     public Integer Ali_MAX;
 
+    @Value("${server.release}")
+    public Boolean release;
+
     public static String successCode = "0000";
 
     /**
@@ -115,7 +118,9 @@ public class PayService {
 
         //sign 前置校验
         String secretKey = mchKeyService.getKeyById(baseOrder.mchId);
-        response = signCheck(baseOrder, secretKey);
+        if (release) {
+            response = signCheck(baseOrder, secretKey);
+        }
         if (response != null) {
             return response;
         }

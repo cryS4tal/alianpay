@@ -3,7 +3,9 @@ package com.ylli.api.pay.service;
 import com.google.common.base.Strings;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.mapper.BankPayOrderMapper;
+import com.ylli.api.pay.mapper.MchBankPayRateMapper;
 import com.ylli.api.pay.model.BankPayOrder;
+import com.ylli.api.pay.model.MchBankPayRate;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
@@ -44,6 +46,9 @@ public class BankPayService {
 
     @Autowired
     BankPaymentMapper bankPaymentMapper;
+
+    @Autowired
+    MchBankPayRateMapper mchBankPayRateMapper;
 
     @Autowired
     ModelMapper modelMapper;
@@ -113,7 +118,15 @@ public class BankPayService {
             return ResponseEnum.A001(null, bankPayOrder);
         }
         Wallet wallet = walletService.getOwnWallet(bankPayOrder.mchId);
-        if (wallet.reservoir < (bankPayOrder.money + bankPayCharge)) {
+
+        //加入代付费率.
+        MchBankPayRate rate = mchBankPayRateMapper.selectByMchId(bankPayOrder.mchId);
+        if (rate == null) {
+            return new Response("A013", "error：请联系管理员设置费率，商户号：" + bankPayOrder.mchId);
+        }
+        Integer payCharge = bankPayOrder.money * rate.rate / 10000 + bankPayCharge;
+
+        if (wallet.reservoir < (bankPayOrder.money + payCharge)) {
             return new Response("A012", "代付余额不足");
         }
 
@@ -138,7 +151,7 @@ public class BankPayService {
         if ("pingAn".equals(code)) {
             //TODO 代付订单系统 , 1 - 平安，2先锋 ，
             //平安
-            bankPayOrder = insertOrder(bankPayOrder, 1L, BankPayOrder.FIX, bankPayCharge);
+            bankPayOrder = insertOrder(bankPayOrder, 1L, rate.rate == 0 ? BankPayOrder.FIX : BankPayOrder.FLOAT, payCharge);
 
             return pingAnService.createPingAnOrder(bankPayOrder.sysOrderId, bankPayOrder.accNo, bankPayOrder.accName,
                     bankPayOrder.bankName, bankPayOrder.mobile, bankPayOrder.money, secretKey, bankPayOrder.mchOrderId,
@@ -146,7 +159,7 @@ public class BankPayService {
 
         } else if ("xianFen".equals(code)) {
             //先锋
-            bankPayOrder = insertOrder(bankPayOrder, 2L, BankPayOrder.FIX, bankPayCharge);
+            bankPayOrder = insertOrder(bankPayOrder, 2L, rate.rate == 0 ? BankPayOrder.FIX : BankPayOrder.FLOAT, payCharge);
 
             return xianFenService.createXianFenOrder(bankPayOrder.sysOrderId, bankPayOrder.money, bankPayOrder.accNo,
                     bankPayOrder.accName, bankPayOrder.mobile, bankPayOrder.payType, bankPayOrder.accType,
