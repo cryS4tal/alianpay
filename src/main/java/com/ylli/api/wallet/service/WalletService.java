@@ -16,6 +16,9 @@ public class WalletService {
     @Value("${cash.charge}")
     public Integer cashCharge;
 
+    @Value("${bank.pay.pwd}")
+    public String sysPwd;
+
     @Autowired
     WalletMapper walletMapper;
 
@@ -144,7 +147,10 @@ public class WalletService {
      * 充值代付池
      */
     @Transactional
-    public Object recharge(Long mchId, Integer money) {
+    public Object recharge(Long mchId, Integer money, String password) {
+        if (!password.equals(sysPwd)) {
+            throw new AwesomeException(Config.ERROR_VERIFY);
+        }
         Wallet wallet = getOwnWallet(mchId);
         wallet.reservoir = wallet.reservoir + money;
         walletMapper.updateByPrimaryKeySelective(wallet);

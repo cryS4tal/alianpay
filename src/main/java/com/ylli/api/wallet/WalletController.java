@@ -60,12 +60,19 @@ public class WalletController {
     static class Recharge {
         public Long mchId;
         public Integer money;
+        public String password;
     }
 
+    /**
+     * 代付充值
+     *
+     * @param recharge
+     * @return
+     */
     @PostMapping("/recharge")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_WALLET))
     public Object recharge(@RequestBody Recharge recharge) {
-        return walletService.recharge(recharge.mchId, recharge.money);
+        return walletService.recharge(recharge.mchId, recharge.money, recharge.password);
     }
 
 }
