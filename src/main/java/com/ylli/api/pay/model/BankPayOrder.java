@@ -101,13 +101,13 @@ public class BankPayOrder {
     @Transient
     public String sign;
 
-    //预留 - 代付通道id
+    //代付通道id
     public Long bankPaymentId;
 
     //预留 - 结算类型：定额 / 百分比
     public Integer chargeType;
 
-    //预留 - 结算金额
+    //手续费
     public Integer chargeMoney;
 
     //子系统是否接受通知.

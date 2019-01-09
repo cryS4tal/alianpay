@@ -4,18 +4,19 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
-import com.ylli.api.mch.mapper.SysAppMapper;
+import com.ylli.api.mch.Config;
 import com.ylli.api.mch.mapper.MchAppMapper;
+import com.ylli.api.mch.mapper.MchBaseMapper;
+import com.ylli.api.mch.mapper.SysAppMapper;
 import com.ylli.api.mch.model.Apps;
-import com.ylli.api.mch.model.SysApp;
+import com.ylli.api.mch.model.MchApp;
 import com.ylli.api.mch.model.MchAppDetail;
+import com.ylli.api.mch.model.SysApp;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.service.PayService;
-import com.ylli.api.mch.Config;
-import com.ylli.api.mch.mapper.MchBaseMapper;
-import com.ylli.api.mch.model.MchApp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -161,7 +162,7 @@ public class AppService {
         for (int i = 0; i < list.size(); i++) {
             details.add(doSome(list.get(i), mchId));
         }
-        String mchName = userBaseMapper.selectByMchId(mchId).mchName;
+        String mchName = Optional.ofNullable(userBaseMapper.selectByMchId(mchId)).map(i ->i.mchName).orElse("");
         details.stream().forEach(i ->{
             i.mchId = mchId;
             i.mchName = mchName;

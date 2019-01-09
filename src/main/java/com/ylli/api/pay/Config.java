@@ -29,11 +29,17 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             4, "此订单不是手工补单，不能回滚");
 
-
     public static final ErrorCode ERROR_FAILURE_BILL_EXCEL_EXPORT
             = new ErrorCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, MODEL_CODE,
             5, "导出excel异常");
 
+    public static final ErrorCode ERROR_MCH_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            6, "商户不存在");
+
+    public static final ErrorCode ERROR_RATE_NOT_NULL
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            7, "利率不能为空");
 
     /**
      * 权限

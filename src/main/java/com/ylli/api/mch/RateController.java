@@ -7,9 +7,10 @@ import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
-import com.ylli.api.mch.model.SysApp;
 import com.ylli.api.mch.model.Apps;
+import com.ylli.api.mch.model.SysApp;
 import com.ylli.api.mch.service.AppService;
+import com.ylli.api.pay.service.BankPayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping
 @Auth
-public class AppController {
+public class RateController {
 
     @Autowired
     AppService appService;
@@ -32,6 +33,9 @@ public class AppController {
 
     @Autowired
     PermissionService permissionService;
+
+    @Autowired
+    BankPayService bankPayService;
 
     @PostMapping("/sys/app")
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
@@ -77,4 +81,21 @@ public class AppController {
         return appService.getMchApp(mchId);
     }
 
+    static class BankPayRate {
+        public Long mchId;
+        public Integer rate;
+    }
+
+    /**
+     * 设置商户代付费率
+     */
+    @PostMapping("/bankpay/mch/rate")
+    public void bankPayRate(@RequestBody BankPayRate rate) {
+        bankPayService.bankPayRate(rate.mchId, rate.rate);
+    }
+
+    @GetMapping("/bankpay/mch/rate")
+    public Object getBankPayRate(@AwesomeParam Long mchId) {
+        return bankPayService.getBankPayRate(mchId);
+    }
 }

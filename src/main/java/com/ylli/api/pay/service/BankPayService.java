@@ -3,8 +3,10 @@ package com.ylli.api.pay.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
+import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.model.base.DataList;
+import com.ylli.api.pay.Config;
 import com.ylli.api.pay.mapper.BankPayOrderMapper;
 import com.ylli.api.pay.mapper.MchBankPayRateMapper;
 import com.ylli.api.pay.model.BankPayOrder;
@@ -262,5 +264,31 @@ public class BankPayService {
         dataList.totalCount = page.getTotal();
         dataList.dataList = page;
         return dataList;
+    }
+
+    @Transactional
+    public void bankPayRate(Long mchId, Integer rate) {
+        if (mchId == null) {
+            throw new AwesomeException(Config.ERROR_MCH_NOT_FOUND);
+        }
+        if (rate == null) {
+            throw new AwesomeException(Config.ERROR_RATE_NOT_NULL);
+        }
+        MchBankPayRate bankPayRate = mchBankPayRateMapper.selectByMchId(mchId);
+        if (bankPayRate == null) {
+            //insert
+            bankPayRate = new MchBankPayRate();
+            bankPayRate.mchId = mchId;
+            bankPayRate.rate = rate;
+            mchBankPayRateMapper.insertSelective(bankPayRate);
+        } else {
+            // update.
+            bankPayRate.rate = rate;
+            mchBankPayRateMapper.updateByPrimaryKeySelective(bankPayRate);
+        }
+    }
+
+    public Object getBankPayRate(Long mchId) {
+        return mchBankPayRateMapper.selectByMchId(mchId);
     }
 }
