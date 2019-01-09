@@ -98,6 +98,12 @@ public class PayService {
     @Value("${ali.max}")
     public Integer Ali_MAX;
 
+    @Value("${cnt.min}")
+    public Integer CNT_MIN;
+
+    @Value("${cnt.max}")
+    public Integer CNT_MAX;
+
     @Value("${server.release}")
     public Boolean release;
 
@@ -259,9 +265,17 @@ public class PayService {
             return new Response("A009", "当前通道关闭，请联系管理员切换通道");
         }
         if (baseOrder.payType.equals(ALI)) {
-            //alipay金额限制 - sys
-            if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
-                return ResponseEnum.A005(String.format("%s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
+
+            if (channel.code.equals("CNT")) {
+                //CNT   单独设置金额范围. 10 -9999
+                if (baseOrder.money < CNT_MIN || baseOrder.money > CNT_MAX) {
+                    return ResponseEnum.A005(String.format("%s - %s 元", CNT_MIN / 100, CNT_MAX / 100), baseOrder);
+                }
+            } else {
+                //alipay金额限制 - sys
+                if (baseOrder.money < Ali_MIN || baseOrder.money > Ali_MAX) {
+                    return ResponseEnum.A005(String.format("%s - %s 元", Ali_MIN / 100, Ali_MAX / 100), baseOrder);
+                }
             }
         } else if (baseOrder.payType.equals(WX)) {
             //平台微信限额
