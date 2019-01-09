@@ -13,7 +13,6 @@ import com.ylli.api.third.pay.model.CTOrderResponse;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,11 +50,16 @@ public class CTService {
     public String secret;
 
     @Transactional
-    public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
+    public CTOrderResponse createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl, String reserve, String payType, String tradeType, Object extra) throws Exception {
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
         String totalFee = String.format("%.2f", (money / 100.0));
-        try {
+
+        String str = ctClient.createOrder(totalFee, bill.sysOrderId);
+        CTOrderResponse response = new Gson().fromJson(str, CTOrderResponse.class);
+        return response;
+
+        /*try {
             String str = ctClient.createOrder(totalFee, bill.sysOrderId);
             CTOrderResponse response = new Gson().fromJson(str, CTOrderResponse.class);
 
@@ -75,7 +79,7 @@ public class CTService {
             billMapper.updateByPrimaryKeySelective(bill);
 
             return null;
-        }
+        }*/
     }
 
     @Transactional

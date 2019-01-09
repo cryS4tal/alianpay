@@ -17,6 +17,7 @@ import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
+import com.ylli.api.third.pay.model.CTOrderResponse;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.service.CTService;
 import com.ylli.api.third.pay.service.CntService;
@@ -158,17 +159,17 @@ public class PayService {
             if (!baseOrder.payType.equals(ALI)) {
                 return new Response("A098", "临时限制：系统暂时只支持支付宝(pay_type = alipay)", baseOrder);
             }
-            String str = ctService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+            CTOrderResponse ctOrderResponse = ctService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-            if (Strings.isNullOrEmpty(str)) {
+            if (!ctOrderResponse.result) {
                 //下单失败
                 Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
                 bill.status = Bill.FAIL;
                 billMapper.updateByPrimaryKeySelective(bill);
-                return ResponseEnum.A099("ct response empty", null);
+                return ResponseEnum.A099(ctOrderResponse.msg, null);
             } else {
                 //下单成功
-                return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+                return new Response("A000", "成功", successSign("A000", "成功", "url", ctOrderResponse.data, secretKey), "url", ctOrderResponse.data);
             }
         } else if (channel.code.equals("CNT")) {
             //cnt 支付.
