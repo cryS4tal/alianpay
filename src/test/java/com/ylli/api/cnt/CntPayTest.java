@@ -5,7 +5,7 @@ import com.ylli.api.pay.enums.Version;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.service.PayService;
-import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.enums.CNTEnum;
 import com.ylli.api.third.pay.model.CNTCard;
@@ -37,14 +37,14 @@ public class CntPayTest {
     PayService payService;
 
     @Autowired
-    SerializeUtil serializeUtil;
+    RedisUtil redisUtil;
 
     @Test
     public void createCntOrder() throws Exception {
         BaseOrder baseOrder = new BaseOrder();
         baseOrder.mchId = 1024L;
         baseOrder.money = 100;
-        baseOrder.mchOrderId = serializeUtil.generateSysOrderId();
+        baseOrder.mchOrderId = redisUtil.generateSysOrderId();
         baseOrder.notifyUrl = "";
         baseOrder.redirectUrl = "";
         baseOrder.reserve = "";
@@ -137,7 +137,7 @@ public class CntPayTest {
         BaseOrder base = new BaseOrder();
         base.mchId = 1024L;
         base.payType = "alipay";
-        base.mchOrderId = serializeUtil.generateSysOrderId();
+        base.mchOrderId = redisUtil.generateSysOrderId();
         base.money = 100;
         base.tradeType = "like";
         Map<String, String> map = SignUtil.objectToMap(base);

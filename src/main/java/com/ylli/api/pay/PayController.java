@@ -64,18 +64,30 @@ public class PayController {
     }
 
     /**
-     * 用于 version = 1.1 (cnt支付) 手动确认支付状态。
+     * 用于 version = 1.1 (cnt支付) 商户 - 手动确认支付状态。
      */
     @PostMapping("/confirm")
     public Object payConfirm(@RequestBody OrderConfirm confirm) throws Exception {
         if (!accountService.isActive(confirm.mchId)) {
             return ResponseEnum.A100(null, null);
         }
-        return payService.payConfirm(confirm);
+        return payService.payConfirm(confirm, true);
+    }
+
+    /**
+     * 用于 version = 1.1 (cnt支付) 系统- 手动确认支付状态。
+     */
+    @PostMapping("/confirm/sys")
+    public Object sysPayConfirm(@RequestBody OrderConfirm confirm) throws Exception {
+        if (!accountService.isActive(confirm.mchId)) {
+            return ResponseEnum.A100(null, null);
+        }
+        return payService.payConfirm(confirm, false);
     }
 
     /**
      * 测试，手动给商户发起回调
+     *
      * @param mchOrderId
      * @return
      * @throws Exception

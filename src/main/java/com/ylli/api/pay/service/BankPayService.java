@@ -16,7 +16,7 @@ import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.model.SignPayOrder;
-import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.mapper.BankPaymentMapper;
 import com.ylli.api.sys.model.BankPayment;
@@ -60,7 +60,7 @@ public class BankPayService {
     ModelMapper modelMapper;
 
     @Autowired
-    SerializeUtil serializeUtil;
+    RedisUtil redisUtil;
 
     @Autowired
     MchKeyService mchKeyService;
@@ -196,7 +196,7 @@ public class BankPayService {
      */
     public BankPayOrder insertOrder(BankPayOrder bankPayOrder, Long bankPaymentId, Integer chargeType, Integer chargeMoney) {
         bankPayOrder.id = null;
-        bankPayOrder.sysOrderId = serializeUtil.generateSysOrderId20();
+        bankPayOrder.sysOrderId = redisUtil.generateSysOrderId20();
         bankPayOrder.superOrderId = null;
         bankPayOrder.bankPaymentId = bankPaymentId;
         bankPayOrder.chargeType = chargeType;

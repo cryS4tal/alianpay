@@ -7,8 +7,8 @@ public class ResponseEnum {
     /**
      * A000 - 成功。
      */
-    public static Response A000(String sign, String type, Object data) {
-        return new Response("A00", "成功", sign, type, data);
+    public static Response SUCCESS() {
+        return new Response("A000", "成功");
     }
 
     /**
@@ -66,6 +66,20 @@ public class ResponseEnum {
      */
     public static Response A100(String message, Object data) {
         return new Response("A100", Strings.isNullOrEmpty(message) ? "商户被冻结，请联系管理员" : message, data);
+    }
+
+    /**
+     * A998 - error: %s
+     */
+    public static Response A998(String message, Object data) {
+        return new Response("A998", new StringBuffer("error: ").append(message).toString(), data);
+    }
+
+    /**
+     * A998 - error: %s
+     */
+    public static Response A998(String message) {
+        return A998(message, null);
     }
 
     /**

@@ -583,12 +583,14 @@ public class PayService {
         }
     }
 
-    public Object payConfirm(OrderConfirm confirm) throws Exception {
+    public Object payConfirm(OrderConfirm confirm, Boolean isMch) throws Exception {
 
-        String secretKey = mchKeyService.getKeyById(confirm.mchId);
+        if (isMch) {
+            String secretKey = mchKeyService.getKeyById(confirm.mchId);
 
-        if (isSignValid(confirm, secretKey)) {
-            return ResponseEnum.A001(null, confirm);
+            if (isSignValid(confirm, secretKey)) {
+                return ResponseEnum.A001(null, confirm);
+            }
         }
 
         //根据商户定单号查询商户定单，获取上游定单号

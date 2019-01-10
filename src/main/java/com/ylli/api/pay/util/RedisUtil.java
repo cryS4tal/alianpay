@@ -11,11 +11,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SerializeUtil {
+public class RedisUtil {
 
     @Autowired
     StringRedisTemplate redisTemplate;
 
+    /**
+     * 生成系统序列号.
+     */
     private static final String SERIAL_KEY = "serial";
     private static final String SERIAL_VALUE = "0";
 

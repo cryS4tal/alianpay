@@ -12,7 +12,7 @@ import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.SumAndCount;
-import com.ylli.api.pay.util.SerializeUtil;
+import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.WzQueryRes;
@@ -59,7 +59,7 @@ public class BillService {
     AppService appService;
 
     @Autowired
-    SerializeUtil serializeUtil;
+    RedisUtil redisUtil;
 
     @Autowired
     MchBaseMapper userBaseMapper;
@@ -254,7 +254,7 @@ public class BillService {
     public Bill createBill(Long mchId, String mchOrderId, Long channelId, String payType, String tradeType, Integer money, String reserve, String notifyUrl, String redirectUrl) {
         Bill bill = new Bill();
         bill.mchId = mchId;
-        bill.sysOrderId = serializeUtil.generateSysOrderId();
+        bill.sysOrderId = redisUtil.generateSysOrderId();
         bill.mchOrderId = mchOrderId;
         bill.channelId = channelId;
         // todo 应用模块 关联.

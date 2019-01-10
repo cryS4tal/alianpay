@@ -9,7 +9,6 @@ import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
-import com.ylli.api.pay.util.SerializeUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.enums.CNTEnum;
 import com.ylli.api.third.pay.model.CNTCard;
@@ -26,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @EnableAsync
@@ -36,6 +36,9 @@ public class CntService {
 
     @Value("${pay.cnt.appid}")
     public String appId;
+
+    @Value("${pay.cnt.apihost}")
+    public String apihost;
 
     @Autowired
     BillService billService;
@@ -65,9 +68,6 @@ public class CntService {
     MchKeyService mchKeyService;
 
     public static String successCode = "0000";
-
-    @Autowired
-    SerializeUtil serializeUtil;
 
     /**
      * cnt下单
@@ -106,7 +106,17 @@ public class CntService {
             bill.reserveWord = cntRes.data.referenceCode;
             billMapper.updateByPrimaryKeySelective(bill);
             //返回支付链接
-            return cntCard.payUrl;
+
+            //支付链接封装成我们自己的路由url.
+            String returnUrl = UriComponentsBuilder.fromHttpUrl(
+                    apihost)
+                    .queryParam("money", bill.money)
+                    .queryParam("order_id", bill.superOrderId)
+                    .queryParam("link", cntCard.payUrl)
+                    .queryParam("mch_id", bill.mchId)
+                    .queryParam("mch_order_id", bill.mchOrderId)
+                    .build().toUriString();
+            return returnUrl;
         } else {
             //下单失败
             bill.status = Bill.FAIL;
