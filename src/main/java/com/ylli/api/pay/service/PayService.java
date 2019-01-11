@@ -218,7 +218,8 @@ public class PayService {
         } else if (channel.code.equals("EAZY")) {
             //eazy 支付
 
-            //String str = eazyPayService.createOrder();
+            String str = eazyPayService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
+                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             return null;
         } else {
