@@ -55,6 +55,20 @@ public class ResponseEnum {
     }
 
     /**
+     * A007 - 支付类型限制：%s
+     */
+    public static Response A007(String message, Object data) {
+        return new Response("A007", new StringBuffer("支付类型限制：").append(message).toString(), data);
+    }
+
+    /**
+     * A008 - 交易方式限制：%s
+     */
+    public static Response A008(String message, Object data) {
+        return new Response("A008", new StringBuffer("交易方式限制：").append(message).toString(), data);
+    }
+
+    /**
      * A099 - 下单失败：%s
      */
     public static Response A099(String message, Object data) {

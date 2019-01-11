@@ -1,22 +1,15 @@
-package com.ylli.api.pay.util;
+package com.ylli.api.third.pay.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 
+public class EazySignUtil {
 
-/**
- * Created by: shufeng
- * Created on: 2018/12/19
- * Function:
- */
-
-public class Utils {
-
-    DecimalFormat df = new DecimalFormat("#0.00");
+    static DecimalFormat df = new DecimalFormat("#0.00");
 
     //加密方法
-    public String encrypt(double money, String orderNumber, String key_id) {
+    public static String encrypt(double money, String orderNumber, String keyId) {
 
         //将传入的金额保留两位小数，然后拼接订单号，加密成MD5格式
         String data = getMd5((df.format(money) + orderNumber).getBytes());
@@ -24,11 +17,11 @@ public class Utils {
         String cipher = "";
         int[] key = new int[256];
         int[] box = new int[256];
-        int pwd_length = key_id.length();
+        int pwd_length = keyId.length();
         int data_length = data.length();
 
         for (int i = 0; i < 256; i++) {
-            key[i] = Integer.parseInt(stringToAscii(String.valueOf(key_id.charAt(i % pwd_length))));
+            key[i] = Integer.parseInt(stringToAscii(String.valueOf(keyId.charAt(i % pwd_length))));
             box[i] = i;
         }
         int j = 0;
@@ -115,10 +108,4 @@ public class Utils {
         s = new String(str);
         return s;
     }
-
-
-    public static void main(String[] args) {
-        System.out.println(new Utils().encrypt(1.00, "test93732", "6AF0E51FD8B934"));
-    }
-
 }

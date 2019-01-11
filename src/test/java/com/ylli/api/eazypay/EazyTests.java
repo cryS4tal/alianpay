@@ -21,6 +21,6 @@ public class EazyTests {
 
     @Test
     public void order() {
-        eazyClient.createOrder("alipay","20190111A00001","1.00");
+        eazyClient.createOrder("20190111A00001","1.00");
     }
 }

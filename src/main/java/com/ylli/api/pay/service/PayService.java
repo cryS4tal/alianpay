@@ -18,6 +18,7 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.model.CTOrderResponse;
+import com.ylli.api.third.pay.model.EazyResponse;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.service.CTService;
 import com.ylli.api.third.pay.service.CntService;
@@ -141,6 +142,10 @@ public class PayService {
         if (response != null) {
             return response;
         }
+        //默认 wap.
+        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
+            baseOrder.tradeType = WAP;
+        }
 
         if (channel.code.equals("YFB")) {
             //易付宝支付
@@ -217,11 +222,21 @@ public class PayService {
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
         } else if (channel.code.equals("EAZY")) {
             //eazy 支付
+            if (!ALI.equals(baseOrder.payType)) {
+                return ResponseEnum.A007("pay_type = alipay",baseOrder);
+            }
+            if (!WAP.equals(baseOrder.tradeType)) {
+                return ResponseEnum.A008("trade_type = wap",baseOrder);
+            }
+            EazyResponse eazyResponse = eazyPayService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
+                    baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
-            String str = eazyPayService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
-                    baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-
-            return null;
+            if (200 == eazyResponse.code) {
+                return new Response("A000", "成功", successSign("A000", "成功", "url", eazyResponse.data.qrcode, secretKey), "url", eazyResponse.data.qrcode);
+            } else {
+                return ResponseEnum.A099(eazyResponse.msg, null);
+            }
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);
@@ -244,10 +259,6 @@ public class PayService {
         }
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
             return ResponseEnum.A003("不支持的支付方式", baseOrder);
-        }
-        //默认 wap.
-        if (Strings.isNullOrEmpty(baseOrder.tradeType)) {
-            baseOrder.tradeType = WAP;
         }
         return null;
     }
