@@ -21,6 +21,7 @@ import com.ylli.api.third.pay.model.CTOrderResponse;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.service.CTService;
 import com.ylli.api.third.pay.service.CntService;
+import com.ylli.api.third.pay.service.EazyPayService;
 import com.ylli.api.third.pay.service.GPayService;
 import com.ylli.api.third.pay.service.HRJFService;
 import com.ylli.api.third.pay.service.UnknownPayService;
@@ -82,6 +83,9 @@ public class PayService {
 
     @Autowired
     PayClient payClient;
+
+    @Autowired
+    EazyPayService eazyPayService;
 
     @Autowired
     BillMapper billMapper;
@@ -211,6 +215,12 @@ public class PayService {
                 return ResponseEnum.A099(str, null);
             }
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+        } else if (channel.code.equals("EAZY")) {
+            //eazy 支付
+
+            //String str = eazyPayService.createOrder();
+
+
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);
