@@ -22,7 +22,7 @@ public class EazyPayService {
         //创建订单
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
-        String result = eazyClient.createOrder();
+        String result = eazyClient.createOrder(payType, bill.sysOrderId);
 
         return null;
     }
