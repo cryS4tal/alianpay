@@ -43,7 +43,13 @@ public class BankPayService {
     @Value("${bank.pay.max}")
     public Integer bankPayMax;
 
-    //手续费暂时设置定值...是否需要修改
+    @Value("${bank.pay.limit}")
+    public Integer bankPayLimit;
+
+    @Value("${bank.pay.add}")
+    public Integer bankPayAdd;
+
+    //手续费暂时设置定值
     @Value("${bank.pay.charge}")
     public Integer bankPayCharge;
 
@@ -130,8 +136,11 @@ public class BankPayService {
         if (rate == null) {
             return new Response("A013", "error：请联系管理员设置费率，商户号：" + bankPayOrder.mchId);
         }
+        // 计算手续费,低于3W加收15
         Integer payCharge = bankPayOrder.money * rate.rate / 10000 + bankPayCharge;
-
+        if (bankPayOrder.money < bankPayLimit) {
+            payCharge = payCharge + bankPayAdd;
+        }
         if (wallet.reservoir < (bankPayOrder.money + payCharge)) {
             return new Response("A012", "代付余额不足");
         }
