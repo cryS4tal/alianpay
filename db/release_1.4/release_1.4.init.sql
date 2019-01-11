@@ -16,3 +16,5 @@ CREATE TABLE t_mch_bank_pay_rate (
   modify_time DATETIME NOT NULL DEFAULT now(),
   UNIQUE KEY `u_mch_app` (`mch_id`)
 );
+
+insert into t_sys_channel (code,name,state) values("EAZY","eazy支付",1);
