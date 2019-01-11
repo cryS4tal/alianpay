@@ -2,6 +2,7 @@ package com.ylli.api.wallet;
 
 import com.ylli.api.wallet.model.CNTAuth;
 import com.ylli.api.wallet.model.CNTCash;
+import com.ylli.api.wallet.model.CNTQuery;
 import com.ylli.api.wallet.service.CNTCashService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,5 +30,10 @@ public class CNTCashController {
     @PostMapping
     public Object cash(@RequestBody CNTCash cntCash) throws Exception {
         return cntCashService.cash(cntCash);
+    }
+
+    @PostMapping("/query")
+    public Object query(@RequestBody CNTQuery query) throws Exception {
+        return cntCashService.query(query);
     }
 }

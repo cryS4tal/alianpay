@@ -5,13 +5,6 @@ import com.google.common.base.Strings;
 public class ResponseEnum {
 
     /**
-     * A000 - 成功。
-     */
-    public static Response SUCCESS() {
-        return new Response("A000", "成功");
-    }
-
-    /**
      * A001 - 签名校验失败
      */
     public static Response A001(String message, Object data) {

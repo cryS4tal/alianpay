@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.ylli.api.auth.mapper.PasswordMapper;
 import com.ylli.api.auth.model.Password;
 import com.ylli.api.mch.service.MchKeyService;
+import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.service.ChannelService;
@@ -15,6 +16,8 @@ import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.model.CNTAuth;
 import com.ylli.api.wallet.model.CNTCash;
+import com.ylli.api.wallet.model.CNTQuery;
+import com.ylli.api.wallet.model.CNTQueryData;
 import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.Wallet;
 import java.util.Map;
@@ -77,7 +80,7 @@ public class CNTCashService {
         }
         walletService.rechargeConvert(auth.primaryId, auth.subId);
 
-        return ResponseEnum.SUCCESS();
+        return new Response("A000", "成功");
     }
 
     @Transactional
@@ -158,7 +161,7 @@ public class CNTCashService {
                 cashLogMapper.updateByPrimaryKeySelective(log);
                 //等待 cnt 回调确认状态.
 
-                return ResponseEnum.SUCCESS();
+                return new Response("A000", "成功", log.id.toString());
             } else {
                 //提现失败
                 log.state = CashLog.FAILED;
@@ -171,5 +174,28 @@ public class CNTCashService {
             //提现失败：%s
             return ResponseEnum.A998(cntCards.resultMsg);
         }
+    }
+
+    public Object query(CNTQuery query) throws Exception {
+        if (Strings.isNullOrEmpty(query.data) || Strings.isNullOrEmpty(query.sign) || query.mchId == null) {
+            return ResponseEnum.A998("非法的请求参数");
+        }
+        String secretKey = mchKeyService.getKeyById(query.mchId);
+        if (secretKey == null) {
+            return ResponseEnum.A998("请先设置密钥");
+        }
+        Map<String, String> map = SignUtil.objectToMap(query);
+        if (Strings.isNullOrEmpty(query.sign) || !SignUtil.generateSignature(map, secretKey).equals(query.sign.toUpperCase())) {
+            return ResponseEnum.A001(null, query);
+        }
+        if (!("CNT").equals(channelService.getCurrentChannel(query.mchId).code)) {
+            return ResponseEnum.A998("非法的请求");
+        }
+        CashLog cashLog = cashLogMapper.selectByPrimaryKey(Long.parseLong(query.data));
+        if (cashLog == null || query.mchId.longValue() != cashLog.mchId.longValue()) {
+            return ResponseEnum.A998("订单不存在");
+        }
+        CNTQueryData data = modelMapper.map(cashLog, CNTQueryData.class);
+        return new Response("A000", "成功", data);
     }
 }
