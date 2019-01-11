@@ -1,6 +1,5 @@
 package com.ylli.api.third.pay.service;
 
-import static com.ylli.api.pay.service.PayService.ALI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -24,44 +23,43 @@ public class EazyClient {
     @Autowired
     RestTemplate restTemplate;
 
+    public static final String KEY = "214F80B813C848";
+
     /**
      * @param payType
      * @param sysOrderId
      * @return
      */
-    public String createOrder(String payType, String sysOrderId) {
+    public String createOrder(String payType, String sysOrderId, String amount) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-
         //提交参数设置
         MultiValueMap<String, String> p = new LinkedMultiValueMap<>();
-        p.add("account_id", accountId);
+        p.add("account_id", "113");
         p.add("content_type", "json");
-        p.add("thoroughfare", payType.equals(ALI) ? "alipay_auto" : "wechat_auto");
+        p.add("thoroughfare", "alicard_auto");
         //p.add("type", "1");
         p.add("out_trade_no", sysOrderId);
-        //2-轮询，1-单通道
-        p.add("robin", "2");
-        //p.add("keyId","");
 
-        p.add("amount", "1.00");
+        p.add("amount", amount);
         p.add("callback_url", "http://47.99.180.135");
-        p.add("sign", "");
+        p.add("success_url", "success_url");
+        p.add("error_url", "error_url");
+        p.add("sign", encrypt(Double.valueOf(amount), sysOrderId));
         p.add("sign_type", "1");
-
 
         //提交请求
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<MultiValueMap<String, String>>(p, headers);
 
-        String result = restTemplate.postForObject("http://zf.13wmb.cn/gateway/index/checkpoint.dot", entity, String.class);
+        String result = restTemplate.postForObject("http://zf.13wmb.cn/gateway/index/checkpoint.do", entity, String.class);
 
         return result;
     }
 
 
     //加密方法
-    public String encrypt(double money, String orderNumber, String key_id) {
+    public String encrypt(double money, String orderNumber) {
 
         //将传入的金额保留两位小数，然后拼接订单号，加密成MD5格式
         String data = getMd5((df.format(money) + orderNumber).getBytes());
@@ -69,11 +67,11 @@ public class EazyClient {
         String cipher = "";
         int[] key = new int[256];
         int[] box = new int[256];
-        int pwd_length = key_id.length();
+        int pwd_length = KEY.length();
         int data_length = data.length();
 
         for (int i = 0; i < 256; i++) {
-            key[i] = Integer.parseInt(stringToAscii(String.valueOf(key_id.charAt(i % pwd_length))));
+            key[i] = Integer.parseInt(stringToAscii(String.valueOf(KEY.charAt(i % pwd_length))));
             box[i] = i;
         }
         int j = 0;
