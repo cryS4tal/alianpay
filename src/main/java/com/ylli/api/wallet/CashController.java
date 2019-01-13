@@ -93,6 +93,6 @@ public class CashController {
     @PostMapping("/sys")
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_CASH))
     public void sysCash(@RequestBody Sys sys) throws Exception {
-        cashService.sysCash(sys.bankPayId, sys.cashLogId);
+        //cashService.sysCash(sys.bankPayId, sys.cashLogId);
     }
 }
