@@ -116,6 +116,9 @@ public class PayService {
     @Value("${pay.hrjf.h5}")
     public Boolean H5;
 
+    @Value("${pay.eazy.apihost}")
+    public String EAZY_HOST;
+
     public static String successCode = "0000";
 
     /**
@@ -226,17 +229,20 @@ public class PayService {
         } else if (channel.code.equals("EAZY")) {
             //eazy 支付
             if (!ALI.equals(baseOrder.payType)) {
-                return ResponseEnum.A007("pay_type = alipay",baseOrder);
+                return ResponseEnum.A007("pay_type = alipay", baseOrder);
             }
             if (!WAP.equals(baseOrder.tradeType)) {
-                return ResponseEnum.A008("trade_type = wap",baseOrder);
+                return ResponseEnum.A008("trade_type = wap", baseOrder);
             }
             EazyResponse eazyResponse = eazyPayService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
                     baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
                     baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             if (200 == eazyResponse.code) {
-                return new Response("A000", "成功", successSign("A000", "成功", "url", eazyResponse.data.qrcode, secretKey), "url", eazyResponse.data.qrcode);
+                //封装自己的跳转页面。
+                String url = new StringBuffer(EAZY_HOST).append(eazyResponse.data.qrcode).toString();
+
+                return new Response("A000", "成功", successSign("A000", "成功", "url", url, secretKey), "url", url);
             } else {
                 return ResponseEnum.A099(eazyResponse.msg, null);
             }
