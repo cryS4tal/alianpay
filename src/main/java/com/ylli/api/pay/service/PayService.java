@@ -113,6 +113,9 @@ public class PayService {
     @Value("${server.release}")
     public Boolean release;
 
+    @Value("${pay.hrjf.h5}")
+    public Boolean H5;
+
     public static String successCode = "0000";
 
     /**
@@ -340,10 +343,11 @@ public class PayService {
             return ResponseEnum.A099("目前网关拥堵,请稍后再试(error:hrjf)", null);
 
         } else {
-            str = str.replace("/ydpay/PayH5New.aspx", "http://gateway.iexindex.com/ydpay/PayH5New.aspx");
-            //str = str.replace("/ydpay/Pay.aspx", "http://gateway.iexindex.com/ydpay/Pay.aspx");
-
-            str = formToUrl(str);
+            if (H5) {
+                str = h5FormToUrl(str);
+            } else {
+                str = nativeFormToUrl(str);
+            }
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
 
         }
@@ -421,7 +425,7 @@ public class PayService {
         return new Response("A000", "成功", successSign("A000", "成功", "form", str, secretKey), "form", str);
     }
 
-    public String formToUrl(String form) {
+    public String h5FormToUrl(String form) {
         form = form.replace("<form name=\"payform\" id=\"payform\" method=\"post\" action=\"http://gateway.iexindex.com/ydpay/PayH5New.aspx\">", "");
         form = form.replace("</form>", "");
         form = form.replace("<script type=\"text/javascript\" language=\"javascript\">function go(){ var _form = document.forms['payform']; _form.submit();};setTimeout(function(){go()},100);</script>", "");
@@ -448,6 +452,33 @@ public class PayService {
                 .queryParam("return_url", return_url)
                 .queryParam("payurl", payurl)
                 .queryParam("id", id)
+                .build().toUriString();
+        return url;
+    }
+
+    public String nativeFormToUrl(String form) {
+        form = form.replace("<form name=\"payform\" id=\"payform\" method=\"post\" action=\"/ydpay/Pay.aspx\">", "");
+        form = form.replace("</form>", "");
+        form = form.replace("<script type=\"text/javascript\" language=\"javascript\">function go(){ var _form = document.forms['payform']; _form.submit();};setTimeout(function(){go()},100);</script>", "");
+
+        String m =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"m\" value=\""), "\"");
+
+        String t =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"t\" value=\""), "\"");
+
+        String order =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"order\" value=\""), "\"");
+
+        String payurl =
+                StringUtils.substringBefore(StringUtils.substringAfter(form, "name=\"payurl\" value=\""), "\"");
+
+        String url = UriComponentsBuilder.fromHttpUrl(
+                "http://gateway.iexindex.com/ydpay/Pay.aspx")
+                .queryParam("m", m)
+                .queryParam("t", t)
+                .queryParam("order", order)
+                .queryParam("payurl", payurl)
                 .build().toUriString();
         return url;
     }

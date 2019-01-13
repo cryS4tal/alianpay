@@ -1,6 +1,7 @@
 package com.ylli.api.third.pay.service;
 
 import com.ylli.api.pay.util.SignUtil;
+import javax.annotation.PostConstruct;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,25 @@ public class HRJFClient {
     @Value("${pay.hrjf.token}")
     public String token;
 
+    @Value("${pay.hrjf.h5}")
+    public Boolean H5;
+
+    public String type;
+
+    public String h5;
+
+    @PostConstruct
+    void init() {
+        if (H5) {
+            type = "6018";
+            h5 = "2";
+        } else {
+            type = "6013";
+            h5 = "0";
+        }
+    }
+
+
     @Autowired
     RestTemplate restTemplate;
 
@@ -30,14 +50,14 @@ public class HRJFClient {
         String requestUrl = UriComponentsBuilder.fromHttpUrl(
                 "http://gateway.iexindex.com/quickpay/index.aspx")
                 .queryParam("parter", parter)
-                .queryParam("type", "6018")
+                .queryParam("type", type)
                 .queryParam("value", value)
                 .queryParam("orderid", sysOrderId)
                 .queryParam("callbackurl", notifyUrl)
                 .queryParam("hrefbackurl", redirectUrl)
                 .queryParam("attach", 1)
                 .queryParam("payuserid", mchId)
-                .queryParam("h5", 2)
+                .queryParam("h5", h5)
                 .queryParam("sign", generateSign(value, sysOrderId, mchId))
                 .build().toUriString();
 
@@ -55,7 +75,7 @@ public class HRJFClient {
     public String generateSign(String value, String sysOrderId, Long mchId) throws Exception {
         StringBuffer sb = new StringBuffer()
                 .append("parter=").append(parter)
-                .append("&type=").append("6018")
+                .append("&type=").append(type)
                 .append("&value=").append(value)
                 .append("&orderid=").append(sysOrderId)
                 .append("&callbackurl=").append(notifyUrl)
