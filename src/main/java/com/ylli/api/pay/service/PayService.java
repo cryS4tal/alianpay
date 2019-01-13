@@ -240,7 +240,10 @@ public class PayService {
 
             if (200 == eazyResponse.code) {
                 //封装自己的跳转页面。
-                String url = new StringBuffer(EAZY_HOST).append(eazyResponse.data.qrcode).toString();
+                String url = new StringBuffer(EAZY_HOST).append(eazyResponse.data.qrcode)
+                        .append("&mch_order_id=").append(baseOrder.mchOrderId)
+                        .append("&money=").append(baseOrder.money)
+                        .toString();
 
                 return new Response("A000", "成功", successSign("A000", "成功", "url", url, secretKey), "url", url);
             } else {
