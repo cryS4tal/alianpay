@@ -335,6 +335,9 @@ public class XianFenService {
                             payOrder.status = BankPayOrder.FAIL;
                             bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
+                            //订单状态为ing时 已扣除金额
+                            walletService.incrReservoir(payOrder.mchId, (payOrder.money + payOrder.chargeMoney));
+
                             //发送异步通知
                             if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
                                 String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
@@ -558,5 +561,31 @@ public class XianFenService {
             walletService.cashFail(log.mchId, log.money);
         }
 
+    }
+
+    @Transactional
+    public Object fail(String sysOrderId) throws Exception {
+        BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(sysOrderId);
+
+        if (payOrder == null) {
+            return "payOrder not found";
+        }
+        //若订单在下单返回时已经处理成功失败。不再去进行相应得逻辑。
+        if (payOrder.status != BankPayOrder.ING) {
+            return "payOrder nor ing";
+        }
+
+        payOrder.status = BankPayOrder.FAIL;
+        bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+
+        //订单状态为ing时 已扣除金额
+        walletService.incrReservoir(payOrder.mchId, (payOrder.money + payOrder.chargeMoney));
+
+        //发送异步通知
+        if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
+            String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);
+            bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
+        }
+        return "ok";
     }
 }
