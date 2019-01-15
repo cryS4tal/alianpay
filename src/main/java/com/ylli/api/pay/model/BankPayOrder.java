@@ -115,6 +115,8 @@ public class BankPayOrder {
 
     public Integer status;
 
+    public String msg;
+
     //交易成立时间
     public Timestamp tradeTime;
 

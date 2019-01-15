@@ -18,3 +18,6 @@ CREATE TABLE t_mch_bank_pay_rate (
 );
 
 insert into t_sys_channel (code,name,state) values("EAZY","eazy支付",1);
+
+ALTER TABLE `t_bank_pay_order`
+ADD COLUMN `msg`  varchar(256) NULL AFTER `status`;

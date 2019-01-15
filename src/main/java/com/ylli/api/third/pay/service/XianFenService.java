@@ -113,7 +113,6 @@ public class XianFenService {
         if (response.code.equals("99000")) {
             //交易成功返回订单数据
             Data data = new Gson().fromJson(bizData, Data.class);
-
             //应答码，00000 成功
             if (data.resCode.equals("00000")) {
 
@@ -164,16 +163,27 @@ public class XianFenService {
                 }
             }
             LOGGER.error("sysOrderId = " + sysOrderId + " ,XianFen response exception: [ code = " + data.resCode + ", message = " + data.resMessage + " ]");
+            //{"status":"F","resMessage":"暂不支持该银行","resCode":"00041"}
+            /**
+             * 下单失败
+             * case处理各种异常情况
+             */
+            if (data.resCode.equals("00041")) {
+                payOrder.status = BankPayOrder.FAIL;
+                payOrder.msg = data.resMessage;
+                bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+                return new Response("A010", data.resMessage);
+            } else {
+                //应答失败，状态置为进行中，扣除钱包代付池。等待轮询结果
+                payOrder.status = BankPayOrder.ING;
+                payOrder.superOrderId = data.tradeNo;
+                bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
-            //应答失败，状态置为进行中，扣除钱包代付池。等待轮询结果
-            payOrder.status = BankPayOrder.ING;
-            payOrder.superOrderId = data.tradeNo;
-            bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
+                //扣除金额.(代付金额+手续费)
+                walletService.decrReservoir(mchId, (money + chargeMoney));
 
-            //扣除金额.(代付金额+手续费)
-            walletService.decrReservoir(mchId, (money + chargeMoney));
-
-            return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);
+                return success(mchOrderId, sysOrderId, money, payOrder.status, secretKey);
+            }
         } else if (response.code.equals("99001")) {
             //接口调用异常，无法确认订单状态
             //更新订单，获取不到父级订单号
@@ -333,6 +343,7 @@ public class XianFenService {
                         }
                         if (data.status != null && data.status.toUpperCase().equals("F")) {
                             payOrder.status = BankPayOrder.FAIL;
+                            payOrder.msg = data.resMessage;
                             bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
                             //订单状态为ing时 已扣除金额
@@ -365,7 +376,7 @@ public class XianFenService {
                         BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(data.merchantNo);
                         payOrder.status = BankPayOrder.FAIL;
                         payOrder.superOrderId = data.tradeNo;
-
+                        payOrder.msg = data.resMessage;
                         bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
                         //金额回滚(代付金额+手续费)
