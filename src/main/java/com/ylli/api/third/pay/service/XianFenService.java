@@ -164,11 +164,11 @@ public class XianFenService {
             }
             LOGGER.error("sysOrderId = " + sysOrderId + " ,XianFen response exception: [ code = " + data.resCode + ", message = " + data.resMessage + " ]");
             //{"status":"F","resMessage":"暂不支持该银行","resCode":"00041"}
+            //[ code = 00063, message = 银行系统升级中，请您稍后再试 ]
             /**
-             * 下单失败
-             * case处理各种异常情况
+             * 下单失败,case处理各种异常情况
              */
-            if (data.resCode.equals("00041")) {
+            if (("00041").equals(data.resCode) || ("00063").equals(data.resCode)) {
                 payOrder.status = BankPayOrder.FAIL;
                 payOrder.msg = data.resMessage;
                 bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
