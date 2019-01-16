@@ -61,4 +61,7 @@ public class RedisUtil {
         return sb.append(StringUtils.leftPad(String.valueOf(getValue()), 6, "0")).toString();
     }
 
+
+
+
 }

@@ -2,17 +2,13 @@ package com.ylli.api.third.pay.service;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.ylli.api.third.pay.mapper.NotifyMapper;
-import com.ylli.api.third.pay.model.Notify;
 import com.ylli.api.third.pay.model.OrderNotify;
-import com.ylli.api.third.pay.model.OrderNotifyRes;
 import com.ylli.api.third.pay.model.OrderQueryRequest;
 import com.ylli.api.third.pay.model.OrderQueryResponse;
 import com.ylli.api.third.pay.model.OrderRequest;
 import com.ylli.api.third.pay.model.OrderResponse;
 import java.security.MessageDigest;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -24,9 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -47,9 +41,6 @@ public class KyPayClient {
 
     @Autowired
     RestTemplate restTemplate;
-
-    @Autowired
-    NotifyMapper notifyMapper;
 
     /**
      * 封装快易支付统一下单接口
@@ -107,31 +98,6 @@ public class KyPayClient {
 
         return gson.fromJson(result, OrderQueryResponse.class);
 
-    }
-
-    /**
-     * 向第三方发送回调通知
-     *
-     * @return
-     */
-    @Async
-    @Transactional
-    public OrderNotifyRes sendNotify(Notify notify) {
-        if (notify.failCount > 5) {
-            notifyMapper.delete(notify);
-            return new OrderNotifyRes("FAIL","失败次数上限");
-        }
-        String res = restTemplate.postForObject(notify.url, notify.params, String.class);
-        OrderNotifyRes notifyRes = new Gson().fromJson(res, OrderNotifyRes.class);
-
-        if (!notifyRes.code.toUpperCase().equals("SUCCESS")) {
-            notify.failCount = notify.failCount + 1;
-            notify.modifyTime = Timestamp.from(Instant.now());
-            notifyMapper.updateByPrimaryKeySelective(notify);
-        } else {
-            notifyMapper.delete(notify);
-        }
-        return notifyRes;
     }
 
     public String getOrderSign(OrderRequest request) {

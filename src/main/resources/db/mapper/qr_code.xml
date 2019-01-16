@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.third.pay.mapper.QrCodeMapper">
+    <resultMap id="codeMap" type="com.ylli.api.third.pay.model.QrCode"/>
+
+    <select id="selectByCondition" resultMap="codeMap">
+        SELECT t_qr_code.* FROM t_qr_code
+        LEFT JOIN t_user_base ON t_qr_code.auth_id = t_user_base.mch_id
+        <where>
+            <if test="auth_id != null">
+                t_qr_code.auth_id = ${auth_id}
+            </if>
+            <if test="nick_name != null">
+                <bind name="name_like_ext" value="nick_name + '%'"/>
+                AND t_user_base.mch_name LIKE #{name_like_ext}
+            </if>
+            <if test="phone != null">
+                AND t_user_base.link_phone = #{phone}
+            </if>
+        </where>
+    </select>
+</mapper>

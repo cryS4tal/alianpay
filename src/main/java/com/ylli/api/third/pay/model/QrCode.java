@@ -6,21 +6,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "t_notify")
-public class Notify {
+@Table(name = "t_qr_code")
+public class QrCode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    //第三方回调url
-    public String url;
+    public Long authId;
 
-    //回调参数
-    public String params;
-
-    //失败次数
-    public Integer failCount;
+    public String codeUrl;
 
     public Timestamp createTime;
 

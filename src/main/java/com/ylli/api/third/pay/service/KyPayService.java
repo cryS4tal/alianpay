@@ -1,15 +1,10 @@
 package com.ylli.api.third.pay.service;
 
-import com.google.gson.Gson;
-import com.ylli.api.third.pay.mapper.NotifyMapper;
-import com.ylli.api.third.pay.model.Notify;
-import com.ylli.api.third.pay.model.OrderNotifyRes;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.LoggerFactory;
@@ -25,9 +20,6 @@ public class KyPayService {
 
     @Autowired
     KyPayClient aliPayClient;
-
-    @Autowired
-    NotifyMapper notifyMapper;
 
     //todo 加入用户登陆与自己业务系统逻辑
     public Object createAliPayOrder() {
@@ -63,9 +55,6 @@ public class KyPayService {
 
                 // important 加入自己的回调通知接口
                 // params 参数参加快易支付需要定义
-                Notify notify = new Notify();
-                aliPayClient.sendNotify(notify);
-
 
                 outputStream.write(new String("success").getBytes("UTF-8"));
             }
@@ -83,21 +72,4 @@ public class KyPayService {
     }
 
 
-    /**
-     * 定义回调返回json.
-     */
-    public String getResJson(String code, String msg) {
-        OrderNotifyRes ret = new OrderNotifyRes();
-        ret.code = code;
-        ret.message = msg;
-        return new Gson().toJson(ret);
-    }
-
-    public void autoSendNotify() {
-        List<Notify> list = notifyMapper.selectNotify();
-        for (int i = 0; i < list.size(); i++) {
-            Notify notify = list.get(i);
-            aliPayClient.sendNotify(notify);
-        }
-    }
 }

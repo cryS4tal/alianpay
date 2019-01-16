@@ -12,7 +12,6 @@ import com.ylli.api.pay.model.PayOrderRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.service.BankPayClient;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.third.pay.mapper.XfBillMapper;
 import com.ylli.api.third.pay.model.Data;
 import com.ylli.api.third.pay.model.NotifyRes;
 import com.ylli.api.third.pay.model.XfPaymentResponse;
@@ -51,9 +50,6 @@ public class XianFenService {
 
     @Autowired
     WalletService walletService;
-
-    @Autowired
-    XfBillMapper xfBillMapper;
 
     @Autowired
     MchKeyService mchKeyService;

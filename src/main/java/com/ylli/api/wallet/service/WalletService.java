@@ -1,7 +1,6 @@
 package com.ylli.api.wallet.service;
 
 import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.third.pay.mapper.YfbBillMapper;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
@@ -21,9 +20,6 @@ public class WalletService {
 
     @Autowired
     WalletMapper walletMapper;
-
-    @Autowired
-    YfbBillMapper yfbBillMapper;
 
     public Wallet getOwnWallet(Long mchId) {
         return walletMapper.selectByPrimaryKey(mchId);
