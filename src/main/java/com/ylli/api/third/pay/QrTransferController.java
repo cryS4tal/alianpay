@@ -40,7 +40,6 @@ public class QrTransferController {
 
     /**
      * 登录，登出（登出将不在派单.）
-     * 设置个码账号。
      * 手动确认订单。
      * todo 回滚订单
      */
@@ -104,6 +103,8 @@ public class QrTransferController {
                             @AwesomeParam(required = false) String nickName,
                             @AwesomeParam(required = false) String phone,
                             @AwesomeParam(required = false) Integer status,
+                            @AwesomeParam(required = false) String sysOrderId,
+                            @AwesomeParam(required = false) String mchOrderId,
                             @AwesomeParam(required = false) AwesomeDateTime startTime,
                             @AwesomeParam(required = false) AwesomeDateTime endTime,
                             @AwesomeParam(defaultValue = "0") int offset,

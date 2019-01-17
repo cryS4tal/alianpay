@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,13 @@ public class QrTransferService {
 
     @Value("${pay.qr.code.apihost}")
     public String QrApiHost;
+
+    @PostConstruct
+    void init() {
+        List<String> urls = qrCodeMapper.selectAll().stream().map(i -> i.codeUrl).collect(Collectors.toList());
+        redisUtil.initUrl(urls);
+    }
+
 
     @Transactional
     public void uploadQrCode(Long authId, String codeUrl) {
@@ -111,7 +119,9 @@ public class QrTransferService {
             //封装自己的url.
             StringBuffer sb = new StringBuffer(QrApiHost)
                     .append("link=").append(url)
-                    .append("&reserve_key=").append(reserveWord);
+                    .append("&money=").append(bill.money)
+                    .append("&sys_order_id=").append(bill.sysOrderId)
+                    .append("&reserve_word=").append(reserveWord);
             String uid = qrCode.uid;
             if (!Strings.isNullOrEmpty(uid)) {
                 sb.append("&native=").append(getNativeUrl(uid, String.format("%.2f", (money / 100.0)), bill.reserveWord));
