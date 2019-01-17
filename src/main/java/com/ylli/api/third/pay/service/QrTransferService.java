@@ -7,12 +7,15 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.BillMapper;
+import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.third.pay.Config;
 import com.ylli.api.third.pay.mapper.QrCodeMapper;
 import com.ylli.api.third.pay.model.QrCode;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,7 +110,7 @@ public class QrTransferService {
 
             //封装自己的url.
             StringBuffer sb = new StringBuffer(QrApiHost)
-                    .append("&link=").append(url)
+                    .append("link=").append(url)
                     .append("&reserve_key=").append(reserveWord);
             String uid = qrCode.uid;
             if (!Strings.isNullOrEmpty(uid)) {
@@ -124,7 +127,7 @@ public class QrTransferService {
     }
 
     @Transactional
-    public void uploadUid(Long id,Long authId, String uid) {
+    public void uploadUid(Long id, Long authId, String uid) {
         QrCode qrCode = qrCodeMapper.selectByPrimaryKey(id);
         if (qrCode == null) {
             throw new AwesomeException(Config.ERROR_QR_CODE_NOT_FOUND);
@@ -140,5 +143,22 @@ public class QrTransferService {
         }
         qrCode.uid = uid;
         qrCodeMapper.updateByPrimaryKeySelective(qrCode);
+    }
+
+    public Object getOrders(Long authId, String nickName, String phone, Integer status, Date startTime, Date endTime, int offset, int limit) {
+        PageHelper.offsetPage(offset, limit);
+        Page<Bill> page = (Page<Bill>) billMapper.getOrders(authId, nickName, phone, status, startTime, endTime);
+
+        DataList<BaseBill> dataList = new DataList<>();
+        dataList.offset = page.getStartRow();
+        dataList.count = page.size();
+        dataList.totalCount = page.getTotal();
+        List<BaseBill> list = new ArrayList();
+        for (Bill bill : page) {
+            //BaseBill object = convert(bill);
+            //list.add(object);
+        }
+        dataList.dataList = list;
+        return dataList;
     }
 }

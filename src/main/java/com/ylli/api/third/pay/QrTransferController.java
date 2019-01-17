@@ -6,6 +6,7 @@ import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.third.pay.model.UploadQrCode;
 import com.ylli.api.third.pay.model.UploadUid;
@@ -50,7 +51,6 @@ public class QrTransferController {
      *
      * @param uploadQrCode
      */
-    @Auth
     @PostMapping("/code")
     public void uploadQrCode(@RequestBody UploadQrCode uploadQrCode) {
         ServiceUtil.checkNotEmpty(uploadQrCode);
@@ -65,20 +65,17 @@ public class QrTransferController {
      *
      * @param uploadUid
      */
-    @Auth
     @PostMapping("/uid")
     public void uploadUid(@RequestBody UploadUid uploadUid) {
         ServiceUtil.checkNotEmpty(uploadUid);
         qrTransferService.uploadUid(uploadUid.id, uploadUid.authId, uploadUid.uid);
     }
 
-    @Auth
     @DeleteMapping("/code/{id}")
     public void deleteQrCode(@PathVariable Long id) {
         qrTransferService.deleteQrCode(id);
     }
 
-    @Auth
     @GetMapping("/code")
     public Object qrCodes(@AwesomeParam(required = false) Long authId,
                           @AwesomeParam(required = false) String nickName,
@@ -91,24 +88,23 @@ public class QrTransferController {
         return qrTransferService.qrCodes(authId, nickName, phone, offset, limit);
     }
 
-    @Auth
     @PostMapping
     public Object finish() {
         return null;
     }
 
-    @Auth
     @GetMapping("/order")
     public Object getOrders(@AwesomeParam(required = false) Long authId,
                             @AwesomeParam(required = false) String nickName,
                             @AwesomeParam(required = false) String phone,
                             @AwesomeParam(required = false) Integer status,
+                            @AwesomeParam(required = false) AwesomeDateTime startTime,
+                            @AwesomeParam(required = false) AwesomeDateTime endTime,
                             @AwesomeParam(defaultValue = "0") int offset,
                             @AwesomeParam(defaultValue = "10") int limit) {
         if (authId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_QR_CODE)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        //return qrTransferService.getOrders(authId, nickName, phone, status, offset, limit);
-        return null;
+        return qrTransferService.getOrders(authId, nickName, phone, status, startTime == null ? null : startTime.getDate(), endTime == null ? null : endTime.getDate(), offset, limit);
     }
 }
