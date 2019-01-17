@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.ylli.api.mch.model.MchKey;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.enums.Version;
-import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.ConfirmResponse;
@@ -25,6 +24,7 @@ import com.ylli.api.third.pay.service.CntService;
 import com.ylli.api.third.pay.service.EazyPayService;
 import com.ylli.api.third.pay.service.GPayService;
 import com.ylli.api.third.pay.service.HRJFService;
+import com.ylli.api.third.pay.service.QrTransferService;
 import com.ylli.api.third.pay.service.UnknownPayService;
 import com.ylli.api.third.pay.service.WzService;
 import com.ylli.api.third.pay.service.YfbService;
@@ -89,7 +89,7 @@ public class PayService {
     EazyPayService eazyPayService;
 
     @Autowired
-    BillMapper billMapper;
+    QrTransferService qrTransferService;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -178,9 +178,7 @@ public class PayService {
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
             if (!ctOrderResponse.result) {
                 //下单失败
-                Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-                bill.status = Bill.FAIL;
-                billMapper.updateByPrimaryKeySelective(bill);
+                billService.orderFail(baseOrder.mchOrderId);
                 return ResponseEnum.A099(ctOrderResponse.msg, null);
             } else {
                 //下单成功
@@ -198,9 +196,7 @@ public class PayService {
             String str = cntService.createOrder(baseOrder.mchId, channel.id, baseOrder.money, baseOrder.mchOrderId, baseOrder.notifyUrl,
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
             if (Strings.isNullOrEmpty(str)) {
-                Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-                bill.status = Bill.FAIL;
-                billMapper.updateByPrimaryKeySelective(bill);
+                billService.orderFail(baseOrder.mchOrderId);
                 return ResponseEnum.A099("cnt response empty", null);
             }
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
@@ -220,9 +216,7 @@ public class PayService {
                     baseOrder.redirectUrl, baseOrder.reserve, baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             if (str.startsWith("message")) {
-                Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-                bill.status = Bill.FAIL;
-                billMapper.updateByPrimaryKeySelective(bill);
+                billService.orderFail(baseOrder.mchOrderId);
                 return ResponseEnum.A099(str, null);
             }
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
@@ -249,6 +243,15 @@ public class PayService {
             } else {
                 return ResponseEnum.A099(eazyResponse.msg, null);
             }
+        } else if (channel.code.equals("QrCode")) {
+            //独立于第三方的个码收款系统.需手工确认!!...
+
+
+            String str = qrTransferService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
+                    baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            return null;
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);
@@ -333,22 +336,15 @@ public class PayService {
 
         if (Strings.isNullOrEmpty(str)) {
             //下单失败
-            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-            bill.status = Bill.FAIL;
-            billMapper.updateByPrimaryKeySelective(bill);
+            billService.orderFail(baseOrder.mchOrderId);
             return ResponseEnum.A099("hrjf response empty", null);
         }
         if (str.startsWith("error")) {
-            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-            bill.status = Bill.FAIL;
-            billMapper.updateByPrimaryKeySelective(bill);
-
+            billService.orderFail(baseOrder.mchOrderId);
             return ResponseEnum.A099(str, null);
 
         } else if (str.startsWith("目前网关拥堵,请稍后再试")) {
-            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-            bill.status = Bill.FAIL;
-            billMapper.updateByPrimaryKeySelective(bill);
+            billService.orderFail(baseOrder.mchOrderId);
             return ResponseEnum.A099("目前网关拥堵,请稍后再试(error:hrjf)", null);
 
         } else {
@@ -376,9 +372,7 @@ public class PayService {
 
         if (Strings.isNullOrEmpty(str)) {
             //下单失败
-            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-            bill.status = Bill.FAIL;
-            billMapper.updateByPrimaryKeySelective(bill);
+            billService.orderFail(baseOrder.mchOrderId);
             return ResponseEnum.A099("123 response empty", null);
         }
 
@@ -400,9 +394,7 @@ public class PayService {
 
         if (Strings.isNullOrEmpty(str)) {
             //下单失败
-            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-            bill.status = Bill.FAIL;
-            billMapper.updateByPrimaryKeySelective(bill);
+            billService.orderFail(baseOrder.mchOrderId);
             return ResponseEnum.A099("wz response empty", null);
         }
         return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
@@ -421,9 +413,7 @@ public class PayService {
 
         if (Strings.isNullOrEmpty(str)) {
             //下单失败
-            Bill bill = billService.selectByMchOrderId(baseOrder.mchOrderId);
-            bill.status = Bill.FAIL;
-            billMapper.updateByPrimaryKeySelective(bill);
+            billService.orderFail(baseOrder.mchOrderId);
             return ResponseEnum.A099("yfb response empty", null);
         }
         //return str;

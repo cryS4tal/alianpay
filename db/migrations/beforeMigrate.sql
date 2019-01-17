@@ -75,18 +75,6 @@ SET @role_personal = 100;
 SET @role_dept_manager = 1001;
 
 /**
- * user
- */
--- 初始化
-SELECT _init(9);
--- 系统权限
--- 管理商户提现费率
-SET @pm_sys.manage_user_charge = @pm_sys_base + 1;
-SET @pm_sys.manage_app = @pm_sys_base + 2;
-SET @pm_sys.manage_user_base = @pm_sys_base + 3;
-SET @pm_sys.manage_user_account = @pm_sys_base + 4;
-
-/**
  * pay
  */
 -- 初始化
@@ -115,3 +103,24 @@ SELECT _init(7);
 SET @pm_sys.manage_stats = @pm_sys_base + 1;
 SET @pm_sys.manage_channel = @pm_sys_base + 2;
 SET @pm_sys.manage_bank_payment = @pm_sys_base + 3;
+
+/**
+ * mch
+ */
+-- 初始化
+SELECT _init(9);
+-- 系统权限
+-- 管理商户提现费率
+SET @pm_sys.manage_user_charge = @pm_sys_base + 1;
+SET @pm_sys.manage_app = @pm_sys_base + 2;
+SET @pm_sys.manage_user_base = @pm_sys_base + 3;
+SET @pm_sys.manage_user_account = @pm_sys_base + 4;
+
+/**
+ * third.pay
+ */
+-- 初始化
+SELECT _init(10);
+-- 系统权限
+-- 管理商户提现费率
+SET @pm_sys.manage_qr_code = @pm_sys_base + 1;

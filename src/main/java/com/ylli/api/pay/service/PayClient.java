@@ -52,6 +52,10 @@ public class PayClient {
                 bill.isSuccess = true;
                 billMapper.updateByPrimaryKeySelective(bill);
             }
+            //删除asyncMessage
+            AsyncMessage message = new AsyncMessage();
+            message.billId = id;
+            asyncMessageMapper.delete(message);
         }
         /**
          * first = true，res != success

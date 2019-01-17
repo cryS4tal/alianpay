@@ -62,7 +62,7 @@ public class BillService {
     RedisUtil redisUtil;
 
     @Autowired
-    MchBaseMapper userBaseMapper;
+    MchBaseMapper mchBaseMapper;
 
     @Autowired
     PayService payService;
@@ -109,7 +109,7 @@ public class BillService {
     private BaseBill convert(Bill bill, Boolean admin) {
         BaseBill baseBill = new BaseBill();
         baseBill.mchId = bill.mchId;
-        baseBill.mchName = Optional.ofNullable(userBaseMapper.selectByMchId(bill.mchId)).map(i -> i.mchName).orElse(null);
+        baseBill.mchName = Optional.ofNullable(mchBaseMapper.selectByMchId(bill.mchId)).map(i -> i.mchName).orElse(null);
         baseBill.mchOrderId = bill.mchOrderId;
         baseBill.sysOrderId = bill.sysOrderId;
         baseBill.superOrderId = bill.superOrderId;
@@ -272,26 +272,6 @@ public class BillService {
     }
 
     @Transactional
-    public Bill createCntBill(String superOrderId, String sysOrderId, Long mchId, String mchOrderId, Long channelId, String payType, String tradeType, Integer money, String reserve) {
-        Bill bill = new Bill();
-        bill.mchId = mchId;
-        bill.sysOrderId = sysOrderId;
-        bill.mchOrderId = mchOrderId;
-        bill.channelId = channelId;
-        bill.superOrderId = superOrderId;
-        // todo 应用模块 关联.
-        bill.appId = appService.getAppId(payType, tradeType);
-
-        bill.money = money;
-        bill.status = Bill.NEW;
-        bill.reserve = reserve;
-        bill.payType = payType;
-        bill.tradeType = tradeType;
-        billMapper.insertSelective(bill);
-        return bill;
-    }
-
-    @Transactional
     public Object reissue(String sysOrderId) throws Exception {
         Bill bill = new Bill();
         bill.sysOrderId = sysOrderId;
@@ -315,15 +295,17 @@ public class BillService {
 
             //加入异步通知下游商户系统
             //params jsonStr.
-            String params = payService.generateRes(
-                    bill.money.toString(),
-                    bill.mchOrderId,
-                    bill.sysOrderId,
-                    bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
-                    bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
-                    bill.reserve);
+            if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
+                String params = payService.generateRes(
+                        bill.money.toString(),
+                        bill.mchOrderId,
+                        bill.sysOrderId,
+                        bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
+                        bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
+                        bill.reserve);
 
-            payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+                payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+            }
         } else {
             throw new AwesomeException(Config.ERROR_BILL_STATUS);
         }
@@ -446,5 +428,12 @@ public class BillService {
         Bill bill = new Bill();
         bill.superOrderId = superOrderId;
         return billMapper.selectOne(bill);
+    }
+
+    @Transactional
+    public void orderFail(String mchOrderId) {
+        Bill bill = selectByMchOrderId(mchOrderId);
+        bill.status = Bill.FAIL;
+        billMapper.updateByPrimaryKeySelective(bill);
     }
 }

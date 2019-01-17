@@ -17,6 +17,8 @@ public class QrCode {
 
     public String codeUrl;
 
+    public String uid;
+
     public Timestamp createTime;
 
     public Timestamp modifyTime;

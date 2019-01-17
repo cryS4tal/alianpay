@@ -53,6 +53,10 @@ public class BankPayClient {
                 payOrder.isSuccess = true;
                 bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
             }
+            //删除asyncMessage
+            AsyncMessage message = new AsyncMessage();
+            message.bankPayOrderId = sysOrderId;
+            asyncMessageMapper.delete(message);
         }
         /**
          * first = true，res != success
@@ -70,7 +74,7 @@ public class BankPayClient {
             message.bankPayOrderId = sysOrderId;
             message = asyncMessageMapper.selectOne(message);
             if (message.failCount > notifyLimit) {
-                //TODO 暂时先删除。后续是否保留？加入状态控制
+                // 暂时先删除。后续是否保留？加入状态控制
                 asyncMessageMapper.delete(message);
             } else {
                 message.failCount = message.failCount + 1;

@@ -7,6 +7,7 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.third.pay.model.UploadQrCode;
+import com.ylli.api.third.pay.model.UploadUid;
 import com.ylli.api.third.pay.service.QrTransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,6 +43,11 @@ public class QrTransferController {
      */
 
 
+    /**
+     * 上传个人收款码
+     *
+     * @param uploadQrCode
+     */
     @Auth
     @PostMapping("/code")
     public void uploadQrCode(@RequestBody UploadQrCode uploadQrCode) {
@@ -50,6 +56,20 @@ public class QrTransferController {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         qrTransferService.uploadQrCode(uploadQrCode.authId, uploadQrCode.codeUrl);
+    }
+
+    /**
+     * 上传个人uid
+     * @param uploadUid
+     */
+    @Auth
+    @PostMapping("/uid")
+    public void uploadUid(@RequestBody UploadUid uploadUid) {
+        ServiceUtil.checkNotEmpty(uploadUid);
+        if (authSession.getAuthId() != uploadUid.authId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        qrTransferService.uploadUid(uploadUid.authId, uploadUid.uid);
     }
 
     @Auth
