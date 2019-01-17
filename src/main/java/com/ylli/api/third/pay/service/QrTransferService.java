@@ -3,6 +3,7 @@ package com.ylli.api.third.pay.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
+import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.BillMapper;
@@ -33,6 +34,9 @@ public class QrTransferService {
 
     @Autowired
     BillMapper billMapper;
+
+    @Autowired
+    AuthSession authSession;
 
     @Value("${pay.qr.code.apihost}")
     public String QrApiHost;
@@ -90,12 +94,14 @@ public class QrTransferService {
         //创建订单
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
+        String url = redisUtil.getUrl(bill.sysOrderId);
+        QrCode qrCode = qrCodeMapper.selectByUrl(url);
+
         //设置关键字为订单序列号
         String reserveWord = bill.sysOrderId.substring(16);
         bill.reserveWord = reserveWord;
+        bill.qrOwner = qrCode.authId;
         billMapper.updateByPrimaryKeySelective(bill);
-
-        String url = redisUtil.getUrl(bill.sysOrderId);
 
         if (Strings.isNullOrEmpty(url)) {
             return null;
@@ -104,7 +110,7 @@ public class QrTransferService {
             StringBuffer sb = new StringBuffer(QrApiHost)
                     .append("&link=").append(url)
                     .append("&reserve_key=").append(reserveWord);
-            String uid = qrCodeMapper.selectByUrl(url).uid;
+            String uid = qrCode.uid;
             if (!Strings.isNullOrEmpty(uid)) {
                 sb.append("&native=").append(getNativeUrl(uid, String.format("%.2f", (money / 100.0)), bill.reserveWord));
             }
@@ -117,10 +123,19 @@ public class QrTransferService {
     }
 
     @Transactional
-    public void uploadUid(Long authId, String uid) {
-        QrCode qrCode = qrCodeMapper.selectByAuthId(authId);
+    public void uploadUid(Long id,Long authId, String uid) {
+        QrCode qrCode = qrCodeMapper.selectByPrimaryKey(id);
         if (qrCode == null) {
             throw new AwesomeException(Config.ERROR_QR_CODE_NOT_FOUND);
+        }
+        if (authSession.getAuthId() != authId || qrCode.authId != authId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        QrCode exist = new QrCode();
+        exist.uid = uid;
+        exist = qrCodeMapper.selectOne(exist);
+        if (exist != null) {
+            throw new AwesomeException(Config.ERROR_UID_EXIST);
         }
         qrCode.uid = uid;
         qrCodeMapper.updateByPrimaryKeySelective(qrCode);

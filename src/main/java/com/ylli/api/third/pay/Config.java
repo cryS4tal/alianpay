@@ -30,6 +30,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             4, "服务连通失败");
 
+    public static final ErrorCode ERROR_UID_EXIST
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            5, "uid已存在");
+
     /**
      * 权限
      */

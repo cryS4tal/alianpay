@@ -69,6 +69,9 @@ public class Bill {
     //手续费
     public Integer payCharge;
 
+    //作用于个码收款系统区别是谁的订单。
+    public Long qrOwner;
+
     public Timestamp createTime;
 
     public Timestamp modifyTime;

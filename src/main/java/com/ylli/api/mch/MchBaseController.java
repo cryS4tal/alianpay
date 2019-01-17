@@ -43,7 +43,7 @@ public class MchBaseController {
         if (userBase.mchId != authSession.getAuthId()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        if (!CheckPhone.isPhoneOrTel(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isPhoneOrTel(userBase.linkPhone))) {
+        if (!CheckPhone.isSimplePhone(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isSimplePhone(userBase.linkPhone))) {
             throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
         }
         userBaseService.register(userBase);
@@ -83,7 +83,7 @@ public class MchBaseController {
     @PutMapping
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
     public Object update(@RequestBody MchBase userBase) {
-        if (!CheckPhone.isPhoneOrTel(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isPhoneOrTel(userBase.linkPhone))) {
+        if (!CheckPhone.isSimplePhone(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isSimplePhone(userBase.linkPhone))) {
             throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
         }
         return userBaseService.update(userBase);

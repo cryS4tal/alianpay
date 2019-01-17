@@ -5,5 +5,6 @@ CREATE TABLE t_qr_code (
   uid VARCHAR(64) COMMENT 'aliUid',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now(),
-  UNIQUE KEY `u_code_url` (`code_url`)
+  UNIQUE KEY `u_code_url` (`code_url`),
+  UNIQUE KEY `u_uid` (`uid`)
 );

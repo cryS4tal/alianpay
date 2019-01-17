@@ -62,16 +62,14 @@ public class QrTransferController {
 
     /**
      * 上传个人uid
+     *
      * @param uploadUid
      */
     @Auth
     @PostMapping("/uid")
     public void uploadUid(@RequestBody UploadUid uploadUid) {
         ServiceUtil.checkNotEmpty(uploadUid);
-        if (authSession.getAuthId() != uploadUid.authId) {
-            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-        }
-        qrTransferService.uploadUid(uploadUid.authId, uploadUid.uid);
+        qrTransferService.uploadUid(uploadUid.id, uploadUid.authId, uploadUid.uid);
     }
 
     @Auth
@@ -87,7 +85,7 @@ public class QrTransferController {
                           @AwesomeParam(required = false) String phone,
                           @AwesomeParam(defaultValue = "0") int offset,
                           @AwesomeParam(defaultValue = "10") int limit) {
-        if (authSession.getAuthId() != authId && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_QR_CODE)) {
+        if (authSession.getAuthId() != (authId == null ? 0 : authId) && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_QR_CODE)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         return qrTransferService.qrCodes(authId, nickName, phone, offset, limit);
@@ -104,6 +102,4 @@ public class QrTransferController {
     public Object getOrders() {
         return null;
     }
-
-
 }
