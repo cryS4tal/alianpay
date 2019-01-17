@@ -3,6 +3,7 @@ package com.ylli.api.third.pay;
 import com.ylli.api.auth.service.PermissionService;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
+import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/pay/qr")
+@Auth(@Permission(Config.SysPermission.QR_CODE))
 public class QrTransferController {
 
     @Autowired
@@ -80,9 +82,9 @@ public class QrTransferController {
 
     @Auth
     @GetMapping("/code")
-    public Object qrCodes(@AwesomeParam Long authId,
-                          @AwesomeParam String nickName,
-                          @AwesomeParam String phone,
+    public Object qrCodes(@AwesomeParam(required = false) Long authId,
+                          @AwesomeParam(required = false) String nickName,
+                          @AwesomeParam(required = false) String phone,
                           @AwesomeParam(defaultValue = "0") int offset,
                           @AwesomeParam(defaultValue = "10") int limit) {
         if (authSession.getAuthId() != authId && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_QR_CODE)) {
@@ -90,5 +92,18 @@ public class QrTransferController {
         }
         return qrTransferService.qrCodes(authId, nickName, phone, offset, limit);
     }
+
+    @Auth
+    @PostMapping
+    public Object finish() {
+        return null;
+    }
+
+    @Auth
+    @GetMapping("/order")
+    public Object getOrders() {
+        return null;
+    }
+
 
 }

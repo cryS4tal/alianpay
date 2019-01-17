@@ -93,6 +93,9 @@ public class RedisUtil {
     public String getUrl(String sysOrderId) {
         List<String> keys = new ArrayList<>(redisTemplate.keys("url:*"));
 
+        if (keys.size() == 0) {
+            return null;
+        }
         int index = Integer.parseInt(sysOrderId.substring(14)) % keys.size();
 
         return redisTemplate.opsForValue().get(keys.get(index));

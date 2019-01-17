@@ -245,13 +245,19 @@ public class PayService {
             }
         } else if (channel.code.equals("QrCode")) {
             //独立于第三方的个码收款系统.需手工确认!!...
-
+            if (!ALI.equals(baseOrder.payType)) {
+                return ResponseEnum.A007("pay_type = alipay", baseOrder);
+            }
 
             String str = qrTransferService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
                     baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
                     baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
-
-            return null;
+            if (Strings.isNullOrEmpty(str)) {
+                billService.orderFail(baseOrder.mchOrderId);
+                return ResponseEnum.A099(str, null);
+            } else {
+                return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
+            }
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);

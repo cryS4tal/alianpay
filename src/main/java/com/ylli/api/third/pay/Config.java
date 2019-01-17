@@ -39,5 +39,7 @@ public class Config {
          * 管理角色与权限
          */
         public static final long MANAGE_QR_CODE = BASE + 1;
+
+        public static final long QR_CODE = BASE + 2;
     }
 }
