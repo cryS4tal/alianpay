@@ -51,6 +51,7 @@ public class QrTransferController {
      *
      * @param uploadQrCode
      */
+    @Auth
     @PostMapping("/code")
     public void uploadQrCode(@RequestBody UploadQrCode uploadQrCode) {
         ServiceUtil.checkNotEmpty(uploadQrCode);
@@ -65,17 +66,20 @@ public class QrTransferController {
      *
      * @param uploadUid
      */
+    @Auth
     @PostMapping("/uid")
     public void uploadUid(@RequestBody UploadUid uploadUid) {
         ServiceUtil.checkNotEmpty(uploadUid);
         qrTransferService.uploadUid(uploadUid.id, uploadUid.authId, uploadUid.uid);
     }
 
+    @Auth
     @DeleteMapping("/code/{id}")
     public void deleteQrCode(@PathVariable Long id) {
         qrTransferService.deleteQrCode(id);
     }
 
+    @Auth
     @GetMapping("/code")
     public Object qrCodes(@AwesomeParam(required = false) Long authId,
                           @AwesomeParam(required = false) String nickName,
@@ -88,11 +92,13 @@ public class QrTransferController {
         return qrTransferService.qrCodes(authId, nickName, phone, offset, limit);
     }
 
+    @Auth
     @PostMapping
     public Object finish() {
         return null;
     }
 
+    @Auth
     @GetMapping("/order")
     public Object getOrders(@AwesomeParam(required = false) Long authId,
                             @AwesomeParam(required = false) String nickName,
