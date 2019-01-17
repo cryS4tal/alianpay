@@ -128,7 +128,7 @@ public class QrTransferService {
         if (qrCode == null) {
             throw new AwesomeException(Config.ERROR_QR_CODE_NOT_FOUND);
         }
-        if (authSession.getAuthId() != authId || qrCode.authId != authId) {
+        if (authSession.getAuthId() != authId || qrCode.authId.longValue() != authId.longValue()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
         QrCode exist = new QrCode();

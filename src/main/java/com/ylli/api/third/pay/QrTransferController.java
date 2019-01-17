@@ -99,7 +99,10 @@ public class QrTransferController {
 
     @Auth
     @GetMapping("/order")
-    public Object getOrders() {
+    public Object getOrders(@AwesomeParam(required = false) Long authId,
+                            @AwesomeParam(required = false) String phone,
+                            @AwesomeParam(defaultValue = "0") int offset,
+                            @AwesomeParam(defaultValue = "10") int limit) {
         return null;
     }
 }
