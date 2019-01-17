@@ -100,9 +100,15 @@ public class QrTransferController {
     @Auth
     @GetMapping("/order")
     public Object getOrders(@AwesomeParam(required = false) Long authId,
+                            @AwesomeParam(required = false) String nickName,
                             @AwesomeParam(required = false) String phone,
+                            @AwesomeParam(required = false) Integer status,
                             @AwesomeParam(defaultValue = "0") int offset,
                             @AwesomeParam(defaultValue = "10") int limit) {
+        if (authId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_QR_CODE)) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        //return qrTransferService.getOrders(authId, nickName, phone, status, offset, limit);
         return null;
     }
 }

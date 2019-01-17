@@ -88,6 +88,7 @@ public class QrTransferService {
         return dataList;
     }
 
+    @Transactional
     public String createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl,
                               String reserve, String payType, String tradeType, Object extra) {
 
@@ -95,17 +96,15 @@ public class QrTransferService {
         Bill bill = billService.createBill(mchId, mchOrderId, channelId, payType, tradeType, money, reserve, notifyUrl, redirectUrl);
 
         String url = redisUtil.getUrl(bill.sysOrderId);
-        QrCode qrCode = qrCodeMapper.selectByUrl(url);
+        if (!Strings.isNullOrEmpty(url)) {
+            QrCode qrCode = qrCodeMapper.selectByUrl(url);
+            bill.qrOwner = qrCode.authId;
 
-        //设置关键字为订单序列号
-        String reserveWord = bill.sysOrderId.substring(16);
-        bill.reserveWord = reserveWord;
-        bill.qrOwner = qrCode.authId;
-        billMapper.updateByPrimaryKeySelective(bill);
+            //设置关键字为订单序列号
+            String reserveWord = bill.sysOrderId.substring(16);
+            bill.reserveWord = reserveWord;
+            billMapper.updateByPrimaryKeySelective(bill);
 
-        if (Strings.isNullOrEmpty(url)) {
-            return null;
-        } else {
             //封装自己的url.
             StringBuffer sb = new StringBuffer(QrApiHost)
                     .append("&link=").append(url)
@@ -115,6 +114,8 @@ public class QrTransferService {
                 sb.append("&native=").append(getNativeUrl(uid, String.format("%.2f", (money / 100.0)), bill.reserveWord));
             }
             return sb.toString();
+        } else {
+            return null;
         }
     }
 
