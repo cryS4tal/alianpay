@@ -255,4 +255,31 @@ public class QrTransferService {
         List<String> urls = qrCodeMapper.selectAll().stream().filter(i -> i.enable).map(i -> i.codeUrl).collect(Collectors.toList());
         redisUtil.initUrl(urls);
     }
+
+    @Transactional
+    public void rollback(String sysOrderId) {
+        Bill bill = new Bill();
+        bill.sysOrderId = sysOrderId;
+        bill = billMapper.selectOne(bill);
+        if (bill == null) {
+            throw new AwesomeException(com.ylli.api.pay.Config.ERROR_BILL_NOT_FOUND);
+        }
+        if (bill.status != Bill.FINISH) {
+            throw new AwesomeException(com.ylli.api.pay.Config.ERROR_BILL_STATUS);
+        }
+        if (!bill.superOrderId.startsWith("unknown")) {
+            throw new AwesomeException(com.ylli.api.pay.Config.ERROR_BILL_ROLLBACK);
+        }
+        // 9 为 个码支付 TODO 加入缓存.全局控制
+        if (bill.channelId != 9) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+
+        if (bill.status == Bill.FINISH) {
+            //钱包金额变动。
+            walletService.rollback(bill.mchId, bill.money - bill.payCharge);
+
+            billMapper.rollback(sysOrderId);
+        }
+    }
 }

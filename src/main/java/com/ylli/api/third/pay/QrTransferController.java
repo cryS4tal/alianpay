@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 个码转账.
  * 原生支付系统，不依赖任何第三方，需手动确认
- *
+ * <p>
  * 功能可以参考billController
  */
 @RestController
@@ -91,6 +91,21 @@ public class QrTransferController {
     @PostMapping("/order/finish")
     public void finish(@RequestBody QrOrderFinish finish) throws Exception {
         qrTransferService.finish(finish.sysOrderId, finish.money);
+    }
+
+    /**
+     * 补单回滚
+     *
+     * @return
+     */
+    static class Reissue {
+        public String sysOrderId;
+    }
+
+    @Auth
+    @PostMapping("/reissue/rollback")
+    public void rollback(@RequestBody Reissue reissue) throws Exception {
+        qrTransferService.rollback(reissue.sysOrderId);
     }
 
     @Auth
