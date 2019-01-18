@@ -8,6 +8,7 @@ import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.third.pay.model.QrOrderFinish;
 import com.ylli.api.third.pay.model.UploadQrCode;
 import com.ylli.api.third.pay.model.UploadUid;
 import com.ylli.api.third.pay.service.QrTransferService;
@@ -40,7 +41,6 @@ public class QrTransferController {
 
     /**
      * 登录，登出（登出将不在派单.）
-     * 手动确认订单。
      * todo 回滚订单
      */
 
@@ -92,9 +92,9 @@ public class QrTransferController {
     }
 
     @Auth
-    @PostMapping
-    public Object finish() {
-        return null;
+    @PostMapping("/order/finish")
+    public void finish(@RequestBody QrOrderFinish finish) {
+        qrTransferService.finish(finish.sysOrderId, finish.money);
     }
 
     @Auth
@@ -112,6 +112,7 @@ public class QrTransferController {
         if (authId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_QR_CODE)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return qrTransferService.getOrders(authId, nickName, phone, status, startTime == null ? null : startTime.getDate(), endTime == null ? null : endTime.getDate(), offset, limit);
+        return qrTransferService.getOrders(authId, nickName, phone, status, sysOrderId, mchOrderId,
+                startTime == null ? null : startTime.getDate(), endTime == null ? null : endTime.getDate(), offset, limit);
     }
 }

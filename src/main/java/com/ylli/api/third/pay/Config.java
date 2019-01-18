@@ -34,6 +34,14 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             5, "uid已存在");
 
+    public static final ErrorCode ERROR_BILL_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            6, "订单不存在");
+
+    public static final ErrorCode ERROR_BILL_STATUS
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            7, "订单不可操作");
+
     /**
      * 权限
      */

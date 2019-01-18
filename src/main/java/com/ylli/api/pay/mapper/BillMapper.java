@@ -47,6 +47,8 @@ public interface BillMapper extends Mapper<Bill> {
                          @Param("nick_name") String nickName,
                          @Param("phone") String phone,
                          @Param("status") Integer status,
-                         @Param("start") Date startTime,
-                         @Param("end") Date endTime);
+                         @Param("sys_order_id") String sysOrderId,
+                         @Param("mch_order_id") String mchOrderId,
+                         @Param("start_time") Date startTime,
+                         @Param("end_time") Date endTime);
 }

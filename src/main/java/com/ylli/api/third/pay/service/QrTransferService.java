@@ -5,16 +5,19 @@ import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.mch.mapper.MchBaseMapper;
+import com.ylli.api.mch.service.AppService;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.BillMapper;
-import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.third.pay.Config;
 import com.ylli.api.third.pay.mapper.QrCodeMapper;
 import com.ylli.api.third.pay.model.QrCode;
-import java.util.ArrayList;
+import com.ylli.api.wallet.service.WalletService;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +44,15 @@ public class QrTransferService {
 
     @Autowired
     AuthSession authSession;
+
+    @Autowired
+    MchBaseMapper mchBaseMapper;
+
+    @Autowired
+    AppService appService;
+
+    @Autowired
+    WalletService walletService;
 
     @Value("${pay.qr.code.apihost}")
     public String QrApiHost;
@@ -155,20 +167,37 @@ public class QrTransferService {
         qrCodeMapper.updateByPrimaryKeySelective(qrCode);
     }
 
-    public Object getOrders(Long authId, String nickName, String phone, Integer status, Date startTime, Date endTime, int offset, int limit) {
+    public Object getOrders(Long authId, String nickName, String phone, Integer status, String sysOrderId,
+                            String mchOrderId, Date startTime, Date endTime, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
-        Page<Bill> page = (Page<Bill>) billMapper.getOrders(authId, nickName, phone, status, startTime, endTime);
+        Page<Bill> page = (Page<Bill>) billMapper.getOrders(authId, nickName, phone, status, sysOrderId, mchOrderId, startTime, endTime);
 
-        DataList<BaseBill> dataList = new DataList<>();
+        DataList<Bill> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();
         dataList.totalCount = page.getTotal();
-        List<BaseBill> list = new ArrayList();
-        for (Bill bill : page) {
-            //BaseBill object = convert(bill);
-            //list.add(object);
-        }
-        dataList.dataList = list;
+        dataList.dataList = page;
         return dataList;
+    }
+
+    @Transactional
+    public void finish(String sysOrderId, Integer money) {
+        Bill bill = billService.selectBySysOrderId(sysOrderId);
+        if (bill == null) {
+            throw new AwesomeException(Config.ERROR_BILL_NOT_FOUND);
+        }
+        if (bill.status != Bill.NEW) {
+            throw new AwesomeException(Config.ERROR_BILL_STATUS);
+        }
+
+        bill.tradeTime = new Timestamp(System.currentTimeMillis());
+        bill.payCharge = (money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+        bill.status = Bill.FINISH;
+        //分转元
+        bill.msg = (new BigDecimal(money).divide(new BigDecimal(100))).toString();
+        billMapper.updateByPrimaryKeySelective(bill);
+
+        //钱包金额变动。
+        walletService.incr(bill.mchId, bill.money - bill.payCharge);
     }
 }
