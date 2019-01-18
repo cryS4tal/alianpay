@@ -241,10 +241,6 @@ public class BillService {
         return billMapper.selectOne(bill);
     }
 
-    /**
-     * 自动关闭创建时间（time_zone=0.00）+ 9h < now()的订单。
-     * 超时1小时关闭
-     */
     @Transactional
     public void autoClose() {
         billMapper.autoClose();

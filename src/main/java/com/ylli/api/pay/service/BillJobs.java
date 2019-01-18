@@ -13,7 +13,11 @@ public class BillJobs {
     @Autowired
     MessageService messageService;
 
-    @Scheduled(cron = "0 0 * * * ?")
+    /**
+     * 每10分钟轮询.
+     * 超时20分钟关闭
+     */
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void autoClose() {
         billService.autoClose();
     }
