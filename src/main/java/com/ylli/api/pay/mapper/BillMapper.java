@@ -25,7 +25,7 @@ public interface BillMapper extends Mapper<Bill> {
     @Select("SELECT SUM(money) as total,COUNT(*) as count FROM t_bill WHERE mch_id = ${mch_id} AND status = 3 AND DAYOFYEAR(NOW()) = DAYOFYEAR(trade_time)")
     SumAndCount getTodayDetail(@Param("mch_id") Long mchId);
 
-    @Update("UPDATE t_bill SET status = 9 WHERE status = 1 AND DATE_ADD(create_time,INTERVAL 9 HOUR) < NOW()")
+    @Update("UPDATE t_bill SET status = 9 WHERE status = 1 AND DATE_ADD(create_time,INTERVAL 20 MINUTE) < NOW()")
     Integer autoClose();
 
     List<Data> getHourlyData(@Param("mch_id") Long mchId);

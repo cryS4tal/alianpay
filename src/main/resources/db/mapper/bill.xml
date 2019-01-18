@@ -75,7 +75,7 @@
         FROM
         t_bill
         <where>
-            DATE_ADD(create_time, INTERVAL 8 HOUR) > CURDATE()
+            create_time > DATE_ADD(CURDATE(), INTERVAL -8 HOUR)
             <if test="mch_id != null">
                 AND mch_id = ${mch_id}
             </if>
