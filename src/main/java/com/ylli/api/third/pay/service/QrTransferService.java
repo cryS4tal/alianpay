@@ -11,6 +11,8 @@ import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
+import com.ylli.api.pay.service.PayClient;
+import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.third.pay.Config;
 import com.ylli.api.third.pay.mapper.QrCodeMapper;
@@ -18,6 +20,8 @@ import com.ylli.api.third.pay.model.QrCode;
 import com.ylli.api.wallet.service.WalletService;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,12 +58,18 @@ public class QrTransferService {
     @Autowired
     WalletService walletService;
 
+    @Autowired
+    PayService payService;
+
+    @Autowired
+    PayClient payClient;
+
     @Value("${pay.qr.code.apihost}")
     public String QrApiHost;
 
     @PostConstruct
     void init() {
-        List<String> urls = qrCodeMapper.selectAll().stream().map(i -> i.codeUrl).collect(Collectors.toList());
+        List<String> urls = qrCodeMapper.selectAll().stream().filter(i -> i.enable).map(i -> i.codeUrl).collect(Collectors.toList());
         redisUtil.initUrl(urls);
     }
 
@@ -78,10 +88,11 @@ public class QrTransferService {
         qrCode = new QrCode();
         qrCode.authId = authId;
         qrCode.codeUrl = codeUrl;
+        qrCode.enable = true;
         qrCodeMapper.insertSelective(qrCode);
 
         //redis add.
-        List<String> urls = qrCodeMapper.selectAll().stream().map(i -> i.codeUrl).collect(Collectors.toList());
+        List<String> urls = qrCodeMapper.selectAll().stream().filter(i -> i.enable).map(i -> i.codeUrl).collect(Collectors.toList());
         redisUtil.initUrl(urls);
     }
 
@@ -94,7 +105,7 @@ public class QrTransferService {
         qrCodeMapper.delete(qrCode);
 
         //redis add.
-        List<String> urls = qrCodeMapper.selectAll().stream().map(i -> i.codeUrl).collect(Collectors.toList());
+        List<String> urls = qrCodeMapper.selectAll().stream().filter(i -> i.enable).map(i -> i.codeUrl).collect(Collectors.toList());
         redisUtil.initUrl(urls);
     }
 
@@ -181,23 +192,67 @@ public class QrTransferService {
     }
 
     @Transactional
-    public void finish(String sysOrderId, Integer money) {
+    public void finish(String sysOrderId, Integer money) throws Exception {
         Bill bill = billService.selectBySysOrderId(sysOrderId);
         if (bill == null) {
             throw new AwesomeException(Config.ERROR_BILL_NOT_FOUND);
         }
-        if (bill.status != Bill.NEW) {
-            throw new AwesomeException(Config.ERROR_BILL_STATUS);
+
+        //补单操作..
+        if (bill.status == Bill.NEW || bill.status == Bill.AUTO_CLOSE) {
+            bill.status = Bill.FINISH;
+            bill.tradeTime = Timestamp.from(Instant.now());
+            bill.payCharge = (money * appService.getRate(bill.mchId, bill.appId)) / 10000;
+            //不返回上游订单号.
+            bill.superOrderId = new StringBuffer().append("unknown").append(bill.id).toString();
+
+            bill.msg = (new BigDecimal(bill.money).divide(new BigDecimal(100))).toString();
+            billMapper.updateByPrimaryKeySelective(bill);
+
+            //钱包金额变动。
+            walletService.incr(bill.mchId, bill.money - bill.payCharge);
+
+            //加入异步通知下游商户系统
+            //params jsonStr.
+            if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
+                String params = payService.generateRes(
+                        bill.money.toString(),
+                        bill.mchOrderId,
+                        bill.sysOrderId,
+                        bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
+                        bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
+                        bill.reserve);
+
+                payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+            }
+        } else {
+            throw new AwesomeException(com.ylli.api.pay.Config.ERROR_BILL_STATUS);
         }
+    }
 
-        bill.tradeTime = new Timestamp(System.currentTimeMillis());
-        bill.payCharge = (money * appService.getRate(bill.mchId, bill.appId)) / 10000;
-        bill.status = Bill.FINISH;
-        //分转元
-        bill.msg = (new BigDecimal(money).divide(new BigDecimal(100))).toString();
-        billMapper.updateByPrimaryKeySelective(bill);
+    @Transactional
+    public void login(long authId) {
+        QrCode qrCode = new QrCode();
+        qrCode.authId = authId;
+        List<QrCode> list = qrCodeMapper.select(qrCode);
+        list.stream().forEach(i ->{
+            i.enable = true;
+            qrCodeMapper.updateByPrimaryKeySelective(i);
+        });
+        List<String> urls = qrCodeMapper.selectAll().stream().filter(i -> i.enable).map(i -> i.codeUrl).collect(Collectors.toList());
+        redisUtil.initUrl(urls);
+    }
 
-        //钱包金额变动。
-        walletService.incr(bill.mchId, bill.money - bill.payCharge);
+    @Transactional
+    public void logout(long authId) {
+        QrCode qrCode = new QrCode();
+        qrCode.authId = authId;
+        List<QrCode> list = qrCodeMapper.select(qrCode);
+        list.stream().forEach(i ->{
+            i.enable = false;
+            qrCodeMapper.updateByPrimaryKeySelective(i);
+        });
+        List<String> urls = qrCodeMapper.selectAll().stream().filter(i -> i.enable).map(i -> i.codeUrl).collect(Collectors.toList());
+        redisUtil.initUrl(urls);
     }
 }

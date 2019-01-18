@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 个码转账.
  * 原生支付系统，不依赖任何第三方，需手动确认
+ *
+ * 功能可以参考billController
  */
 @RestController
 @RequestMapping("/pay/qr")
@@ -38,12 +40,6 @@ public class QrTransferController {
 
     @Autowired
     PermissionService permissionService;
-
-    /**
-     * 登录，登出（登出将不在派单.）
-     * todo 回滚订单
-     */
-
 
     /**
      * 上传个人收款码
@@ -93,7 +89,7 @@ public class QrTransferController {
 
     @Auth
     @PostMapping("/order/finish")
-    public void finish(@RequestBody QrOrderFinish finish) {
+    public void finish(@RequestBody QrOrderFinish finish) throws Exception {
         qrTransferService.finish(finish.sysOrderId, finish.money);
     }
 
@@ -114,5 +110,23 @@ public class QrTransferController {
         }
         return qrTransferService.getOrders(authId, nickName, phone, status, sysOrderId, mchOrderId,
                 startTime == null ? null : startTime.getDate(), endTime == null ? null : endTime.getDate(), offset, limit);
+    }
+
+    /**
+     * 登入.默认登入
+     */
+    @Auth
+    @PostMapping("/login")
+    public void login() {
+        qrTransferService.login(authSession.getAuthId());
+    }
+
+    /**
+     * 登出.
+     */
+    @Auth
+    @DeleteMapping("/logout")
+    public void logout() {
+        qrTransferService.logout(authSession.getAuthId());
     }
 }

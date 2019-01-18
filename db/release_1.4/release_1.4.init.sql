@@ -26,3 +26,6 @@ insert into t_sys_channel (code,name,state) values("QrCode","个人收款码",1)
 
 ALTER TABLE `t_bill`
 ADD COLUMN `qr_owner`  bigint NULL AFTER `msg`;
+
+ALTER TABLE `t_qr_code`
+ADD COLUMN `enable`  tinyint(4) NULL DEFAULT 1 AFTER `uid`;

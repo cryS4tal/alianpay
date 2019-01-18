@@ -254,7 +254,7 @@ public class PayService {
                     baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
             if (Strings.isNullOrEmpty(str)) {
                 billService.orderFail(baseOrder.mchOrderId);
-                return ResponseEnum.A099(str, null);
+                return ResponseEnum.A099("暂无可用收款账户", null);
             } else {
                 return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
             }
