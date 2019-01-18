@@ -206,17 +206,17 @@ public class QrTransferService {
             //不返回上游订单号.
             bill.superOrderId = new StringBuffer().append("unknown").append(bill.id).toString();
 
-            bill.msg = (new BigDecimal(bill.money).divide(new BigDecimal(100))).toString();
+            bill.msg = (new BigDecimal(money).divide(new BigDecimal(100))).toString();
             billMapper.updateByPrimaryKeySelective(bill);
 
             //钱包金额变动。
-            walletService.incr(bill.mchId, bill.money - bill.payCharge);
+            walletService.incr(bill.mchId, money - bill.payCharge);
 
             //加入异步通知下游商户系统
             //params jsonStr.
             if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
                 String params = payService.generateRes(
-                        bill.money.toString(),
+                        money.toString(),
                         bill.mchOrderId,
                         bill.sysOrderId,
                         bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
@@ -235,7 +235,7 @@ public class QrTransferService {
         QrCode qrCode = new QrCode();
         qrCode.authId = authId;
         List<QrCode> list = qrCodeMapper.select(qrCode);
-        list.stream().forEach(i ->{
+        list.stream().forEach(i -> {
             i.enable = true;
             qrCodeMapper.updateByPrimaryKeySelective(i);
         });
@@ -248,7 +248,7 @@ public class QrTransferService {
         QrCode qrCode = new QrCode();
         qrCode.authId = authId;
         List<QrCode> list = qrCodeMapper.select(qrCode);
-        list.stream().forEach(i ->{
+        list.stream().forEach(i -> {
             i.enable = false;
             qrCodeMapper.updateByPrimaryKeySelective(i);
         });
@@ -277,7 +277,7 @@ public class QrTransferService {
 
         if (bill.status == Bill.FINISH) {
             //钱包金额变动。
-            walletService.rollback(bill.mchId, bill.money - bill.payCharge);
+            walletService.rollback(bill.mchId, Double.valueOf(Double.valueOf(bill.msg) * 100).intValue() - bill.payCharge);
 
             billMapper.rollback(sysOrderId);
         }

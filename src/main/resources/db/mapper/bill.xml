@@ -149,8 +149,9 @@
             LEFT JOIN t_user_base ON t_bill.qr_owner = t_user_base.mch_id
         </if>
         <where>
+            t_bill.channel_id = 9
             <if test="auth_id != null">
-                t_bill.qr_owner = ${auth_id}
+                AND t_bill.qr_owner = ${auth_id}
             </if>
             <if test="nick_name != null">
                 <bind name="name_like_ext" value="nick_name + '%'" />
