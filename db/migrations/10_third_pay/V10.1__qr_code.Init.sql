@@ -10,6 +10,9 @@ CREATE TABLE t_qr_code (
   UNIQUE KEY `u_uid` (`uid`)
 );
 
+ALTER TABLE `t_qr_code`
+ADD COLUMN `code_name`  varchar(64) NULL AFTER `auth_id`;
+
 CREATE TABLE t_qr_pend_info (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   name VARCHAR(64) COMMENT '昵称',
