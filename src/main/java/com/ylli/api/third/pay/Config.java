@@ -42,6 +42,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             7, "订单不可操作");
 
+    public static final ErrorCode ERROR_INFO_NOT_FOUND
+            = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
+            8, "信息不存在");
+
     /**
      * 权限
      */

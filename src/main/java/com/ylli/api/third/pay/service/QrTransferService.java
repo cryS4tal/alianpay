@@ -16,7 +16,9 @@ import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.third.pay.Config;
 import com.ylli.api.third.pay.mapper.QrCodeMapper;
+import com.ylli.api.third.pay.mapper.QrPendInfoMapper;
 import com.ylli.api.third.pay.model.QrCode;
+import com.ylli.api.third.pay.model.QrPendInfo;
 import com.ylli.api.wallet.service.WalletService;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -53,6 +55,9 @@ public class QrTransferService {
     MchBaseMapper mchBaseMapper;
 
     @Autowired
+    QrPendInfoMapper qrPendInfoMapper;
+
+    @Autowired
     AppService appService;
 
     @Autowired
@@ -75,9 +80,9 @@ public class QrTransferService {
 
 
     @Transactional
-    public void uploadQrCode(Long authId, String codeUrl) {
+    public void uploadQrCode(Long authId, String codeName, String codeUrl) {
         //toUpperCase
-        codeUrl = codeUrl.toUpperCase();
+        //codeUrl = codeUrl.toUpperCase();
 
         QrCode qrCode = new QrCode();
         qrCode.codeUrl = codeUrl;
@@ -88,6 +93,7 @@ public class QrTransferService {
         qrCode = new QrCode();
         qrCode.authId = authId;
         qrCode.codeUrl = codeUrl;
+        qrCode.codeName = codeName;
         qrCode.enable = true;
         qrCodeMapper.insertSelective(qrCode);
 
@@ -281,5 +287,36 @@ public class QrTransferService {
 
             billMapper.rollback(sysOrderId);
         }
+    }
+
+    @Transactional
+    public void addPending(QrPendInfo pendInfo) {
+        qrPendInfoMapper.insertSelective(pendInfo);
+    }
+
+    public Object getPending(String name, Integer money, Date startTime, Date endTime, int offset, int limit) {
+        PageHelper.offsetPage(offset, limit);
+        Page<QrPendInfo> page = (Page<QrPendInfo>) qrPendInfoMapper.getPending(name, money, startTime, endTime);
+
+        DataList<QrPendInfo> dataList = new DataList<>();
+        dataList.offset = page.getStartRow();
+        dataList.count = page.size();
+        dataList.totalCount = page.getTotal();
+        dataList.dataList = page;
+        return dataList;
+    }
+
+    @Transactional
+    public void pendHand(Long id) {
+        QrPendInfo info = qrPendInfoMapper.selectByPrimaryKey(id);
+        if (info == null) {
+            throw new AwesomeException(Config.ERROR_INFO_NOT_FOUND);
+        }
+        info.enable = !info.enable;
+        qrPendInfoMapper.updateByPrimaryKeySelective(info);
+    }
+
+    public Integer loginCount() {
+        return qrCodeMapper.selectLoginCount().size();
     }
 }

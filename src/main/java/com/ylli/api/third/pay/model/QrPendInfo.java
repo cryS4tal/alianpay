@@ -6,22 +6,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "t_qr_code")
-public class QrCode {
+@Table(name = "t_qr_pend_info")
+public class QrPendInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    public Long authId;
+    public String name;
 
-    public String codeName;
-
-    public String codeUrl;
-
-    public String uid;
+    public Integer money;
 
     public Boolean enable;
+
+    public Timestamp orderTime;
 
     public Timestamp createTime;
 

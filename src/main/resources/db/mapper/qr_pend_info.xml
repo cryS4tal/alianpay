@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ylli.api.third.pay.mapper.QrPendInfoMapper">
+    <resultMap id="infoMap" type="com.ylli.api.third.pay.model.QrPendInfo"/>
+
+    <select id="getPending" resultMap="infoMap">
+        SELECT * FROM t_qr_pend_info
+        <where>
+            <if test="name != null">
+                <bind name="name_like_ext" value="name + '%'"/>
+                name LIKE #{name_like_ext}
+            </if>
+            <if test="money != null">
+                AND money = ${money}
+            </if>
+            <if test="start_time != null">
+                AND order_time >= #{start_time}
+            </if>
+            <if test="end_time != null">
+                AND order_time &lt; #{end_time}
+            </if>
+        </where>
+    </select>
+</mapper>

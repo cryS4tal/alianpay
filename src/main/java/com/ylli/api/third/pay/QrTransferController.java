@@ -9,6 +9,7 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.third.pay.model.QrOrderFinish;
+import com.ylli.api.third.pay.model.QrPendInfo;
 import com.ylli.api.third.pay.model.UploadQrCode;
 import com.ylli.api.third.pay.model.UploadUid;
 import com.ylli.api.third.pay.service.QrTransferService;
@@ -53,7 +54,7 @@ public class QrTransferController {
         if (authSession.getAuthId() != uploadQrCode.authId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        qrTransferService.uploadQrCode(uploadQrCode.authId, uploadQrCode.codeUrl);
+        qrTransferService.uploadQrCode(uploadQrCode.authId, uploadQrCode.codeName, uploadQrCode.codeUrl);
     }
 
     /**
@@ -143,5 +144,37 @@ public class QrTransferController {
     @DeleteMapping("/logout")
     public void logout() {
         qrTransferService.logout(authSession.getAuthId());
+    }
+
+
+    @Auth
+    @GetMapping("/login")
+    public Integer loginCount() {
+        return qrTransferService.loginCount();
+    }
+
+    @Auth
+    @PostMapping("/pending")
+    public void addPending(@RequestBody QrPendInfo pendInfo) {
+        ServiceUtil.checkNotEmptyIgnore(pendInfo, true, "enable");
+        qrTransferService.addPending(pendInfo);
+    }
+
+    @Auth
+    @GetMapping("/pending")
+    public Object getPending(@AwesomeParam(required = false) String name,
+                             @AwesomeParam(required = false) Integer money,
+                             @AwesomeParam(required = false) AwesomeDateTime startTime,
+                             @AwesomeParam(required = false) AwesomeDateTime endTime,
+                             @AwesomeParam(defaultValue = "0") int offset,
+                             @AwesomeParam(defaultValue = "10") int limit) {
+        return qrTransferService.getPending(name, money, startTime == null ? null : startTime.getDate(),
+                endTime == null ? null : endTime.getDate(), offset, limit);
+    }
+
+    @Auth
+    @GetMapping("/pending/{id}")
+    public void pendHand(@PathVariable Long id) {
+        qrTransferService.pendHand(id);
     }
 }

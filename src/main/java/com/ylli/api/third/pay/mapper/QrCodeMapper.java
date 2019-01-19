@@ -17,4 +17,8 @@ public interface QrCodeMapper extends Mapper<QrCode> {
 
     @Select("SELECT * FROM t_qr_code WHERE code_url = #{url}")
     QrCode selectByUrl(@Param("url") String url);
+
+    @Select("SELECT DISTINCT auth_id FROM t_qr_code WHERE `enable` = 1")
+    List<QrCode> selectLoginCount();
+
 }
