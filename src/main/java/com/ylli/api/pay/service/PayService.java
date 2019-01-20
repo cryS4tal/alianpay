@@ -310,8 +310,8 @@ public class PayService {
         }
         if (baseOrder.payType.equals(ALI)) {
 
-            if (channel.code.equals("CNT")) {
-                //CNT   单独设置金额范围. 10 -9999
+            if (channel.code.equals("CNT") || channel.code.equals("QrCode")) {
+                //CNT ,BNT  单独设置金额范围. 10 -9999
                 if (baseOrder.money < CNT_MIN || baseOrder.money > CNT_MAX) {
                     return ResponseEnum.A005(String.format("%s - %s 元", CNT_MIN / 100, CNT_MAX / 100), baseOrder);
                 }
