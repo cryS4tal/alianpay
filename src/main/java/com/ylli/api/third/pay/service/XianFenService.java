@@ -233,7 +233,8 @@ public class XianFenService {
         res.sysOrderId = sysOrderId;
         res.money = money;
         res.status = BankPayOrder.statusToString(status);
-        Response response = new Response("A000", "成功", null, res);
+        //TODO 询问1037，1044，1067，1069，1078 怎么校验的。
+        Response response = new Response("A000", "成功", null, new Gson().toJson(res));
         response.sign = SignUtil.generateSignature(SignUtil.objectToMap(response), secretKey);
         return response;
     }
