@@ -13,6 +13,7 @@ import com.ylli.api.mch.model.MchBase;
 import com.ylli.api.mch.service.MchBaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MchBaseController {
 
     @Autowired
-    MchBaseService userBaseService;
+    MchBaseService mchBaseService;
 
     @Autowired
     AuthSession authSession;
@@ -35,18 +36,18 @@ public class MchBaseController {
 
     /**
      * 基础信息注册
-     * @param userBase
+     * @param mchBase
      */
     @PostMapping
-    public void register(@RequestBody MchBase userBase) {
-        ServiceUtil.checkNotEmptyIgnore(userBase, true, "nickName", "linkName", "linkPhone", "businessLicense", "state");
-        if (userBase.mchId != authSession.getAuthId()) {
+    public void register(@RequestBody MchBase mchBase) {
+        ServiceUtil.checkNotEmptyIgnore(mchBase, true, "nickName", "linkName", "linkPhone", "businessLicense", "state");
+        if (mchBase.mchId != authSession.getAuthId()) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        if (!CheckPhone.isSimplePhone(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isSimplePhone(userBase.linkPhone))) {
+        if (!CheckPhone.isSimplePhone(mchBase.legalPhone) || (mchBase.linkPhone != null && !CheckPhone.isSimplePhone(mchBase.linkPhone))) {
             throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
         }
-        userBaseService.register(userBase);
+        mchBaseService.register(mchBase);
     }
 
     /**
@@ -64,8 +65,15 @@ public class MchBaseController {
         if (mchId == null && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BASE)) {
             permissionService.permissionDeny();
         }
-        return userBaseService.getBase(mchId, state, mchName, name, phone, businessLicense, offset, limit);
+        return mchBaseService.getBase(mchId, state, mchName, name, phone, businessLicense, offset, limit);
     }
+
+    @PutMapping("/agency")
+    public Object setAgency(@AwesomeParam Long mchId) {
+        return mchBaseService.setAgency(mchId);
+    }
+
+
 
     /**
      * 管理员基础信息审核
@@ -74,7 +82,7 @@ public class MchBaseController {
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
     public Object audit(@RequestBody Audit audit) {
         ServiceUtil.checkNotEmpty(audit);
-        return userBaseService.audit(audit.mchId, audit.state);
+        return mchBaseService.audit(audit.mchId, audit.state);
     }
 
     /**
@@ -82,10 +90,10 @@ public class MchBaseController {
      */
     @PutMapping
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_BASE))
-    public Object update(@RequestBody MchBase userBase) {
-        if (!CheckPhone.isSimplePhone(userBase.legalPhone) || (userBase.linkPhone != null && !CheckPhone.isSimplePhone(userBase.linkPhone))) {
+    public Object update(@RequestBody MchBase mchBase) {
+        if (!CheckPhone.isSimplePhone(mchBase.legalPhone) || (mchBase.linkPhone != null && !CheckPhone.isSimplePhone(mchBase.linkPhone))) {
             throw new AwesomeException(Config.ERROR_ILLEGAL_PHONE);
         }
-        return userBaseService.update(userBase);
+        return mchBaseService.update(mchBase);
     }
 }

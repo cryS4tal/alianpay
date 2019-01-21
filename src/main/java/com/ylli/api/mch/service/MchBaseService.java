@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MchBaseService {
 
     @Autowired
-    MchBaseMapper userBaseMapper;
+    MchBaseMapper mchBaseMapper;
 
     @Autowired
     ModelMapper modelMapper;
@@ -27,7 +27,7 @@ public class MchBaseService {
     @Transactional
     public void register(MchBase userBase) {
 
-        MchBase base = userBaseMapper.selectByMchId(userBase.mchId);
+        MchBase base = mchBaseMapper.selectByMchId(userBase.mchId);
         if (base == null) {
             base = init(userBase.mchId, userBase.linkPhone);
         }
@@ -39,20 +39,20 @@ public class MchBaseService {
         //fix use modelMapper cause not update data
         userBase.id  = base.id;
         modelMapper.map(userBase, base);
-        userBaseMapper.updateByPrimaryKeySelective(base);
+        mchBaseMapper.updateByPrimaryKeySelective(base);
     }
 
 
     @Transactional
     public Object audit(Long mchId, Integer state) {
-        MchBase userBase = userBaseMapper.selectByMchId(mchId);
+        MchBase userBase = mchBaseMapper.selectByMchId(mchId);
         if (userBase == null) {
             throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
         }
         userBase.state = state;
         userBase.modifyTime = Timestamp.from(Instant.now());
-        userBaseMapper.updateByPrimaryKeySelective(userBase);
-        return userBaseMapper.selectByPrimaryKey(userBase);
+        mchBaseMapper.updateByPrimaryKeySelective(userBase);
+        return mchBaseMapper.selectByPrimaryKey(userBase);
     }
 
     @Transactional
@@ -61,27 +61,27 @@ public class MchBaseService {
         userBase.mchId = mchId;
         userBase.linkPhone = phone;
         userBase.state = MchBase.NEW;
-        userBaseMapper.insertSelective(userBase);
-        return userBaseMapper.selectByPrimaryKey(userBase.id);
+        mchBaseMapper.insertSelective(userBase);
+        return mchBaseMapper.selectByPrimaryKey(userBase.id);
     }
 
     public Integer getState(Long id) {
         MchBase userBase = new MchBase();
         userBase.mchId = id;
-        userBase = userBaseMapper.selectOne(userBase);
+        userBase = mchBaseMapper.selectOne(userBase);
         return Optional.ofNullable(userBase).map(base -> base.state).orElse(MchBase.NEW);
     }
 
     public MchBase getBase(Long id) {
         MchBase userBase = new MchBase();
         userBase.mchId = id;
-        userBase = userBaseMapper.selectOne(userBase);
+        userBase = mchBaseMapper.selectOne(userBase);
         return userBase;
     }
 
     public DataList<MchBase> getBase(Long mchId, Integer state, String mchName, String name, String phone, String businessLicense, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
-        Page<MchBase> page = (Page<MchBase>) userBaseMapper.getBase(mchId, state, mchName, name, phone, businessLicense);
+        Page<MchBase> page = (Page<MchBase>) mchBaseMapper.getBase(mchId, state, mchName, name, phone, businessLicense);
         DataList<MchBase> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();
@@ -92,14 +92,20 @@ public class MchBaseService {
 
     @Transactional
     public MchBase update(MchBase userBase) {
-        MchBase base = userBaseMapper.selectByMchId(userBase.mchId);
+        MchBase base = mchBaseMapper.selectByMchId(userBase.mchId);
         if (base == null) {
             base = init(userBase.mchId, userBase.linkPhone);
         }
         //fix use modelMapper cause not update data
         userBase.id  = base.id;
         modelMapper.map(userBase, base);
-        userBaseMapper.updateByPrimaryKeySelective(base);
-        return userBaseMapper.selectByPrimaryKey(userBase);
+        mchBaseMapper.updateByPrimaryKeySelective(base);
+        return mchBaseMapper.selectByPrimaryKey(userBase);
+    }
+
+    public Object setAgency(Long mchId) {
+        MchBase mchBase = mchBaseMapper.selectByMchId(mchId);
+
+        return null;
     }
 }
