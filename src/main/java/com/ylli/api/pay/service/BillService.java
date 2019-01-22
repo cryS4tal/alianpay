@@ -432,4 +432,15 @@ public class BillService {
         bill.status = Bill.FAIL;
         billMapper.updateByPrimaryKeySelective(bill);
     }
+
+    public Bill getBntBill(String sysOrderId) {
+        Bill bill = selectBySysOrderId(sysOrderId);
+        if (bill == null) {
+            return null;
+        }
+        Bill bill1 = new Bill();
+        bill1.status = bill.status;
+        bill1.createTime = bill.createTime;
+        return bill1;
+    }
 }

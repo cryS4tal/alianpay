@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/bill")
-@Auth
 public class BillController {
 
     @Autowired
@@ -42,6 +41,7 @@ public class BillController {
      */
 
     @GetMapping
+    @Auth
     public Object getBills(@AwesomeParam(required = false) Long mchId,
                            @AwesomeParam(required = false) Integer status,
                            @AwesomeParam(required = false) String mchOrderId,
@@ -68,6 +68,7 @@ public class BillController {
     }
 
     @GetMapping("/export")
+    @Auth
     public void exportBills(@AwesomeParam(required = false) Long mchId,
                             //@AwesomeParam(required = false) Integer status,
                             @AwesomeParam(required = false) String mchOrderId,
@@ -87,6 +88,7 @@ public class BillController {
 
 
     @GetMapping("/today")
+    @Auth
     public Object getTodayDetail(@AwesomeParam(required = false) Long mchId) {
         do {
             if (mchId != null && authSession.getAuthId() == mchId) {
@@ -125,4 +127,10 @@ public class BillController {
     public void rollback(@RequestBody Reissue reissue) throws Exception {
         billService.rollback(reissue.sysOrderId);
     }
+
+    @GetMapping("/bnt")
+    public Object getBntBill(@AwesomeParam String sysOrderId) {
+        return billService.getBntBill(sysOrderId);
+    }
+
 }
