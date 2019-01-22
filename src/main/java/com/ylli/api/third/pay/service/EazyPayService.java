@@ -2,7 +2,7 @@ package com.ylli.api.third.pay.service;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
@@ -44,7 +44,7 @@ public class EazyPayService {
     WalletService walletService;
 
     @Autowired
-    AppService appService;
+    RateService appService;
 
     @Transactional
     public EazyResponse createOrder(Long mchId, Long channelId, Integer money, String mchOrderId, String notifyUrl, String redirectUrl,

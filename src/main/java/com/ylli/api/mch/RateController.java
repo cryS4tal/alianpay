@@ -9,7 +9,7 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.mch.model.Apps;
 import com.ylli.api.mch.model.SysApp;
-import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.pay.service.BankPayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RateController {
 
     @Autowired
-    AppService appService;
+    RateService rateService;
 
     @Autowired
     AuthSession authSession;
@@ -41,7 +41,7 @@ public class RateController {
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
     public Object createApp(@RequestBody SysApp app) {
         ServiceUtil.checkNotEmptyIgnore(app, true, "status");
-        return appService.createApp(app.rate, app.appName);
+        return rateService.createApp(app.rate, app.appName);
     }
 
     @GetMapping("/sys/app")
@@ -50,27 +50,27 @@ public class RateController {
                             @AwesomeParam(required = false) Boolean status,
                             @AwesomeParam(defaultValue = "0") int offset,
                             @AwesomeParam(defaultValue = "10") int limit) {
-        return appService.getSysApp(appName, status, offset, limit);
+        return rateService.getSysApp(appName, status, offset, limit);
     }
 
     @PutMapping("/sys/app")
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
     public Object updateApp(@RequestBody SysApp app) {
-        return appService.updateApp(app);
+        return rateService.updateApp(app);
     }
 
 
     @PostMapping("/mch/app")
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
     public Object setUserRate(@RequestBody Apps apps) {
-        return appService.setUserRate(apps);
+        return rateService.setUserRate(apps);
     }
 
     @DeleteMapping("/mch/app")
     @Auth(@Permission(Config.SysPermission.MANAGE_APP))
     public void removeApp(@AwesomeParam Long appId,
                           @AwesomeParam Long mchId) {
-        appService.removeApp(appId, mchId);
+        rateService.removeApp(appId, mchId);
     }
 
     @GetMapping("/mch/app")
@@ -78,7 +78,7 @@ public class RateController {
         if (mchId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_APP)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return appService.getMchApp(mchId);
+        return rateService.getMchApp(mchId);
     }
 
     static class BankPayRate {

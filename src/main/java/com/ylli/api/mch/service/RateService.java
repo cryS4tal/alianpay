@@ -13,7 +13,6 @@ import com.ylli.api.mch.model.MchApp;
 import com.ylli.api.mch.model.MchAppDetail;
 import com.ylli.api.mch.model.SysApp;
 import com.ylli.api.model.base.DataList;
-import com.ylli.api.pay.service.PayService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AppService {
+public class RateService {
 
     @Autowired
     MchAppMapper mchAppMapper;
@@ -32,7 +31,7 @@ public class AppService {
     SysAppMapper sysAppMapper;
 
     @Autowired
-    MchBaseMapper userBaseMapper;
+    MchBaseMapper mchBaseMapper;
 
     @Autowired
     ModelMapper modelMapper;
@@ -110,7 +109,7 @@ public class AppService {
         detail.appId = mchApp.appId;
         detail.appName = sysAppMapper.selectByPrimaryKey(mchApp.appId).appName;
         detail.mchId = mchApp.mchId;
-        detail.mchName = userBaseMapper.selectByMchId(mchApp.mchId).mchName;
+        detail.mchName = mchBaseMapper.selectByMchId(mchApp.mchId).mchName;
         detail.rate = mchApp.rate;
         detail.createTime = mchApp.createTime;
         return detail;
@@ -134,25 +133,11 @@ public class AppService {
     }
 
     /**
-     * 根据 pay_type;trade_type 返回appid
-     * 默认， v1.0  需要加上 payType 和 tradeType 与 sysApp 之间关联
-     * 1 - 支付宝H5
-     * 2 - 微信H5
-     * 3 - 支付宝扫码
-     * 4 - 微信扫码
+     * 1 - 支付宝 alipay
+     * 2 - 微信 wx
      */
-    public Long getAppId(String payType, String tradeType) {
-        if (payType.equals(PayService.ALI) && tradeType.equals(PayService.WAP)) {
-            return 1L;
-        } else if (payType.equals(PayService.WX) && tradeType.equals(PayService.WAP)) {
-            return 2L;
-        } else if (payType.equals(PayService.ALI) && tradeType.equals(PayService.NATIVE)) {
-            return 3L;
-        } else if (payType.equals(PayService.WX) && tradeType.equals(PayService.NATIVE)) {
-            return 4L;
-        } else {
-            return 0l;
-        }
+    public Long getAppId(String code) {
+        return Optional.ofNullable(sysAppMapper.selectByCode(code)).map(i -> i.id).orElse(0L);
     }
 
     public Object getMchApp(Long mchId) {
@@ -162,14 +147,17 @@ public class AppService {
         for (int i = 0; i < list.size(); i++) {
             details.add(doSome(list.get(i), mchId));
         }
-        String mchName = Optional.ofNullable(userBaseMapper.selectByMchId(mchId)).map(i ->i.mchName).orElse("");
-        details.stream().forEach(i ->{
+        String mchName = Optional.ofNullable(mchBaseMapper.selectByMchId(mchId)).map(i -> i.mchName).orElse("");
+        details.stream().forEach(i -> {
             i.mchId = mchId;
             i.mchName = mchName;
         });
         return details;
     }
 
+    /**
+     * 查询商户费率。没有个性化设置，应用系统默认
+     */
     public MchAppDetail doSome(SysApp sysApp, Long mchId) {
         MchAppDetail detail = new MchAppDetail();
         MchApp mchApp = new MchApp();

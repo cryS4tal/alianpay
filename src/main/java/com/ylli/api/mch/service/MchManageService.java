@@ -63,7 +63,7 @@ public class MchManageService {
     public void mchEnable(Long mchId, Boolean open) {
         Account account = accountMapper.selectByPrimaryKey(mchId);
         if (account == null) {
-            throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
+            throw new AwesomeException(Config.ERROR_MCH_NOT_FOUND);
         }
         account.state = open ? Account.STATE_ENABLE : Account.STATE_DISABLE;
         accountMapper.updateByPrimaryKeySelective(account);
@@ -73,7 +73,7 @@ public class MchManageService {
     public void resetPwd(Long mchId, String pwd) {
         Account account = accountMapper.selectByPrimaryKey(mchId);
         if (account == null) {
-            throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
+            throw new AwesomeException(Config.ERROR_MCH_NOT_FOUND);
         }
         if (account.state.equals(Account.STATE_DISABLE)) {
             throw new AwesomeException(Config.ERROR_MCH_DISABLE);

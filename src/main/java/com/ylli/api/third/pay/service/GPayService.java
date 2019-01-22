@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import static com.ucf.sdk.util.RSAUtils.KEY_ALGORITHM;
-import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
@@ -56,7 +56,7 @@ public class GPayService {
     WalletService walletService;
 
     @Autowired
-    AppService appService;
+    RateService appService;
 
     @Value("${gpay.public.key}")
     public String publicKey;

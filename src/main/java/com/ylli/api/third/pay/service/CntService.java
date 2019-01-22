@@ -2,7 +2,7 @@ package com.ylli.api.third.pay.service;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
@@ -62,7 +62,7 @@ public class CntService {
     WalletService walletService;
 
     @Autowired
-    AppService appService;
+    RateService appService;
 
     @Autowired
     MchKeyService mchKeyService;

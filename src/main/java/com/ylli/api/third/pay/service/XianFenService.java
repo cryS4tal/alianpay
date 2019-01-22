@@ -412,58 +412,6 @@ public class XianFenService {
         return str.toUpperCase();
     }
 
-    @Transactional
-    public Object orderQuery(String sysOrderId) throws Exception {
-        //TODO sysOrderId CHECK.
-
-
-        String str = xfClient.orderQuery(sysOrderId);
-
-        XfPaymentResponse response = new Gson().fromJson(str, XfPaymentResponse.class);
-        //加密后的业务数据
-        String bizData = UcfForOnline.decryptData(str, mer_pri_key);
-
-        if (response.code.equals("99000")) {
-
-            //交易成功返回订单数据
-            Data data = new Gson().fromJson(bizData, Data.class);
-
-            String superOrderId = data.tradeNo;
-            if (data.tradeTime != null) {
-                //bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYYMMDDhhmmss").parse(data.tradeTime).getTime());
-            }
-
-            if (data.status != null && data.status.toUpperCase().equals("S")) {
-                //
-
-
-            }
-            if (data.status != null && data.status.toUpperCase().equals("F")) {
-                //
-
-
-            }
-            if (data.status != null && data.status.toUpperCase().equals("I")) {
-                //
-
-            }
-
-            //兼容status 没有返回值.
-            //具体情况未知
-
-            return null;
-        } else if (response.code.equals("99001")) {
-
-            //return getResJson(response.code, response.message, null);
-            return null;
-        } else {
-            //通用错误返回.
-            //具体原因 @see 先锋支付网关返回码.
-            //对下游服务商隐藏先锋返回message，统一返回请求失败
-            //return getResJson(response.code, "请求失败", null);
-            return null;
-        }
-    }
 
     /**
      * 系统内部提现使用.

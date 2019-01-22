@@ -78,7 +78,7 @@ public class CNTCashService {
                 || !("CNT").equals(channelService.getCurrentChannel(auth.primaryId).code)) {
             return ResponseEnum.A998("非法的请求");
         }
-        walletService.rechargeConvert(auth.primaryId, auth.subId);
+        //walletService.rechargeConvert(auth.primaryId, auth.subId);
 
         return new Response("A000", "成功");
     }

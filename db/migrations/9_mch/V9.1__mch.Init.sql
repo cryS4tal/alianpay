@@ -57,3 +57,13 @@ CREATE TABLE t_user_base (
   UNIQUE KEY `u_business_license` (`business_license`),
   KEY `n_state` (`state`)
 );
+
+CREATE TABLE t_mch_sub (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  mch_id BIGINT COMMENT '用户id',
+  sub_id BIGINT NOT NULL COMMENT '子账户id',
+  type INTEGER NOT NULL COMMENT '代理商类型：1-支付，2-代付',
+  create_time DATETIME NOT NULL DEFAULT now(),
+  modify_time DATETIME NOT NULL DEFAULT now(),
+  UNIQUE KEY `u_mch_app` (`mch_id`,`sub_id`)
+);

@@ -6,7 +6,7 @@ import com.google.common.base.Strings;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.mapper.MchBaseMapper;
-import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
@@ -58,7 +58,7 @@ public class QrTransferService {
     QrPendInfoMapper qrPendInfoMapper;
 
     @Autowired
-    AppService appService;
+    RateService appService;
 
     @Autowired
     WalletService walletService;

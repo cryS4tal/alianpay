@@ -1,6 +1,8 @@
 package com.ylli.api.wallet.service;
 
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.mch.model.MchSub;
+import com.ylli.api.mch.service.MchSubService;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
@@ -21,6 +23,9 @@ public class WalletService {
     @Autowired
     WalletMapper walletMapper;
 
+    @Autowired
+    MchSubService mchSubService;
+
     public Wallet getOwnWallet(Long mchId) {
         return walletMapper.selectByPrimaryKey(mchId);
     }
@@ -39,6 +44,11 @@ public class WalletService {
         wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
         walletMapper.updateByPrimaryKeySelective(wallet);
         // todo 加入钱包金额变动 关联 账单日志表。  wallet log
+
+        //加入分润计算.
+        MchSub sup = mchSubService.getPaySupper(mchId);
+        // TODO。
+
     }
 
     @Transactional
@@ -157,7 +167,7 @@ public class WalletService {
      * 适用 cnt 商户余额转换
      * 将子账户subId 余额 转换至 主账户 primaryId
      */
-    public void rechargeConvert(Long primaryId, Long subId) {
+    /*public void rechargeConvert(Long primaryId, Long subId) {
         Wallet wallet = getOwnWallet(primaryId);
 
         Wallet decr = getOwnWallet(subId);
@@ -168,5 +178,5 @@ public class WalletService {
         decr.total = decr.recharge + decr.pending + decr.bonus;
         walletMapper.updateByPrimaryKeySelective(wallet);
         walletMapper.updateByPrimaryKeySelective(decr);
-    }
+    }*/
 }

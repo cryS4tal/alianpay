@@ -47,7 +47,7 @@ public class MchBaseService {
     public Object audit(Long mchId, Integer state) {
         MchBase userBase = mchBaseMapper.selectByMchId(mchId);
         if (userBase == null) {
-            throw new AwesomeException(Config.ERROR_USER_NOT_FOUND);
+            throw new AwesomeException(Config.ERROR_MCH_NOT_FOUND);
         }
         userBase.state = state;
         userBase.modifyTime = Timestamp.from(Instant.now());
@@ -103,9 +103,15 @@ public class MchBaseService {
         return mchBaseMapper.selectByPrimaryKey(userBase);
     }
 
+    @Transactional
     public Object setAgency(Long mchId) {
         MchBase mchBase = mchBaseMapper.selectByMchId(mchId);
-
-        return null;
+        if (mchBase == null) {
+            throw new AwesomeException(Config.ERROR_MCH_NOT_FOUND);
+        }
+        //TODO 回滚操作.
+        mchBase.isAgency = !mchBase.isAgency;
+        mchBaseMapper.updateByPrimaryKeySelective(mchBase);
+        return mchBase;
     }
 }

@@ -12,7 +12,7 @@ import static com.ylli.api.pay.service.PayService.NATIVE;
 import static com.ylli.api.pay.service.PayService.WAP;
 import static com.ylli.api.pay.service.PayService.WX;
 import com.ylli.api.third.pay.Config;
-import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -41,7 +41,7 @@ public class YfbService {
     WalletService walletService;
 
     @Autowired
-    AppService appService;
+    RateService appService;
 
     @Autowired
     PayService payService;

@@ -5,7 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.mapper.MchBaseMapper;
-import com.ylli.api.mch.service.AppService;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.Config;
 import com.ylli.api.pay.mapper.BillMapper;
@@ -56,7 +56,7 @@ public class BillService {
     WalletService walletService;
 
     @Autowired
-    AppService appService;
+    RateService appService;
 
     @Autowired
     RedisUtil redisUtil;
@@ -115,7 +115,7 @@ public class BillService {
         baseBill.superOrderId = bill.superOrderId;
         baseBill.money = bill.money;
         baseBill.mchCharge = bill.payCharge;
-        baseBill.payType = typeToString(bill.payType, bill.tradeType);
+        baseBill.payType = typeToString(bill.payType);
         baseBill.state = bill.status;
         if (bill.tradeTime != null) {
             baseBill.tradeTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime);
@@ -136,17 +136,12 @@ public class BillService {
         return sumAndCount;
     }
 
-    public String typeToString(String payType, String tradeType) {
-        if (Strings.isNullOrEmpty(tradeType)) {
-            tradeType = PayService.NATIVE;
-        }
+    public String typeToString(String payType) {
         return new StringBuffer()
                 .append(payType)
-                .append(tradeType)
                 .toString()
                 .replace(PayService.ALI, "支付宝")
-                .replace(PayService.WX, "微信")
-                .replace(PayService.NATIVE, "");
+                .replace(PayService.WX, "微信");
     }
 
 
@@ -253,9 +248,7 @@ public class BillService {
         bill.sysOrderId = redisUtil.generateSysOrderId();
         bill.mchOrderId = mchOrderId;
         bill.channelId = channelId;
-        // todo 应用模块 关联.
-        bill.appId = appService.getAppId(payType, tradeType);
-
+        bill.appId = appService.getAppId(payType);
         bill.money = money;
         bill.status = Bill.NEW;
         bill.reserve = reserve;

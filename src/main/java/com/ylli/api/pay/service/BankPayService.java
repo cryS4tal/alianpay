@@ -297,7 +297,7 @@ public class BankPayService {
         }
     }
 
-    public Object getBankPayRate(Long mchId) {
+    public MchBankPayRate getBankPayRate(Long mchId) {
         return mchBankPayRateMapper.selectByMchId(mchId);
     }
 }

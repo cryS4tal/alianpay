@@ -17,7 +17,7 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             1, "权限不足");
 
-    public static final ErrorCode ERROR_USER_NOT_FOUND
+    public static final ErrorCode ERROR_MCH_NOT_FOUND
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             2, "用户不存在");
 
@@ -36,6 +36,18 @@ public class Config {
     public static final ErrorCode ERROR_MCH_DISABLE
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             6, "用户已被禁用.");
+
+    public static final ErrorCode ERROR_SUB_FORBIDDEN
+            = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
+            7, "子账户禁止成为代理商，当前商户代理商：%s");
+
+    public static final ErrorCode ERROR_SUB_BAD_REQUEST
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            8, "当前商户以被设置为代理商：%s 的子账户");
+
+    public static final ErrorCode ERROR_FORMAT
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            9, "设置子账户失败：%s");
 
 
     /**
