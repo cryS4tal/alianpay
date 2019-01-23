@@ -18,9 +18,13 @@ public class MchSubController {
     @Autowired
     MchSubService mchSubService;
 
+    //TODO 权限控制
+    //TODO
+
+
     @PostMapping
     public void addSub(@RequestBody MchSub mchSub) {
-        ServiceUtil.checkNotEmptyIgnore(mchSub, true);
+        ServiceUtil.checkNotEmptyIgnore(mchSub, true,"alipayRate","wxRate","bankRate");
         mchSubService.addSub(mchSub.mchId, mchSub.subId, mchSub.type);
     }
 }

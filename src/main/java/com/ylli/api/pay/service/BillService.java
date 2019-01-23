@@ -176,7 +176,7 @@ public class BillService {
                     billMapper.updateByPrimaryKeySelective(bill);
 
                     //钱包金额变动。
-                    walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                    walletService.incr(bill.mchId, bill.money, bill.payCharge, bill.payType);
                 }
             } else if (res.code.equals("fail")) {
                 if (bill.status == Bill.NEW) {
@@ -213,7 +213,7 @@ public class BillService {
                         billMapper.updateByPrimaryKeySelective(bill);
 
                         //钱包金额变动。
-                        walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                        walletService.incr(bill.mchId, bill.money, bill.payCharge, bill.payType);
                     }
                 }
                 //其他情况 暂时不做处理.
@@ -280,7 +280,7 @@ public class BillService {
             billMapper.updateByPrimaryKeySelective(bill);
 
             //钱包金额变动。
-            walletService.incr(bill.mchId, bill.money - bill.payCharge);
+            walletService.incr(bill.mchId, bill.money, bill.payCharge, bill.payType);
 
             //加入异步通知下游商户系统
             //params jsonStr.

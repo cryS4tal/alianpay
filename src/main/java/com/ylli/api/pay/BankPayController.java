@@ -44,6 +44,9 @@ public class BankPayController {
         if (!enable) {
             return ResponseEnum.A999(null, null);
         }
+        if (bankPayOrder.mchId == null) {
+            return ResponseEnum.A003("mch_id not empty, or please check Content-Type is application/json ?", null);
+        }
         if (!accountService.isActive(bankPayOrder.mchId)) {
             return ResponseEnum.A100(null, null);
         }
@@ -52,6 +55,9 @@ public class BankPayController {
 
     @PostMapping("/order/query")
     public Object orderQuery(@RequestBody OrderQueryReq orderQuery) throws Exception {
+        if (orderQuery.mchId == null) {
+            return ResponseEnum.A003("mch_id not empty, or please check Content-Type is application/json ?", null);
+        }
         if (!accountService.isActive(orderQuery.mchId)) {
             return ResponseEnum.A100(null, null);
         }

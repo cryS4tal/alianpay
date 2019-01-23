@@ -330,6 +330,9 @@ public class XianFenService {
                             payOrder.status = BankPayOrder.FINISH;
                             bankPayOrderMapper.updateByPrimaryKeySelective(payOrder);
 
+                            //加入代付分润计算
+                            walletService.incrBankBonus(payOrder.mchId, payOrder.money);
+
                             //发送异步通知
                             if (!Strings.isNullOrEmpty(payOrder.notifyUrl)) {
                                 String params1 = generateRes(payOrder.money, payOrder.mchOrderId, payOrder.sysOrderId, payOrder.status, payOrder.tradeTime);

@@ -8,7 +8,6 @@ import com.ylli.api.mch.model.MchSub;
 import com.ylli.api.pay.model.MchBankPayRate;
 import com.ylli.api.pay.service.BankPayService;
 import com.ylli.api.pay.service.BillService;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,21 +36,25 @@ public class MchSubService {
     @Transactional
     public void addSub(Long mchId, Long subId, Integer type) {
 
+        if (mchId.longValue() == subId.longValue()) {
+            throw new AwesomeException(Config.ERROR_FORMAT.format("代理商不能设置自己为子账户"));
+        }
+
         //mch_id check.
         MchSub mch = new MchSub();
         mch.subId = mchId;
         mch.type = type;
-        List<MchSub> list = mchSubMapper.select(mch);
-        if (list.size() > 0) {
-            throw new AwesomeException(Config.ERROR_SUB_FORBIDDEN.format(list.get(0).mchId));
+        mch = mchSubMapper.selectOne(mch);
+        if (mch != null) {
+            throw new AwesomeException(Config.ERROR_SUB_FORBIDDEN.format(mch.mchId));
         }
         //sub_id check
         MchSub sub = new MchSub();
         sub.subId = subId;
-        mch.type = type;
-        List<MchSub> list1 = mchSubMapper.select(sub);
-        if (list1.size() > 0) {
-            throw new AwesomeException(Config.ERROR_SUB_BAD_REQUEST.format(list1.get(0).mchId));
+        sub.type = type;
+        sub = mchSubMapper.selectOne(sub);
+        if (sub != null) {
+            throw new AwesomeException(Config.ERROR_SUB_BAD_REQUEST.format(sub.mchId));
         }
 
         MchSub exist = new MchSub();
@@ -66,41 +69,44 @@ public class MchSubService {
                 Long wx = sysAppMapper.selectByCode("wx").id;
 
                 //支付宝
-                Integer mchAlipayRate = rateService.getRate(mchId, alipay);
+                Integer supAlipayRate = rateService.getRate(mchId, alipay);
                 Integer subAlipayRate = rateService.getRate(subId, alipay);
-                if (mchAlipayRate > subAlipayRate) {
-                    throw new AwesomeException(Config.ERROR_FORMAT.format("代理商：" + mchId + " 支付宝费率(" + String.format("%.2f", (mchAlipayRate / 100.0)) + "%" + ") 大于子账户支付宝费率（" + String.format("%.2f", (subAlipayRate / 100.0)) + "）"));
+                if (supAlipayRate > subAlipayRate) {
+                    throw new AwesomeException(Config.ERROR_FORMAT.format("代理商：" + mchId + " 支付宝费率(" + String.format("%.2f", (supAlipayRate / 100.0)) + "%" + ") 大于子账户支付宝费率（" + String.format("%.2f", (subAlipayRate / 100.0)) + "%）"));
                 }
                 //微信
-                Integer mchWxRate = rateService.getRate(mchId, wx);
+                Integer supWxRate = rateService.getRate(mchId, wx);
                 Integer subWxRate = rateService.getRate(subId, wx);
-                if (mchWxRate > subWxRate) {
-                    throw new AwesomeException(Config.ERROR_FORMAT.format("代理商：" + mchId + " 微信费率(" + String.format("%.2f", (mchWxRate / 100.0)) + "%" + ") 大于子账户微信费率（" + String.format("%.2f", (subWxRate / 100.0)) + "）"));
+                if (supWxRate > subWxRate) {
+                    throw new AwesomeException(Config.ERROR_FORMAT.format("代理商：" + mchId + " 微信费率(" + String.format("%.2f", (supWxRate / 100.0)) + "%" + ") 大于子账户微信费率（" + String.format("%.2f", (subWxRate / 100.0)) + "%）"));
                 }
                 exist = new MchSub();
                 exist.mchId = mchId;
                 exist.subId = subId;
                 exist.type = type;
+                exist.alipayRate = subAlipayRate - supAlipayRate;
+                exist.wxRate = subWxRate - supWxRate;
                 mchSubMapper.insertSelective(exist);
 
             } else if (bankPay.intValue() == type) {
                 //代付
-                MchBankPayRate mchRate = bankPayService.getBankPayRate(mchId);
+                MchBankPayRate supRate = bankPayService.getBankPayRate(mchId);
                 MchBankPayRate subRate = bankPayService.getBankPayRate(subId);
-                if (mchRate == null) {
+                if (supRate == null) {
                     throw new AwesomeException(Config.ERROR_FORMAT.format("请先设置代理商：" + mch + " 代付结算费率"));
                 }
                 if (subRate == null) {
                     throw new AwesomeException(Config.ERROR_FORMAT.format("请先设置子账户:" + subId + " 代付结算费率"));
                 }
-                if (mchRate.rate > subRate.rate) {
-                    throw new AwesomeException(Config.ERROR_FORMAT.format("代理商:" + mchId + "代付费率（" + String.format("%.2f", (mchRate.rate / 100.0)) + "%）大于子账户代付费率（" + String.format("%.2f", (subRate.rate / 100.0)) + "%）"));
+                if (supRate.rate > subRate.rate) {
+                    throw new AwesomeException(Config.ERROR_FORMAT.format("代理商:" + mchId + "代付费率（" + String.format("%.2f", (supRate.rate / 100.0)) + "%）大于子账户代付费率（" + String.format("%.2f", (subRate.rate / 100.0)) + "%）"));
                 }
 
                 exist = new MchSub();
                 exist.mchId = mchId;
                 exist.subId = subId;
                 exist.type = type;
+                exist.bankRate = subRate.rate - supRate.rate;
                 mchSubMapper.insertSelective(exist);
 
             } else {
@@ -114,6 +120,13 @@ public class MchSubService {
         MchSub mchSub = new MchSub();
         mchSub.subId = mchId;
         mchSub.type = pay;
+        return mchSubMapper.selectOne(mchSub);
+    }
+
+    public MchSub getBankSupper(Long mchId) {
+        MchSub mchSub = new MchSub();
+        mchSub.subId = mchId;
+        mchSub.type = bankPay;
         return mchSubMapper.selectOne(mchSub);
     }
 }

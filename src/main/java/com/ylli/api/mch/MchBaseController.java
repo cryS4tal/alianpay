@@ -68,10 +68,6 @@ public class MchBaseController {
         return mchBaseService.getBase(mchId, state, mchName, name, phone, businessLicense, offset, limit);
     }
 
-    @PutMapping("/agency")
-    public Object setAgency(@AwesomeParam Long mchId) {
-        return mchBaseService.setAgency(mchId);
-    }
 
     /**
      * 管理员基础信息审核

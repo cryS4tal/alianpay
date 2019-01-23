@@ -103,15 +103,4 @@ public class MchBaseService {
         return mchBaseMapper.selectByPrimaryKey(userBase);
     }
 
-    @Transactional
-    public Object setAgency(Long mchId) {
-        MchBase mchBase = mchBaseMapper.selectByMchId(mchId);
-        if (mchBase == null) {
-            throw new AwesomeException(Config.ERROR_MCH_NOT_FOUND);
-        }
-        //TODO 回滚操作.
-        mchBase.isAgency = !mchBase.isAgency;
-        mchBaseMapper.updateByPrimaryKeySelective(mchBase);
-        return mchBase;
-    }
 }

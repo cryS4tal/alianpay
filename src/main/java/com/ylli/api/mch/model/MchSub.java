@@ -20,6 +20,15 @@ public class MchSub {
     //代理商类型：1-支付，2-代付
     public Integer type;
 
+    //支付宝费率差
+    public Integer alipayRate;
+
+    //微信费率差
+    public Integer wxRate;
+
+    //代付费率差
+    public Integer bankRate;
+
     public Timestamp createTime;
 
     public Timestamp modifyTime;

@@ -35,8 +35,8 @@ ADD COLUMN `code_name`  varchar(64) NULL AFTER `auth_id`;
 
 
 /* 待执行 */
-ALTER TABLE `t_user_base`
-ADD COLUMN `is_agency`  tinyint(4) NULL DEFAULT 0 AFTER `other_images`;
+/*ALTER TABLE `t_user_base`
+ADD COLUMN `is_agency`  tinyint(4) NULL DEFAULT 0 AFTER `other_images`;*/
 
 ALTER TABLE `t_sys_app`
 ADD COLUMN `code`  varchar(32) NULL AFTER `app_name`;
@@ -46,9 +46,13 @@ CREATE TABLE t_mch_sub (
   mch_id BIGINT COMMENT '用户id',
   sub_id BIGINT NOT NULL COMMENT '子账户id',
   type INTEGER NOT NULL COMMENT '代理商类型：1-支付，2-代付',
+  alipay_rate INTEGER  COMMENT '支付宝费率差',
+  wx_rate INTEGER  COMMENT '微信费率差',
+  bank_rate INTEGER  COMMENT '代付费率差',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now(),
-  UNIQUE KEY `t_mch_sub` (`mch_id`,`sub_id`,`type`)
+  UNIQUE KEY `t_mch_sub_type` (`mch_id`,`sub_id`,`type`),
+  UNIQUE KEY `t_mch_sub` (`sub_id`,`type`)
 );
 
 UPDATE t_sys_app SET app_name = '支付宝',`code` = 'alipay' WHERE id = 1;

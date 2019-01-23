@@ -216,7 +216,7 @@ public class QrTransferService {
             billMapper.updateByPrimaryKeySelective(bill);
 
             //钱包金额变动。
-            walletService.incr(bill.mchId, money - bill.payCharge);
+            walletService.incr(bill.mchId, money, bill.payCharge, bill.payType);
 
             //加入异步通知下游商户系统
             //params jsonStr.

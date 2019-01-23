@@ -60,9 +60,6 @@ public class MchBase {
     //审核状态
     public Integer state;
 
-    //是否为代理商
-    public Boolean isAgency;
-
     public Timestamp createTime;
 
     public Timestamp modifyTime;

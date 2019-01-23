@@ -167,7 +167,7 @@ public class GPayService {
                     billMapper.updateByPrimaryKeySelective(bill);
 
                     //钱包金额变动。
-                    walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                    walletService.incr(bill.mchId, bill.money, bill.payCharge, bill.payType);
                 }
 
             } else {

@@ -7,8 +7,6 @@ import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.enums.Version;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Bill;
-import com.ylli.api.pay.model.ConfirmResponse;
-import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
@@ -119,7 +117,7 @@ public class PayService {
     @Value("${pay.eazy.apihost}")
     public String EAZY_HOST;
 
-    public static String successCode = "0000";
+    //public static String successCode = "0000";
 
     /**
      * 中央调度server. 根据情况选择不同通道
@@ -521,10 +519,10 @@ public class PayService {
         return !SignUtil.generateSignature(map, secretKey).equals(order.sign.toUpperCase());
     }
 
-    public boolean isSignValid(OrderConfirm confirm, String secretKey) throws Exception {
+    /*public boolean isSignValid(OrderConfirm confirm, String secretKey) throws Exception {
         Map<String, String> map = SignUtil.objectToMap(confirm);
         return !SignUtil.generateSignature(map, secretKey).equals(confirm.sign.toUpperCase());
-    }
+    }*/
 
     public String successSign(String code, String message, String type, Object data, String key) throws Exception {
         Response response = new Response(code, message, data);
@@ -641,7 +639,7 @@ public class PayService {
         }
     }
 
-    public Object payConfirm(OrderConfirm confirm, Boolean isMch) throws Exception {
+    /*public Object payConfirm(OrderConfirm confirm, Boolean isMch) throws Exception {
 
         if (isMch) {
             String secretKey = mchKeyService.getKeyById(confirm.mchId);
@@ -670,7 +668,7 @@ public class PayService {
         } catch (Exception e) {
             return new Response("A010", "失败,当前服务状态异常。");
         }
-    }
+    }*/
 
     public Object manualNotify(String mchOrderId) throws Exception {
         Bill bill = billService.selectByMchOrderId(mchOrderId);

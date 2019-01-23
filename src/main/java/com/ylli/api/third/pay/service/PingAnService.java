@@ -486,6 +486,9 @@ public class PingAnService {
                 bankPayOrder.tradeTime = Timestamp.from(Instant.now());
                 bankPayOrderMapper.updateByPrimaryKeySelective(bankPayOrder);
 
+                //加入代付分润计算
+                walletService.incrBankBonus(bankPayOrder.mchId, bankPayOrder.money);
+
                 //发送异步通知
                 if (!Strings.isNullOrEmpty(bankPayOrder.notifyUrl)) {
                     String params = generateRes(bankPayOrder.money, bankPayOrder.mchOrderId, bankPayOrder.sysOrderId, bankPayOrder.status, bankPayOrder.tradeTime);

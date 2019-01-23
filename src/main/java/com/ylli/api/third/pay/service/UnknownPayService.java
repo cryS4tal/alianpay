@@ -1,12 +1,13 @@
 package com.ylli.api.third.pay.service;
 
+import com.google.common.base.Strings;
+import com.ylli.api.mch.service.RateService;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.mch.service.RateService;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -86,21 +87,22 @@ public class UnknownPayService {
                 billMapper.updateByPrimaryKeySelective(bill);
 
                 //钱包金额变动。
-                walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                walletService.incr(bill.mchId, bill.money, bill.payCharge, bill.payType);
             }
 
-            //加入异步通知下游商户系统
-            //params jsonStr.
-            String params = payService.generateRes(
-                    bill.money.toString(),
-                    bill.mchOrderId,
-                    bill.sysOrderId,
-                    bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
-                    bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
-                    bill.reserve);
+            if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
+                //加入异步通知下游商户系统
+                //params jsonStr.
+                String params = payService.generateRes(
+                        bill.money.toString(),
+                        bill.mchOrderId,
+                        bill.sysOrderId,
+                        bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
+                        bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
+                        bill.reserve);
 
-            payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
-
+                payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+            }
             /*if (bill.isSuccess != null && bill.isSuccess) {
                 return "success";
             } else {

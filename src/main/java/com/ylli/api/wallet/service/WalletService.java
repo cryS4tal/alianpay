@@ -3,6 +3,7 @@ package com.ylli.api.wallet.service;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.model.MchSub;
 import com.ylli.api.mch.service.MchSubService;
+import com.ylli.api.pay.service.PayService;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
@@ -37,18 +38,36 @@ public class WalletService {
         walletMapper.insertSelective(wallet);
     }
 
+    /**
+     * 支付成功。钱包余额到账
+     *
+     * @param mchId       商户id，对于有代理商的商户会计算代理商的分润
+     * @param orderMoney  下单金额
+     * @param chargeMoney 手续费
+     * @param payType     支付类型
+     */
     @Transactional
-    public void incr(Long mchId, int money) {
+    public void incr(Long mchId, Integer orderMoney, Integer chargeMoney, String payType) {
         Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
-        wallet.recharge = wallet.recharge + money;
+        wallet.recharge = wallet.recharge + orderMoney - chargeMoney;
         wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
         walletMapper.updateByPrimaryKeySelective(wallet);
-        // todo 加入钱包金额变动 关联 账单日志表。  wallet log
 
         //加入分润计算.
         MchSub sup = mchSubService.getPaySupper(mchId);
-        // TODO。
-
+        if (sup != null) {
+            Wallet wallet1 = walletMapper.selectByPrimaryKey(sup.mchId);
+            if (PayService.ALI.equals(payType)) {
+                wallet1.bonus = orderMoney * sup.alipayRate / 10000;
+            } else if (PayService.WX.equals(payType)) {
+                wallet1.bonus = orderMoney * sup.wxRate / 10000;
+            } else {
+                //预留其他情况.
+                wallet1.bonus = 0;
+            }
+            wallet1.total = wallet1.recharge + wallet1.pending + wallet1.bonus;
+            walletMapper.updateByPrimaryKeySelective(wallet1);
+        }
     }
 
     @Transactional
@@ -161,6 +180,23 @@ public class WalletService {
         wallet.reservoir = wallet.reservoir + money;
         walletMapper.updateByPrimaryKeySelective(wallet);
         return wallet;
+    }
+
+    /**
+     * 代付分润计算.
+     *
+     * @param mchId
+     * @param money
+     */
+    @Transactional
+    public void incrBankBonus(Long mchId, Integer money) {
+        MchSub sup = mchSubService.getBankSupper(mchId);
+        if (sup != null) {
+            Wallet wallet = walletMapper.selectByPrimaryKey(sup.mchId);
+            wallet.bonus = money * sup.bankRate / 10000;
+            wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
+            walletMapper.updateByPrimaryKeySelective(wallet);
+        }
     }
 
     /**

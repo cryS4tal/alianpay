@@ -3,7 +3,6 @@ package com.ylli.api.pay;
 import com.ylli.api.auth.service.AccountService;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.pay.model.BaseOrder;
-import com.ylli.api.pay.model.OrderConfirm;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.service.PayService;
@@ -40,6 +39,9 @@ public class PayController {
         if (!enable) {
             return ResponseEnum.A999(null, null);
         }
+        if (baseOrder.mchId == null) {
+            return ResponseEnum.A003("mch_id not empty, or please check Content-Type is application/json ?", null);
+        }
         if (!accountService.isActive(baseOrder.mchId)) {
             return ResponseEnum.A100(null, null);
         }
@@ -48,6 +50,9 @@ public class PayController {
 
     @PostMapping("/order/query")
     public Object orderQuery(@RequestBody OrderQueryReq orderQuery) throws Exception {
+        if (orderQuery.mchId == null) {
+            return ResponseEnum.A003("mch_id not empty, or please check Content-Type is application/json ?", null);
+        }
         if (!accountService.isActive(orderQuery.mchId)) {
             return ResponseEnum.A100(null, null);
         }
@@ -66,24 +71,24 @@ public class PayController {
     /**
      * 用于 version = 1.1 (cnt支付) 商户 - 手动确认支付状态。
      */
-    @PostMapping("/confirm")
+    /*@PostMapping("/confirm")
     public Object payConfirm(@RequestBody OrderConfirm confirm) throws Exception {
         if (!accountService.isActive(confirm.mchId)) {
             return ResponseEnum.A100(null, null);
         }
         return payService.payConfirm(confirm, true);
-    }
+    }*/
 
     /**
      * 用于 version = 1.1 (cnt支付) 系统- 手动确认支付状态。
      */
-    @PostMapping("/confirm/sys")
+    /*@PostMapping("/confirm/sys")
     public Object sysPayConfirm(@RequestBody OrderConfirm confirm) throws Exception {
         if (!accountService.isActive(confirm.mchId)) {
             return ResponseEnum.A100(null, null);
         }
         return payService.payConfirm(confirm, false);
-    }
+    }*/
 
     /**
      * 测试，手动给商户发起回调

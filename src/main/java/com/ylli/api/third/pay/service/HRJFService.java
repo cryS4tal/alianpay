@@ -71,35 +71,37 @@ public class HRJFService {
                     bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYY/MM/DD hh:mm:ss").parse(systime).getTime());
                     bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                     bill.status = Bill.FINISH;
-                    //todo msg暂时先记录实际交易金额/元 两位小数
+
                     bill.msg = ovalue;
                     billMapper.updateByPrimaryKeySelective(bill);
 
                     //钱包金额变动。
-                    walletService.incr(bill.mchId, bill.money - bill.payCharge);
+                    walletService.incr(bill.mchId, bill.money, bill.payCharge, bill.payType);
                 }
 
             } else {
                 bill.superOrderId = sysorderid;
                 bill.tradeTime = new Timestamp(new SimpleDateFormat("YYYY/MM/DD hh:mm:ss").parse(systime).getTime());
                 bill.status = Bill.FAIL;
-                //todo msg暂时先记录实际交易金额/元 两位小数
+
                 bill.msg = ovalue;
                 //bill.msg = msg;
                 billMapper.updateByPrimaryKeySelective(bill);
             }
 
-            //加入异步通知下游商户系统
-            //params jsonStr.
-            String params = payService.generateRes(
-                    bill.money.toString(),
-                    bill.mchOrderId,
-                    bill.sysOrderId,
-                    bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
-                    bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
-                    bill.reserve);
+            if (!Strings.isNullOrEmpty(bill.notifyUrl)) {
+                //加入异步通知下游商户系统
+                //params jsonStr.
+                String params = payService.generateRes(
+                        bill.money.toString(),
+                        bill.mchOrderId,
+                        bill.sysOrderId,
+                        bill.status == Bill.FINISH ? "S" : bill.status == Bill.FAIL ? "F" : "I",
+                        bill.tradeTime == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(bill.tradeTime),
+                        bill.reserve);
 
-            payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+                payClient.sendNotify(bill.id, bill.notifyUrl, params, true);
+            }
 
             /*if (bill.isSuccess != null && bill.isSuccess) {
                 return "opstate=0";
