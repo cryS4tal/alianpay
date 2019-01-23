@@ -99,8 +99,15 @@ public class RateService {
             exist.mchId = item.mchId;
             exist = mchRateMapper.selectOne(exist);
 
-            // TODO rate check
+            if (exist == null) {
+                mchRateMapper.insertSelective(item);
+            } else {
+                item.id = exist.id;
+                mchRateMapper.updateByPrimaryKeySelective(item);
+            }
+
             /**
+             * rate check
              * 是否是代理商？yes 更新所有 mch_agency 费率差。出现小于0 throw
              *
              * 是否子账户？ yes 更新所有 mch_agency 费率差。出现小于0 throw
@@ -112,34 +119,37 @@ public class RateService {
             if (subs.size() > 0) {
                 //item.appId =1 支付宝，= 2 微信
                 subs.stream().forEach(sub -> {
-                   //更新支付宝，微信费率差
+                    //更新支付宝，微信费率差
+                    MchRate subRate = new MchRate();
+                    subRate.mchId = sub.subId;
+                    subRate.appId = item.appId;
+                    subRate = mchRateMapper.selectOne(subRate);
+
                     if (item.appId == 1) {
                         //支付宝
-
+                        sub.alipayRate = subRate.rate - item.rate;
+                        if (sub.alipayRate < 0) {
+                            throw new AwesomeException(Config.ERROR_FORMAT.format(new StringBuffer("当前子账户")
+                                    .append(subRate.mchId).append("支付宝费率")
+                                    .append(String.format("%.2f", (subRate.rate / 100.0))).append("%")
+                                    .append("大于代理商").append(item.mchId).append("支付宝费率")
+                                    .append(String.format("%.2f", (item.rate / 100.0))).append("%").toString()
+                            ));
+                        }
                     } else if (item.appId == 2) {
                         //微信
-
+                        sub.wxRate = mchRateMapper.selectOne(subRate).rate - item.rate;
+                        if (sub.wxRate < 0) {
+                            throw new AwesomeException(Config.ERROR_FORMAT.format(new StringBuffer("当前子账户")
+                                    .append(subRate.mchId).append("微信费率")
+                                    .append(String.format("%.2f", (subRate.rate / 100.0))).append("%")
+                                    .append("大于代理商").append(item.mchId).append("微信费率")
+                                    .append(String.format("%.2f", (item.rate / 100.0))).append("%").toString()
+                            ));
+                        }
                     }
-
-                    sub.alipayRate = 0 - item.rate;
-                    sub.wxRate = 0;
-
-                    if (true) {
-
-                    }
-                    if (true) {
-
-                    }
-
+                    mchAgencyMapper.updateByPrimaryKeySelective(sub);
                 });
-            }
-
-
-            if (exist == null) {
-                mchRateMapper.insertSelective(item);
-            } else {
-                item.id = exist.id;
-                mchRateMapper.updateByPrimaryKeySelective(item);
             }
             list.add(convert(item));
         }

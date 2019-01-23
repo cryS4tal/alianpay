@@ -47,7 +47,7 @@ public class Config {
 
     public static final ErrorCode ERROR_FORMAT
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            9, "设置子账户失败：%s");
+            9, "失败：%s");
 
 
     /**
