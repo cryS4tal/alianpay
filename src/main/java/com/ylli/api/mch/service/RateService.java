@@ -78,7 +78,7 @@ public class RateService {
         return sysAppMapper.selectAll();
     }
 
-    public List<MchAppDetail> setUserRate(Apps apps) {
+    public List<MchAppDetail> setMchRate(Apps apps) {
 
         List<MchAppDetail> list = new ArrayList<>();
         for (int i = 0; i < apps.apps.size(); i++) {

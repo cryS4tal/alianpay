@@ -23,8 +23,6 @@ public class MchAgencyController {
     @Autowired
     MchAgencyService mchAgencyService;
 
-    //TODO 切换费率
-
     @PostMapping
     public void addSub(@RequestBody MchAgency mchAgency) {
         ServiceUtil.checkNotEmptyIgnore(mchAgency, true, "alipayRate", "wxRate", "bankRate");

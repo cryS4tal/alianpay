@@ -60,7 +60,7 @@ public class Config {
          */
         public static final long MANAGE_AGENCY = BASE + 1;
 
-        public static final long MANAGE_APP = BASE + 2;
+        public static final long MANAGE_RATE = BASE + 2;
 
         //审核用户（代付）
         public static final long MANAGE_USER_BASE = BASE + 3;

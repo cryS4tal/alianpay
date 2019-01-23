@@ -4,7 +4,7 @@ VALUES (@pm_sys.manage_agency, @pm_type_sys, "代理商管理", "管理代理商
 
 -- 添加系统预置权限
 INSERT INTO t_permission (id, type, name, description)
-VALUES (@pm_sys.manage_app, @pm_type_sys, "商户应用管理", "管理商户应用");
+VALUES (@pm_sys.manage_rate, @pm_type_sys, "商户费率管理", "管理商户费率");
 
 -- 添加系统预置权限
 INSERT INTO t_permission (id, type, name, description)
