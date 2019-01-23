@@ -263,10 +263,10 @@ public class BankPayService {
         return ResponseEnum.A001(null, null);
     }
 
-    public DataList<BankPayOrder> getOrders(Long mchId, Integer status, String mchOrderId, String sysOrderId, String accName, Integer payType, Date tradeTime, Date startTime, Date endTime, int offset, int limit) {
+    public DataList<BankPayOrder> getOrders(List<Long> mchIds, Integer status, String mchOrderId, String sysOrderId, String accName, Integer payType, Date tradeTime, Date startTime, Date endTime, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
-        Page<BankPayOrder> page = (Page<BankPayOrder>) bankPayOrderMapper.getOrders(mchId, status, mchOrderId, sysOrderId, accName, payType, tradeTime, startTime, endTime);
+        Page<BankPayOrder> page = (Page<BankPayOrder>) bankPayOrderMapper.getOrders(mchIds, status, mchOrderId, sysOrderId, accName, payType, tradeTime, startTime, endTime);
         DataList<BankPayOrder> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();

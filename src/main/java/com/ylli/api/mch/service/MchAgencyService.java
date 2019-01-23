@@ -188,10 +188,22 @@ public class MchAgencyService {
         mchAgencyMapper.deleteByPrimaryKey(id);
     }
 
-    public boolean reg(List<Long> mchIds, long authId) {
+    public boolean regPay(List<Long> mchIds, long authId) {
         MchAgency mchAgency = new MchAgency();
         mchAgency.mchId = authId;
         mchAgency.type = pay;
+        List<Long> subs = mchAgencyMapper.select(mchAgency).stream().map(i -> i.subId).collect(Collectors.toList());
+        subs.add(authId);
+        if (subs.containsAll(mchIds)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean regBankPay(List<Long> mchIds, long authId) {
+        MchAgency mchAgency = new MchAgency();
+        mchAgency.mchId = authId;
+        mchAgency.type = bankPay;
         List<Long> subs = mchAgencyMapper.select(mchAgency).stream().map(i -> i.subId).collect(Collectors.toList());
         subs.add(authId);
         if (subs.containsAll(mchIds)) {

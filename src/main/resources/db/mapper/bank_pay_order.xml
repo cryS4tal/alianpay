@@ -7,8 +7,11 @@
         *
         FROM t_bank_pay_order
         <where>
-            <if test="mch_id != null">
-                mch_id = ${mch_id}
+            <if test="mch_ids != null">
+                mch_id IN
+                <foreach item="item" collection="mch_ids" open="(" close=")" separator=",">
+                    ${item}
+                </foreach>
             </if>
             <if test="status != null">
                 AND status = ${status}

@@ -47,12 +47,10 @@ public class BillController {
 
     @GetMapping
     public Object getBills(@AwesomeParam(required = false) List<Long> mchIds,
-                           //@AwesomeParam(required = false) Long mchId,
                            @AwesomeParam(required = false) Integer status,
                            @AwesomeParam(required = false) String mchOrderId,
                            @AwesomeParam(required = false) String sysOrderId,
                            @AwesomeParam(required = false) String payType,
-                           //@AwesomeParam(required = false) String tradeType,
                            @AwesomeParam(required = false) AwesomeDateTime tradeTime,
                            @AwesomeParam(required = false) AwesomeDateTime startTime,
                            @AwesomeParam(required = false) AwesomeDateTime endTime,
@@ -67,7 +65,7 @@ public class BillController {
             if (mchIds.size() == 1 && authSession.getAuthId() == mchIds.get(0)) {
                 break;
             }
-            if (mchAgencyService.reg(mchIds, authSession.getAuthId())) {
+            if (mchAgencyService.regPay(mchIds, authSession.getAuthId())) {
                 break;
             }
             permissionService.permissionDeny();
@@ -84,12 +82,9 @@ public class BillController {
 
     @GetMapping("/export")
     public void exportBills(@AwesomeParam(required = false) List<Long> mchIds,
-                            //@AwesomeParam(required = false) Long mchId,
-                            //@AwesomeParam(required = false) Integer status,
                             @AwesomeParam(required = false) String mchOrderId,
                             @AwesomeParam(required = false) String sysOrderId,
                             @AwesomeParam(required = false) String payType,
-                            //@AwesomeParam(required = false) String tradeType,
                             @AwesomeParam(required = false) AwesomeDateTime tradeTime,
                             @AwesomeParam(required = false) AwesomeDateTime startTime,
                             @AwesomeParam(required = false) AwesomeDateTime endTime,

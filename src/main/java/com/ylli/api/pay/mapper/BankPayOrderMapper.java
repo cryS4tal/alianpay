@@ -14,7 +14,7 @@ public interface BankPayOrderMapper extends Mapper<BankPayOrder> {
     @Select("SELECT * FROM t_bank_pay_order WHERE mch_order_id = #{mch_order_id}")
     BankPayOrder selectByMchOrderId(@Param("mch_order_id") String mchOrderId);
 
-    List<BankPayOrder> getOrders(@Param("mch_id") Long mchId,
+    List<BankPayOrder> getOrders(@Param("mch_ids") List<Long> mchIds,
                                  @Param("status") Integer status,
                                  @Param("mch_order_id") String mchOrderId,
                                  @Param("sys_order_id") String sysOrderId,
