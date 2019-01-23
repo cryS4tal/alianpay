@@ -25,7 +25,8 @@ public class MchAgencyController {
 
     @PostMapping
     public void addSub(@RequestBody MchAgency mchAgency) {
-        ServiceUtil.checkNotEmptyIgnore(mchAgency, true, "alipayRate", "wxRate", "bankRate");
+        ServiceUtil.checkNotEmptyIgnore(mchAgency, true, "alipayRate", "wxRate", "bankRate", "mchName",
+                "subName", "supAlipayRate", "subAlipayRate", "supWxRate", "subWxRate", "supRate", "subRate");
         mchAgencyService.addSub(mchAgency.mchId, mchAgency.subId, mchAgency.type);
     }
 

@@ -10,7 +10,6 @@ import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.mapper.MchRateMapper;
 import com.ylli.api.mch.mapper.SysAppMapper;
 import com.ylli.api.mch.model.Apps;
-import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.mch.model.MchRate;
 import com.ylli.api.mch.model.MchRateDetail;
 import com.ylli.api.mch.model.SysApp;
@@ -97,25 +96,6 @@ public class RateService {
             exist.appId = mchRate.appId;
             exist.mchId = mchRate.mchId;
             exist = mchRateMapper.selectOne(exist);
-
-            //TODO 费率check
-            MchAgency mchAgency = new MchAgency();
-            mchAgency.mchId = mchRate.mchId;
-            mchAgency.type = mchRate.appId.intValue();
-            List<MchAgency> agencyList = mchAgencyMapper.select(mchAgency);
-            if (agencyList.size() > 0) {
-                //代理商。费率需要小于所有子账户
-                //MchRate agency = mchRateMapper.selectByPrimaryKey()
-
-
-            }
-            MchAgency subAgency = new MchAgency();
-            subAgency.subId = mchAgency.mchId;
-            mchAgency.type = mchRate.appId.intValue();
-            if (subAgency != null) {
-
-
-            }
 
             if (exist == null) {
                 mchRateMapper.insertSelective(mchRate);
