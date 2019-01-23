@@ -39,6 +39,19 @@ public class MchAgencyController {
         mchAgencyService.addSub(mchAgency.mchId, mchAgency.subId, mchAgency.type);
     }
 
+    @Auth
+    @GetMapping("/available")
+    public Object isAgency(@AwesomeParam Integer type) {
+        return mchAgencyService.isAgency(authSession.getAuthId(), type);
+    }
+
+
+    @DeleteMapping("/{id}")
+    @Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
+    public void delete(@PathVariable Long id) {
+        mchAgencyService.delete(id);
+    }
+
     @GetMapping
     @Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
     public Object agencyList(@AwesomeParam Integer type,
@@ -57,11 +70,5 @@ public class MchAgencyController {
         } while (false);
 
         return mchAgencyService.agencyList(type, mchId, subId, offset, limit);
-    }
-
-    @DeleteMapping("/{id}")
-    @Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
-    public void delete(@PathVariable Long id) {
-        mchAgencyService.delete(id);
     }
 }

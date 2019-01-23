@@ -8,6 +8,7 @@ import com.ylli.api.mch.Config;
 import com.ylli.api.mch.mapper.MchAgencyMapper;
 import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.mapper.SysAppMapper;
+import com.ylli.api.mch.model.IsAgency;
 import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.MchBankPayRateMapper;
@@ -210,5 +211,22 @@ public class MchAgencyService {
             return true;
         }
         return false;
+    }
+
+
+    public Object isAgency(long authId, Integer type) {
+        IsAgency isAgency = new IsAgency();
+
+        MchAgency mchAgency = new MchAgency();
+        mchAgency.mchId = authId;
+        mchAgency.type = type;
+        List<MchAgency> list = mchAgencyMapper.select(mchAgency);
+        if (list.size() == 0) {
+            isAgency.isAgency = false;
+        } else {
+            isAgency.isAgency = true;
+            isAgency.subIds = list.stream().map(i ->i.subId).collect(Collectors.toList());
+        }
+        return isAgency;
     }
 }

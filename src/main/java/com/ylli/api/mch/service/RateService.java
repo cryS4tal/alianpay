@@ -10,9 +10,11 @@ import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.mapper.MchRateMapper;
 import com.ylli.api.mch.mapper.SysAppMapper;
 import com.ylli.api.mch.model.Apps;
+import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.mch.model.MchRate;
 import com.ylli.api.mch.model.MchRateDetail;
 import com.ylli.api.mch.model.SysApp;
+import static com.ylli.api.mch.service.MchAgencyService.pay;
 import com.ylli.api.model.base.DataList;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,23 +89,59 @@ public class RateService {
 
         List<MchRateDetail> list = new ArrayList<>();
         for (int i = 0; i < apps.apps.size(); i++) {
-            MchRate mchRate = apps.apps.get(i);
+            MchRate item = apps.apps.get(i);
             ServiceUtil.checkNotEmptyIgnore(apps.apps.get(i), true);
-            if (sysAppMapper.selectByPrimaryKey(mchRate.appId) == null) {
+            if (sysAppMapper.selectByPrimaryKey(item.appId) == null) {
                 throw new AwesomeException(Config.ERROR_APP_NOT_FOUND);
             }
             MchRate exist = new MchRate();
-            exist.appId = mchRate.appId;
-            exist.mchId = mchRate.mchId;
+            exist.appId = item.appId;
+            exist.mchId = item.mchId;
             exist = mchRateMapper.selectOne(exist);
 
-            if (exist == null) {
-                mchRateMapper.insertSelective(mchRate);
-            } else {
-                mchRate.id = exist.id;
-                mchRateMapper.updateByPrimaryKeySelective(mchRate);
+            // TODO rate check
+            /**
+             * 是否是代理商？yes 更新所有 mch_agency 费率差。出现小于0 throw
+             *
+             * 是否子账户？ yes 更新所有 mch_agency 费率差。出现小于0 throw
+             */
+            MchAgency sup = new MchAgency();
+            sup.mchId = item.mchId;
+            sup.type = pay;
+            List<MchAgency> subs = mchAgencyMapper.select(sup);
+            if (subs.size() > 0) {
+                //item.appId =1 支付宝，= 2 微信
+                subs.stream().forEach(sub -> {
+                   //更新支付宝，微信费率差
+                    if (item.appId == 1) {
+                        //支付宝
+
+                    } else if (item.appId == 2) {
+                        //微信
+
+                    }
+
+                    sub.alipayRate = 0 - item.rate;
+                    sub.wxRate = 0;
+
+                    if (true) {
+
+                    }
+                    if (true) {
+
+                    }
+
+                });
             }
-            list.add(convert(mchRate));
+
+
+            if (exist == null) {
+                mchRateMapper.insertSelective(item);
+            } else {
+                item.id = exist.id;
+                mchRateMapper.updateByPrimaryKeySelective(item);
+            }
+            list.add(convert(item));
         }
         return list;
     }
