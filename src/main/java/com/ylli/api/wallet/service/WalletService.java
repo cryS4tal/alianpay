@@ -193,7 +193,7 @@ public class WalletService {
         MchSub sup = mchSubService.getBankSupper(mchId);
         if (sup != null) {
             Wallet wallet = walletMapper.selectByPrimaryKey(sup.mchId);
-            wallet.bonus = money * sup.bankRate / 10000;
+            wallet.bonus = wallet.bonus + money * sup.bankRate / 10000;
             wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
             walletMapper.updateByPrimaryKeySelective(wallet);
         }
