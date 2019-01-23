@@ -12,12 +12,12 @@ import tk.mybatis.mapper.common.Mapper;
 
 public interface BillMapper extends Mapper<Bill> {
 
-    List<Bill> getBills(@Param("mch_id") Long mchId,
+    List<Bill> getBills(@Param("mch_ids") List<Long> mchIds,
                         @Param("status") Integer status,
                         @Param("mch_order_id") String mchOrderId,
                         @Param("sys_order_id") String sysOrderId,
                         @Param("pay_type") String payType,
-                        @Param("trade_type") String tradeType,
+                        //@Param("trade_type") String tradeType,
                         @Param("trade_time") Date tradeTime,
                         @Param("start_time") Date startTime,
                         @Param("end_time") Date endTime);

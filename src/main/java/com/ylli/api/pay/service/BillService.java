@@ -74,23 +74,22 @@ public class BillService {
     ChannelService channelService;
 
     /**
-     * @param mchId
+     * @param mchIds
      * @param status
      * @param mchOrderId
      * @param sysOrderId
      * @param payType
-     * @param tradeType
      * @param tradeTime
      * @param startTime
      * @param endTime
      * @return
      */
 
-    public Object getBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
-                           String tradeType, Date tradeTime, Date startTime, Date endTime, Boolean admin, int offset, int limit) {
+    public Object getBills(List<Long> mchIds, Integer status, String mchOrderId, String sysOrderId, String payType,
+                           Date tradeTime, Date startTime, Date endTime, Boolean admin, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
-        Page<Bill> page = (Page<Bill>) billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
+        Page<Bill> page = (Page<Bill>) billMapper.getBills(mchIds, status, mchOrderId, sysOrderId, payType, tradeTime, startTime, endTime);
 
         DataList<BaseBill> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
@@ -325,9 +324,9 @@ public class BillService {
     }
 
     //TODO 分段下载.过多会内存溢出
-    public void exportBills(Long mchId, Integer status, String mchOrderId, String sysOrderId, String payType,
-                            String tradeType, Date tradeTime, Date startTime, Date endTime, HttpServletResponse response) {
-        List<Bill> list = billMapper.getBills(mchId, status, mchOrderId, sysOrderId, payType, tradeType, tradeTime, startTime, endTime);
+    public void exportBills(List<Long> mchIds, Integer status, String mchOrderId, String sysOrderId, String payType,
+                            Date tradeTime, Date startTime, Date endTime, HttpServletResponse response) {
+        List<Bill> list = billMapper.getBills(mchIds, status, mchOrderId, sysOrderId, payType, tradeTime, startTime, endTime);
 
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet();

@@ -14,7 +14,9 @@ import com.ylli.api.pay.mapper.MchBankPayRateMapper;
 import com.ylli.api.pay.model.MchBankPayRate;
 import com.ylli.api.pay.service.BankPayService;
 import com.ylli.api.pay.service.BillService;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -184,5 +186,17 @@ public class MchAgencyService {
     @Transactional
     public void delete(Long id) {
         mchAgencyMapper.deleteByPrimaryKey(id);
+    }
+
+    public boolean reg(List<Long> mchIds, long authId) {
+        MchAgency mchAgency = new MchAgency();
+        mchAgency.mchId = authId;
+        mchAgency.type = pay;
+        List<Long> subs = mchAgencyMapper.select(mchAgency).stream().map(i -> i.subId).collect(Collectors.toList());
+        subs.add(authId);
+        if (subs.containsAll(mchIds)) {
+            return true;
+        }
+        return false;
     }
 }

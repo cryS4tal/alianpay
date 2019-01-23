@@ -6,10 +6,11 @@ import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
-import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.AwesomeDateTime;
+import com.ylli.api.mch.service.MchAgencyService;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,9 @@ public class BillController {
     @Autowired
     PermissionService permissionService;
 
+    @Autowired
+    MchAgencyService mchAgencyService;
+
     /**
      * 金额
      * 交易时间
@@ -42,43 +46,55 @@ public class BillController {
      */
 
     @GetMapping
-    public Object getBills(@AwesomeParam(required = false) Long mchId,
+    public Object getBills(@AwesomeParam(required = false) List<Long> mchIds,
+                           //@AwesomeParam(required = false) Long mchId,
                            @AwesomeParam(required = false) Integer status,
                            @AwesomeParam(required = false) String mchOrderId,
                            @AwesomeParam(required = false) String sysOrderId,
                            @AwesomeParam(required = false) String payType,
-                           @AwesomeParam(required = false) String tradeType,
+                           //@AwesomeParam(required = false) String tradeType,
                            @AwesomeParam(required = false) AwesomeDateTime tradeTime,
                            @AwesomeParam(required = false) AwesomeDateTime startTime,
                            @AwesomeParam(required = false) AwesomeDateTime endTime,
                            @AwesomeParam(defaultValue = "0") int offset,
                            @AwesomeParam(defaultValue = "20") int limit) {
+
         Boolean admin = permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL);
-        if (mchId == null && !admin) {
-            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-        }
-        return billService.getBills(mchId, status,
+        do {
+            if (admin) {
+                break;
+            }
+            if (mchIds.size() == 1 && authSession.getAuthId() == mchIds.get(0)) {
+                break;
+            }
+            if (mchAgencyService.reg(mchIds, authSession.getAuthId())) {
+                break;
+            }
+            permissionService.permissionDeny();
+        } while (false);
+        return billService.getBills(mchIds, status,
                 Strings.isNullOrEmpty(mchOrderId) ? null : mchOrderId,
                 Strings.isNullOrEmpty(sysOrderId) ? null : sysOrderId,
                 Strings.isNullOrEmpty(payType) ? null : payType,
-                Strings.isNullOrEmpty(tradeType) ? null : tradeType,
+                //Strings.isNullOrEmpty(tradeType) ? null : tradeType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(), admin, offset, limit);
     }
 
     @GetMapping("/export")
-    public void exportBills(@AwesomeParam(required = false) Long mchId,
+    public void exportBills(@AwesomeParam(required = false) List<Long> mchIds,
+                            //@AwesomeParam(required = false) Long mchId,
                             //@AwesomeParam(required = false) Integer status,
                             @AwesomeParam(required = false) String mchOrderId,
                             @AwesomeParam(required = false) String sysOrderId,
                             @AwesomeParam(required = false) String payType,
-                            @AwesomeParam(required = false) String tradeType,
+                            //@AwesomeParam(required = false) String tradeType,
                             @AwesomeParam(required = false) AwesomeDateTime tradeTime,
                             @AwesomeParam(required = false) AwesomeDateTime startTime,
                             @AwesomeParam(required = false) AwesomeDateTime endTime,
                             HttpServletResponse response) {
-        billService.exportBills(mchId, Bill.FINISH, mchOrderId, sysOrderId, payType, tradeType,
+        billService.exportBills(mchIds, Bill.FINISH, mchOrderId, sysOrderId, payType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(),
