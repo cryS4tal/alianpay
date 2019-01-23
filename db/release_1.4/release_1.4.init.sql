@@ -52,7 +52,8 @@ CREATE TABLE t_mch_agency (
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now(),
   UNIQUE KEY `u_mch_sub_type` (`mch_id`,`sub_id`,`type`),
-  UNIQUE KEY `u_mch_sub` (`sub_id`,`type`)
+  KEY `n_mch_type` (`mch_id`,`type`),
+  UNIQUE KEY `u_sub_type` (`sub_id`,`type`)
 );
 
 UPDATE t_sys_app SET app_name = '支付宝',`code` = 'alipay' WHERE id = 1;
@@ -70,3 +71,5 @@ DELETE FROM t_user_app WHERE app_id > 2;
 ALTER TABLE `t_mch_agency`
 ADD INDEX `n_mch_id` (`mch_id`) ,
 ADD INDEX `n_sub_id` (`sub_id`) ;
+
+RENAME TABLE t_user_app TO t_mch_rate;

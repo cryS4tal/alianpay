@@ -6,8 +6,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "t_user_app")
-public class MchApp {
+@Table(name = "t_mch_rate")
+public class MchRate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

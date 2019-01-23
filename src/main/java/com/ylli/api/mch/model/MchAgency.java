@@ -16,13 +16,7 @@ public class MchAgency {
 
     public Long mchId;
 
-    @Transient
-    public String mchName;
-
     public Long subId;
-
-    @Transient
-    public String subName;
 
     //代理商类型：1-支付，2-代付
     public Integer type;
@@ -30,23 +24,29 @@ public class MchAgency {
     //支付宝费率差
     public Integer alipayRate;
 
+    //微信费率差
+    public Integer wxRate;
+
+    //代付费率差
+    public Integer bankRate;
+
+    @Transient
+    public String mchName;
+
+    @Transient
+    public String subName;
+
     @Transient
     public Integer supAlipayRate;
 
     @Transient
     public Integer subAlipayRate;
 
-    //微信费率差
-    public Integer wxRate;
-
     @Transient
     public Integer supWxRate;
 
     @Transient
     public Integer subWxRate;
-
-    //代付费率差
-    public Integer bankRate;
 
     @Transient
     public Integer supRate;

@@ -1,4 +1,4 @@
-CREATE TABLE t_user_app (
+CREATE TABLE t_mch_rate (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   mch_id BIGINT COMMENT '用户id',
   app_id BIGINT NOT NULL COMMENT '应用id',

@@ -63,17 +63,17 @@ public class RateController {
     }
 
     @DeleteMapping("/mch/app")
-    public void removeApp(@AwesomeParam Long appId,
+    public void removeRate(@AwesomeParam Long appId,
                           @AwesomeParam Long mchId) {
-        rateService.removeApp(appId, mchId);
+        rateService.removeRate(appId, mchId);
     }
 
     @GetMapping("/mch/app")
-    public Object getMchApp(@AwesomeParam Long mchId) {
+    public Object getMchRate(@AwesomeParam Long mchId) {
         if (mchId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_RATE)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
         }
-        return rateService.getMchApp(mchId);
+        return rateService.getMchRate(mchId);
     }
 
     static class BankPayRate {

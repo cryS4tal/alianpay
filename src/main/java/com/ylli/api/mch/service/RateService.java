@@ -5,12 +5,14 @@ import com.github.pagehelper.PageHelper;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.mch.Config;
-import com.ylli.api.mch.mapper.MchAppMapper;
+import com.ylli.api.mch.mapper.MchAgencyMapper;
 import com.ylli.api.mch.mapper.MchBaseMapper;
+import com.ylli.api.mch.mapper.MchRateMapper;
 import com.ylli.api.mch.mapper.SysAppMapper;
 import com.ylli.api.mch.model.Apps;
-import com.ylli.api.mch.model.MchApp;
-import com.ylli.api.mch.model.MchAppDetail;
+import com.ylli.api.mch.model.MchAgency;
+import com.ylli.api.mch.model.MchRate;
+import com.ylli.api.mch.model.MchRateDetail;
 import com.ylli.api.mch.model.SysApp;
 import com.ylli.api.model.base.DataList;
 import java.util.ArrayList;
@@ -25,13 +27,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class RateService {
 
     @Autowired
-    MchAppMapper mchAppMapper;
+    MchRateMapper mchRateMapper;
 
     @Autowired
     SysAppMapper sysAppMapper;
 
     @Autowired
     MchBaseMapper mchBaseMapper;
+
+    @Autowired
+    MchAgencyMapper mchAgencyMapper;
 
     @Autowired
     ModelMapper modelMapper;
@@ -49,11 +54,11 @@ public class RateService {
 
 
     @Transactional
-    public void removeApp(Long appId, Long mchId) {
-        MchApp mchApp = new MchApp();
-        mchApp.appId = appId;
-        mchApp.mchId = mchId;
-        mchAppMapper.delete(mchApp);
+    public void removeRate(Long appId, Long mchId) {
+        MchRate mchRate = new MchRate();
+        mchRate.appId = appId;
+        mchRate.mchId = mchId;
+        mchRateMapper.delete(mchRate);
     }
 
     public DataList<SysApp> getSysApp(String appName, Boolean status, int offset, int limit) {
@@ -78,40 +83,61 @@ public class RateService {
         return sysAppMapper.selectAll();
     }
 
-    public List<MchAppDetail> setMchRate(Apps apps) {
+    @Transactional
+    public List<MchRateDetail> setMchRate(Apps apps) {
 
-        List<MchAppDetail> list = new ArrayList<>();
+        List<MchRateDetail> list = new ArrayList<>();
         for (int i = 0; i < apps.apps.size(); i++) {
-            MchApp mchApp = apps.apps.get(i);
+            MchRate mchRate = apps.apps.get(i);
             ServiceUtil.checkNotEmptyIgnore(apps.apps.get(i), true);
-            if (sysAppMapper.selectByPrimaryKey(mchApp.appId) == null) {
+            if (sysAppMapper.selectByPrimaryKey(mchRate.appId) == null) {
                 throw new AwesomeException(Config.ERROR_APP_NOT_FOUND);
             }
-            MchApp exist = new MchApp();
-            exist.appId = mchApp.appId;
-            exist.mchId = mchApp.mchId;
-            exist = mchAppMapper.selectOne(exist);
-            if (exist == null) {
-                mchAppMapper.insertSelective(mchApp);
-            } else {
-                mchApp.id = exist.id;
-                mchAppMapper.updateByPrimaryKeySelective(mchApp);
+            MchRate exist = new MchRate();
+            exist.appId = mchRate.appId;
+            exist.mchId = mchRate.mchId;
+            exist = mchRateMapper.selectOne(exist);
+
+            //TODO 费率check
+            MchAgency mchAgency = new MchAgency();
+            mchAgency.mchId = mchRate.mchId;
+            mchAgency.type = mchRate.appId.intValue();
+            List<MchAgency> agencyList = mchAgencyMapper.select(mchAgency);
+            if (agencyList.size() > 0) {
+                //代理商。费率需要小于所有子账户
+                //MchRate agency = mchRateMapper.selectByPrimaryKey()
+
+
             }
-            list.add(convert(mchApp));
+            MchAgency subAgency = new MchAgency();
+            subAgency.subId = mchAgency.mchId;
+            mchAgency.type = mchRate.appId.intValue();
+            if (subAgency != null) {
+
+
+            }
+
+            if (exist == null) {
+                mchRateMapper.insertSelective(mchRate);
+            } else {
+                mchRate.id = exist.id;
+                mchRateMapper.updateByPrimaryKeySelective(mchRate);
+            }
+            list.add(convert(mchRate));
         }
         return list;
     }
 
-    public MchAppDetail convert(MchApp mchApp) {
-        MchAppDetail detail = new MchAppDetail();
+    public MchRateDetail convert(MchRate mchRate) {
+        MchRateDetail detail = new MchRateDetail();
 
-        detail.id = mchApp.id;
-        detail.appId = mchApp.appId;
-        detail.appName = sysAppMapper.selectByPrimaryKey(mchApp.appId).appName;
-        detail.mchId = mchApp.mchId;
-        detail.mchName = mchBaseMapper.selectByMchId(mchApp.mchId).mchName;
-        detail.rate = mchApp.rate;
-        detail.createTime = mchApp.createTime;
+        detail.id = mchRate.id;
+        detail.appId = mchRate.appId;
+        detail.appName = sysAppMapper.selectByPrimaryKey(mchRate.appId).appName;
+        detail.mchId = mchRate.mchId;
+        detail.mchName = mchBaseMapper.selectByMchId(mchRate.mchId).mchName;
+        detail.rate = mchRate.rate;
+        detail.createTime = mchRate.createTime;
         return detail;
     }
 
@@ -121,14 +147,14 @@ public class RateService {
      * @return
      */
     public Integer getRate(Long mchId, Long appId) {
-        MchApp mchApp = new MchApp();
-        mchApp.mchId = mchId;
-        mchApp.appId = appId;
-        mchApp = mchAppMapper.selectOne(mchApp);
-        if (mchApp == null) {
+        MchRate mchRate = new MchRate();
+        mchRate.mchId = mchId;
+        mchRate.appId = appId;
+        mchRate = mchRateMapper.selectOne(mchRate);
+        if (mchRate == null) {
             return sysAppMapper.selectByPrimaryKey(appId).rate;
         } else {
-            return mchApp.rate;
+            return mchRate.rate;
         }
     }
 
@@ -140,10 +166,10 @@ public class RateService {
         return Optional.ofNullable(sysAppMapper.selectByCode(code)).map(i -> i.id).orElse(0L);
     }
 
-    public Object getMchApp(Long mchId) {
+    public Object getMchRate(Long mchId) {
         List<SysApp> list = sysAppMapper.selectAll();
 
-        List<MchAppDetail> details = new ArrayList<>();
+        List<MchRateDetail> details = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             details.add(doSome(list.get(i), mchId));
         }
@@ -158,20 +184,20 @@ public class RateService {
     /**
      * 查询商户费率。没有个性化设置，应用系统默认
      */
-    public MchAppDetail doSome(SysApp sysApp, Long mchId) {
-        MchAppDetail detail = new MchAppDetail();
-        MchApp mchApp = new MchApp();
-        mchApp.mchId = mchId;
-        mchApp.appId = sysApp.id;
-        mchApp = mchAppMapper.selectOne(mchApp);
-        if (mchApp == null) {
+    public MchRateDetail doSome(SysApp sysApp, Long mchId) {
+        MchRateDetail detail = new MchRateDetail();
+        MchRate mchRate = new MchRate();
+        mchRate.mchId = mchId;
+        mchRate.appId = sysApp.id;
+        mchRate = mchRateMapper.selectOne(mchRate);
+        if (mchRate == null) {
             detail.appId = sysApp.id;
             detail.appName = sysApp.appName;
             detail.rate = sysApp.rate;
             detail.isDefault = true;
         } else {
-            detail.rate = mchApp.rate;
-            detail.appId = mchApp.appId;
+            detail.rate = mchRate.rate;
+            detail.appId = mchRate.appId;
             detail.appName = sysApp.appName;
             detail.isDefault = false;
         }
