@@ -1,8 +1,10 @@
 package com.ylli.api.mch;
 
+import com.ylli.api.auth.service.PermissionService;
 import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
+import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.util.ServiceUtil;
 import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.mch.service.MchAgencyService;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
+
 @RestController
 @RequestMapping("/mch/agency")
 public class MchAgencyController {
@@ -23,7 +25,14 @@ public class MchAgencyController {
     @Autowired
     MchAgencyService mchAgencyService;
 
+    @Autowired
+    PermissionService permissionService;
+
+    @Autowired
+    AuthSession authSession;
+
     @PostMapping
+    @Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
     public void addSub(@RequestBody MchAgency mchAgency) {
         ServiceUtil.checkNotEmptyIgnore(mchAgency, true, "alipayRate", "wxRate", "bankRate", "mchName",
                 "subName", "supAlipayRate", "subAlipayRate", "supWxRate", "subWxRate", "supRate", "subRate");
@@ -31,15 +40,27 @@ public class MchAgencyController {
     }
 
     @GetMapping
+    @Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
     public Object agencyList(@AwesomeParam Integer type,
                              @AwesomeParam(required = false) Long mchId,
                              @AwesomeParam(required = false) Long subId,
                              @AwesomeParam(defaultValue = "0") int offset,
                              @AwesomeParam(defaultValue = "10") int limit) {
+        do {
+            if (mchId != null && authSession.getAuthId() == mchId) {
+                break;
+            }
+            if (permissionService.hasSysPermission(Config.SysPermission.MANAGE_AGENCY)) {
+                break;
+            }
+            permissionService.permissionDeny();
+        } while (false);
+
         return mchAgencyService.agencyList(type, mchId, subId, offset, limit);
     }
 
     @DeleteMapping("/{id}")
+    @Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
     public void delete(@PathVariable Long id) {
         mchAgencyService.delete(id);
     }

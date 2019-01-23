@@ -2,10 +2,11 @@ package com.ylli.api.mch.service;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.ylli.api.auth.mapper.AccountMapper;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.Config;
-import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.mapper.MchAgencyMapper;
+import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.mapper.SysAppMapper;
 import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.model.base.DataList;
@@ -42,6 +43,9 @@ public class MchAgencyService {
     @Autowired
     BillService billService;
 
+    @Autowired
+    AccountMapper accountMapper;
+
     public static final Integer pay = 1;
     public static final Integer bankPay = 2;
 
@@ -51,7 +55,12 @@ public class MchAgencyService {
         if (mchId.longValue() == subId.longValue()) {
             throw new AwesomeException(Config.ERROR_FORMAT.format("代理商不能设置自己为子账户"));
         }
-
+        if (accountMapper.selectByPrimaryKey(mchId) == null) {
+            throw new AwesomeException(Config.ERROR_FORMAT.format("代理商" + mchId + "账户不存在"));
+        }
+        if (accountMapper.selectByPrimaryKey(subId) == null) {
+            throw new AwesomeException(Config.ERROR_FORMAT.format("子账户" + subId + "账户不存在"));
+        }
         //mch_id check.
         MchAgency mch = new MchAgency();
         mch.subId = mchId;
