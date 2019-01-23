@@ -1,13 +1,19 @@
 package com.ylli.api.mch.service;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.Config;
+import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.mapper.MchSubMapper;
 import com.ylli.api.mch.mapper.SysAppMapper;
 import com.ylli.api.mch.model.MchSub;
+import com.ylli.api.model.base.DataList;
+import com.ylli.api.pay.mapper.MchBankPayRateMapper;
 import com.ylli.api.pay.model.MchBankPayRate;
 import com.ylli.api.pay.service.BankPayService;
 import com.ylli.api.pay.service.BillService;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +32,12 @@ public class MchSubService {
 
     @Autowired
     BankPayService bankPayService;
+
+    @Autowired
+    MchBaseMapper mchBaseMapper;
+
+    @Autowired
+    MchBankPayRateMapper mchBankPayRateMapper;
 
     @Autowired
     BillService billService;
@@ -128,5 +140,40 @@ public class MchSubService {
         mchSub.subId = mchId;
         mchSub.type = bankPay;
         return mchSubMapper.selectOne(mchSub);
+    }
+
+
+    public Object agencyList(Integer type, Long mchId, Long subId, int offset, int limit) {
+        PageHelper.offsetPage(offset, limit);
+        Page<MchSub> page = (Page<MchSub>) mchSubMapper.agencyList(type, mchId, subId);
+
+        DataList<MchSub> dataList = new DataList<>();
+        dataList.offset = page.getStartRow();
+        dataList.count = page.size();
+        dataList.totalCount = page.getTotal();
+
+        Long alipay = sysAppMapper.selectByCode("alipay").id;
+        Long wx = sysAppMapper.selectByCode("wx").id;
+        page.stream().forEach(item -> {
+            item.mchName = mchBaseMapper.selectByMchId(item.mchId).mchName;
+            item.subName = mchBaseMapper.selectByMchId(item.subId).mchName;
+
+            item.supAlipayRate = rateService.getRate(item.mchId, alipay);
+            item.subAlipayRate = rateService.getRate(item.subId, alipay);
+
+            item.supWxRate = rateService.getRate(item.mchId, wx);
+            item.subWxRate = rateService.getRate(item.subId, wx);
+
+            item.supRate = Optional.ofNullable(mchBankPayRateMapper.selectByMchId(item.mchId)).map(i -> i.rate).orElse(0);
+            item.subRate = Optional.ofNullable(mchBankPayRateMapper.selectByMchId(item.subId)).map(i -> i.rate).orElse(0);
+
+        });
+        dataList.dataList = page;
+        return dataList;
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        mchSubMapper.deleteByPrimaryKey(id);
     }
 }

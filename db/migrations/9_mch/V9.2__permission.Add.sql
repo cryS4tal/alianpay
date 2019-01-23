@@ -1,6 +1,6 @@
 -- 添加系统预置权限
 INSERT INTO t_permission (id, type, name, description)
-VALUES (@pm_sys.manage_user_charge, @pm_type_sys, "商户提现费率管理", "设置商户提现费率");
+VALUES (@pm_sys.manage_agency, @pm_type_sys, "代理商管理", "管理代理商");
 
 -- 添加系统预置权限
 INSERT INTO t_permission (id, type, name, description)

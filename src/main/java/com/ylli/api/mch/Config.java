@@ -58,7 +58,7 @@ public class Config {
         /**
          * 管理角色与权限
          */
-        public static final long MANAGE_USER_CHARGE = BASE + 1;
+        public static final long MANAGE_AGENCY = BASE + 1;
 
         public static final long MANAGE_APP = BASE + 2;
 

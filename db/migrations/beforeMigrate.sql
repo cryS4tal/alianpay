@@ -111,7 +111,7 @@ SET @pm_sys.manage_bank_payment = @pm_sys_base + 3;
 SELECT _init(9);
 -- 系统权限
 -- 管理商户提现费率
-SET @pm_sys.manage_user_charge = @pm_sys_base + 1;
+SET @pm_sys.manage_agency = @pm_sys_base + 1;
 SET @pm_sys.manage_app = @pm_sys_base + 2;
 SET @pm_sys.manage_user_base = @pm_sys_base + 3;
 SET @pm_sys.manage_user_account = @pm_sys_base + 4;

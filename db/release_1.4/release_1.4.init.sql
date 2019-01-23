@@ -66,3 +66,7 @@ UPDATE t_bill SET app_id = 1 WHERE app_id = 3;
 UPDATE t_bill SET app_id = 2 WHERE app_id = 4;
 
 DELETE FROM t_user_app WHERE app_id > 2;
+
+ALTER TABLE `t_mch_sub`
+ADD INDEX `n_mch_id` (`mch_id`) ,
+ADD INDEX `n_sub_id` (`sub_id`) ;
