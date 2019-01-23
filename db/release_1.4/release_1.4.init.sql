@@ -41,7 +41,7 @@ ADD COLUMN `is_agency`  tinyint(4) NULL DEFAULT 0 AFTER `other_images`;*/
 ALTER TABLE `t_sys_app`
 ADD COLUMN `code`  varchar(32) NULL AFTER `app_name`;
 
-CREATE TABLE t_mch_sub (
+CREATE TABLE t_mch_agency (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   mch_id BIGINT COMMENT '用户id',
   sub_id BIGINT NOT NULL COMMENT '子账户id',
@@ -51,8 +51,8 @@ CREATE TABLE t_mch_sub (
   bank_rate INTEGER  COMMENT '代付费率差',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now(),
-  UNIQUE KEY `t_mch_sub_type` (`mch_id`,`sub_id`,`type`),
-  UNIQUE KEY `t_mch_sub` (`sub_id`,`type`)
+  UNIQUE KEY `u_mch_sub_type` (`mch_id`,`sub_id`,`type`),
+  UNIQUE KEY `u_mch_sub` (`sub_id`,`type`)
 );
 
 UPDATE t_sys_app SET app_name = '支付宝',`code` = 'alipay' WHERE id = 1;
@@ -67,6 +67,6 @@ UPDATE t_bill SET app_id = 2 WHERE app_id = 4;
 
 DELETE FROM t_user_app WHERE app_id > 2;
 
-ALTER TABLE `t_mch_sub`
+ALTER TABLE `t_mch_agency`
 ADD INDEX `n_mch_id` (`mch_id`) ,
 ADD INDEX `n_sub_id` (`sub_id`) ;

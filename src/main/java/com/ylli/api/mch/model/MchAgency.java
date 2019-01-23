@@ -7,8 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-@Table(name = "t_mch_sub")
-public class MchSub {
+@Table(name = "t_mch_agency")
+public class MchAgency {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

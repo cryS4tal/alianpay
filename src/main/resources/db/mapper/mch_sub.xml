@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.ylli.api.mch.mapper.MchSubMapper">
-    <resultMap id="subMap" type="com.ylli.api.mch.model.MchSub"/>
+<mapper namespace="com.ylli.api.mch.mapper.MchAgencyMapper">
+    <resultMap id="agencyMap" type="com.ylli.api.mch.model.MchAgency"/>
 
-    <select id="agencyList" resultMap="subMap">
-        SELECT * FROM t_mch_sub
+    <select id="agencyList" resultMap="agencyMap">
+        SELECT * FROM t_mch_agency
         <where>
             <if test="type != null">
                 type = ${type}

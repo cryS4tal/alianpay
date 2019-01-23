@@ -1,8 +1,8 @@
 package com.ylli.api.wallet.service;
 
 import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.mch.model.MchSub;
-import com.ylli.api.mch.service.MchSubService;
+import com.ylli.api.mch.model.MchAgency;
+import com.ylli.api.mch.service.MchAgencyService;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.WalletMapper;
@@ -25,7 +25,7 @@ public class WalletService {
     WalletMapper walletMapper;
 
     @Autowired
-    MchSubService mchSubService;
+    MchAgencyService mchAgencyService;
 
     public Wallet getOwnWallet(Long mchId) {
         return walletMapper.selectByPrimaryKey(mchId);
@@ -54,7 +54,7 @@ public class WalletService {
         walletMapper.updateByPrimaryKeySelective(wallet);
 
         //加入分润计算.
-        MchSub sup = mchSubService.getPaySupper(mchId);
+        MchAgency sup = mchAgencyService.getPaySupper(mchId);
         if (sup != null) {
             Wallet wallet1 = walletMapper.selectByPrimaryKey(sup.mchId);
             if (PayService.ALI.equals(payType)) {
@@ -190,7 +190,7 @@ public class WalletService {
      */
     @Transactional
     public void incrBankBonus(Long mchId, Integer money) {
-        MchSub sup = mchSubService.getBankSupper(mchId);
+        MchAgency sup = mchAgencyService.getBankSupper(mchId);
         if (sup != null) {
             Wallet wallet = walletMapper.selectByPrimaryKey(sup.mchId);
             wallet.bonus = wallet.bonus + money * sup.bankRate / 10000;

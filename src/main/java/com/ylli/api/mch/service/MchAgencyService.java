@@ -5,9 +5,9 @@ import com.github.pagehelper.PageHelper;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.Config;
 import com.ylli.api.mch.mapper.MchBaseMapper;
-import com.ylli.api.mch.mapper.MchSubMapper;
+import com.ylli.api.mch.mapper.MchAgencyMapper;
 import com.ylli.api.mch.mapper.SysAppMapper;
-import com.ylli.api.mch.model.MchSub;
+import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.mapper.MchBankPayRateMapper;
 import com.ylli.api.pay.model.MchBankPayRate;
@@ -19,10 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MchSubService {
+public class MchAgencyService {
 
     @Autowired
-    MchSubMapper mchSubMapper;
+    MchAgencyMapper mchAgencyMapper;
 
     @Autowired
     SysAppMapper sysAppMapper;
@@ -53,27 +53,27 @@ public class MchSubService {
         }
 
         //mch_id check.
-        MchSub mch = new MchSub();
+        MchAgency mch = new MchAgency();
         mch.subId = mchId;
         mch.type = type;
-        mch = mchSubMapper.selectOne(mch);
+        mch = mchAgencyMapper.selectOne(mch);
         if (mch != null) {
             throw new AwesomeException(Config.ERROR_SUB_FORBIDDEN.format(mch.mchId));
         }
         //sub_id check
-        MchSub sub = new MchSub();
+        MchAgency sub = new MchAgency();
         sub.subId = subId;
         sub.type = type;
-        sub = mchSubMapper.selectOne(sub);
+        sub = mchAgencyMapper.selectOne(sub);
         if (sub != null) {
             throw new AwesomeException(Config.ERROR_SUB_BAD_REQUEST.format(sub.mchId));
         }
 
-        MchSub exist = new MchSub();
+        MchAgency exist = new MchAgency();
         exist.mchId = mchId;
         exist.subId = subId;
         exist.type = type;
-        exist = mchSubMapper.selectOne(exist);
+        exist = mchAgencyMapper.selectOne(exist);
         if (exist == null) {
             if (pay.intValue() == type) {
                 //支付
@@ -92,13 +92,13 @@ public class MchSubService {
                 if (supWxRate > subWxRate) {
                     throw new AwesomeException(Config.ERROR_FORMAT.format("代理商：" + mchId + " 微信费率(" + String.format("%.2f", (supWxRate / 100.0)) + "%" + ") 大于子账户微信费率（" + String.format("%.2f", (subWxRate / 100.0)) + "%）"));
                 }
-                exist = new MchSub();
+                exist = new MchAgency();
                 exist.mchId = mchId;
                 exist.subId = subId;
                 exist.type = type;
                 exist.alipayRate = subAlipayRate - supAlipayRate;
                 exist.wxRate = subWxRate - supWxRate;
-                mchSubMapper.insertSelective(exist);
+                mchAgencyMapper.insertSelective(exist);
 
             } else if (bankPay.intValue() == type) {
                 //代付
@@ -114,12 +114,12 @@ public class MchSubService {
                     throw new AwesomeException(Config.ERROR_FORMAT.format("代理商:" + mchId + "代付费率（" + String.format("%.2f", (supRate.rate / 100.0)) + "%）大于子账户代付费率（" + String.format("%.2f", (subRate.rate / 100.0)) + "%）"));
                 }
 
-                exist = new MchSub();
+                exist = new MchAgency();
                 exist.mchId = mchId;
                 exist.subId = subId;
                 exist.type = type;
                 exist.bankRate = subRate.rate - supRate.rate;
-                mchSubMapper.insertSelective(exist);
+                mchAgencyMapper.insertSelective(exist);
 
             } else {
                 throw new AwesomeException(Config.ERROR_FORMAT.format("代理商类型错误"));
@@ -128,26 +128,26 @@ public class MchSubService {
     }
 
 
-    public MchSub getPaySupper(Long mchId) {
-        MchSub mchSub = new MchSub();
-        mchSub.subId = mchId;
-        mchSub.type = pay;
-        return mchSubMapper.selectOne(mchSub);
+    public MchAgency getPaySupper(Long mchId) {
+        MchAgency mchAgency = new MchAgency();
+        mchAgency.subId = mchId;
+        mchAgency.type = pay;
+        return mchAgencyMapper.selectOne(mchAgency);
     }
 
-    public MchSub getBankSupper(Long mchId) {
-        MchSub mchSub = new MchSub();
-        mchSub.subId = mchId;
-        mchSub.type = bankPay;
-        return mchSubMapper.selectOne(mchSub);
+    public MchAgency getBankSupper(Long mchId) {
+        MchAgency mchAgency = new MchAgency();
+        mchAgency.subId = mchId;
+        mchAgency.type = bankPay;
+        return mchAgencyMapper.selectOne(mchAgency);
     }
 
 
     public Object agencyList(Integer type, Long mchId, Long subId, int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
-        Page<MchSub> page = (Page<MchSub>) mchSubMapper.agencyList(type, mchId, subId);
+        Page<MchAgency> page = (Page<MchAgency>) mchAgencyMapper.agencyList(type, mchId, subId);
 
-        DataList<MchSub> dataList = new DataList<>();
+        DataList<MchAgency> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
         dataList.count = page.size();
         dataList.totalCount = page.getTotal();
@@ -174,6 +174,6 @@ public class MchSubService {
 
     @Transactional
     public void delete(Long id) {
-        mchSubMapper.deleteByPrimaryKey(id);
+        mchAgencyMapper.deleteByPrimaryKey(id);
     }
 }
