@@ -117,7 +117,7 @@ public class CashService {
         //是否转入代付池？暂时以银行卡号为判断依据
         if ("0000300000000236".equals(req.bankcardNumber)) {
             // 商户提现金额限制
-            if (req.money > wallet.recharge) {
+            if (req.money > wallet.total - wallet.pending) {
                 throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.recharge / 100.0))));
             }
         } else {
@@ -129,8 +129,8 @@ public class CashService {
                 throw new AwesomeException(Config.ERROR_CHARGE_MAX.format(String.format("%.2f", (max / 100.0))));
             }
             // 商户提现金额限制
-            if (req.money + cashCharge > wallet.recharge) {
-                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - cashCharge) / 100.0))));
+            if (req.money + cashCharge > wallet.total - wallet.pending) {
+                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.total - wallet.pending - cashCharge) / 100.0))));
             }
         }
 
