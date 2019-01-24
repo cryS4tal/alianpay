@@ -1,37 +1,9 @@
 package com.ylli.api.wallet.service;
 
-import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.ylli.api.auth.mapper.PasswordMapper;
-import com.ylli.api.auth.model.Password;
-import com.ylli.api.mch.service.MchKeyService;
-import com.ylli.api.pay.model.Response;
-import com.ylli.api.pay.model.ResponseEnum;
-import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.third.pay.enums.CNTEnum;
-import com.ylli.api.third.pay.model.CNTCards;
-import com.ylli.api.third.pay.model.CNTResponse;
-import com.ylli.api.third.pay.service.CntClient;
-import com.ylli.api.wallet.mapper.CashLogMapper;
-import com.ylli.api.wallet.model.CNTAuth;
-import com.ylli.api.wallet.model.CNTCash;
-import com.ylli.api.wallet.model.CNTQuery;
-import com.ylli.api.wallet.model.CNTQueryData;
-import com.ylli.api.wallet.model.CashLog;
-import com.ylli.api.wallet.model.Wallet;
-import java.util.Map;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-@Service
+//@Service
 public class CNTCashService {
 
-    @Autowired
+    /*@Autowired
     MchKeyService mchKeyService;
 
     @Autowired
@@ -60,28 +32,6 @@ public class CNTCashService {
 
     @Value("${cash.max}")
     public Integer max;
-
-    @Transactional
-    public Object convert(CNTAuth auth) throws Exception {
-        if (auth.primaryId == auth.subId) {
-            return ResponseEnum.A998("主账户不能等于子账户");
-        }
-        String secretKey = mchKeyService.getKeyById(auth.subId);
-        if (secretKey == null) {
-            return ResponseEnum.A998("请先设置密钥");
-        }
-        Map<String, String> map = SignUtil.objectToMap(auth);
-        if (!SignUtil.generateSignature(map, secretKey).equals(auth.sign.toUpperCase())) {
-            return ResponseEnum.A001(null, auth);
-        }
-        if (!("CNT").equals(channelService.getCurrentChannel(auth.subId).code)
-                || !("CNT").equals(channelService.getCurrentChannel(auth.primaryId).code)) {
-            return ResponseEnum.A998("非法的请求");
-        }
-        //walletService.rechargeConvert(auth.primaryId, auth.subId);
-
-        return new Response("A000", "成功");
-    }
 
     @Transactional
     public Object cash(CNTCash cntCash) throws Exception {
@@ -197,5 +147,5 @@ public class CNTCashService {
         }
         CNTQueryData data = modelMapper.map(cashLog, CNTQueryData.class);
         return new Response("A000", "成功", data);
-    }
+    }*/
 }

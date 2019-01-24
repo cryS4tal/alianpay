@@ -234,21 +234,4 @@ public class WalletService {
             walletMapper.updateByPrimaryKeySelective(wallet);
         }
     }
-
-    /**
-     * 适用 cnt 商户余额转换
-     * 将子账户subId 余额 转换至 主账户 primaryId
-     */
-    /*public void rechargeConvert(Long primaryId, Long subId) {
-        Wallet wallet = getOwnWallet(primaryId);
-
-        Wallet decr = getOwnWallet(subId);
-        wallet.recharge = wallet.recharge + decr.recharge;
-        wallet.total = wallet.recharge + wallet.bonus + wallet.pending;
-
-        decr.recharge = 0;
-        decr.total = decr.recharge + decr.pending + decr.bonus;
-        walletMapper.updateByPrimaryKeySelective(wallet);
-        walletMapper.updateByPrimaryKeySelective(decr);
-    }*/
 }
