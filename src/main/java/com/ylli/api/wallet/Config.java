@@ -17,17 +17,17 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             1, "权限不足");
 
-    public static final ErrorCode ERROR_CHARGE_MONEY
+    public static final ErrorCode ERROR_CHARGE_MIN
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            2, "提现金额区间为：100 - 49900 元");
+            2, "系统最小提现金额：%s 元");
 
     public static final ErrorCode ERROR_VERIFY
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
             3, "密码错误");
 
-    public static final ErrorCode ERROR_REQUEST_FAIL
+    public static final ErrorCode ERROR_CHARGE_MAX
             = new ErrorCode(HttpServletResponse.SC_FORBIDDEN, MODEL_CODE,
-            4, "提现失败：%s");
+            4, "系统最大提现金额：%s 元");
 
     public static final ErrorCode ERROR_CASH_OUT_BOUND
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,

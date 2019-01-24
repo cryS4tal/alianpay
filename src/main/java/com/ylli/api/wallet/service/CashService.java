@@ -3,7 +3,6 @@ package com.ylli.api.wallet.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
-import com.google.gson.Gson;
 import com.ylli.api.auth.mapper.PasswordMapper;
 import com.ylli.api.auth.model.Password;
 import com.ylli.api.base.exception.AwesomeException;
@@ -11,12 +10,8 @@ import com.ylli.api.mch.mapper.MchBaseMapper;
 import com.ylli.api.mch.model.MchBase;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.sys.model.BankPayment;
-import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.BankPaymentService;
 import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.third.pay.enums.CNTEnum;
-import com.ylli.api.third.pay.model.CNTCards;
-import com.ylli.api.third.pay.model.CNTResponse;
 import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.third.pay.service.PingAnService;
 import com.ylli.api.third.pay.service.WzClient;
@@ -28,8 +23,6 @@ import com.ylli.api.wallet.mapper.WzCashLogMapper;
 import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
-import com.ylli.api.wallet.model.WzCashLog;
-import com.ylli.api.wallet.model.WzRes;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +35,12 @@ public class CashService {
 
     @Value("${cash.charge}")
     public Integer cashCharge;
+
+    @Value("${cash.min}")
+    public Integer min;
+
+    @Value("${cash.max}")
+    public Integer max;
 
     @Autowired
     CashLogMapper cashLogMapper;
@@ -113,12 +112,26 @@ public class CashService {
         if (Strings.isNullOrEmpty(req.password) || !BCrypt.checkpw(req.password, password.password)) {
             throw new AwesomeException(Config.ERROR_VERIFY);
         }
-        // 金额计算.
-        // v1.0 加入限制，存在待处理的体现申请，金额进入钱包待处理部分
         Wallet wallet = walletService.getOwnWallet(req.mchId);
 
-        if (req.money + cashCharge > wallet.recharge) {
-            throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - cashCharge) / 100.0))));
+        //是否转入代付池？暂时以银行卡号为判断依据
+        if ("0000300000000236".equals(req.bankcardNumber)) {
+            // 商户提现金额限制
+            if (req.money > wallet.recharge) {
+                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.recharge / 100.0))));
+            }
+        } else {
+            //系统提现金额限制
+            if (req.money < min) {
+                throw new AwesomeException(Config.ERROR_CHARGE_MIN.format(String.format("%.2f", (min / 100.0))));
+            }
+            if (req.money > max) {
+                throw new AwesomeException(Config.ERROR_CHARGE_MAX.format(String.format("%.2f", (max / 100.0))));
+            }
+            // 商户提现金额限制
+            if (req.money + cashCharge > wallet.recharge) {
+                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.recharge - cashCharge) / 100.0))));
+            }
         }
 
         //记录日志
@@ -129,13 +142,11 @@ public class CashService {
 
         walletService.pendingSuc(wallet, req.money, cashCharge);
 
-        SysChannel channel = channelService.getCurrentChannel(req.mchId);
-
         /**
-         * 存在商户通道切换。商户若是历史钱包余额未体现会导致走以下体现会失败。
-         * TODO 切换通道时加入判断。在切换通道时，要求商户余额体现完毕。？ WZ 和 CNT
+         * 注释cnt代码。若继续走cnt，需要开启以下代码
          */
-        if (channel.code.equals("WZ")) {
+        //SysChannel channel = channelService.getCurrentChannel(req.mchId);
+        /*if (channel.code.equals("WZ")) {
             //自动发起提现请求；
 
             try {
@@ -166,19 +177,19 @@ public class CashService {
             }
             CNTCards cntCards = gson.fromJson(cards, CNTCards.class);
             if ("0000".equals(cntCards.resultCode)) {
-                /**
-                 * {"data":[{   "id":390,
-                 *              "userId":"M1812281125570284",
-                 *              "userName":"李玉龙",
-                 *              "payName":"6217920274920375",
-                 *              "payUrl":null,
-                 *              "openBank":"浦发银行",
-                 *              "subbranch":"浦发银行",
-                 *              "payType":3,
-                 *              "openStatus":0}],
-                 *   "resultCode":"0000",
-                 *   "resultMsg":"查询成功"}
-                 */
+                *//**
+         * {"data":[{   "id":390,
+         *              "userId":"M1812281125570284",
+         *              "userName":"李玉龙",
+         *              "payName":"6217920274920375",
+         *              "payUrl":null,
+         *              "openBank":"浦发银行",
+         *              "subbranch":"浦发银行",
+         *              "payType":3,
+         *              "openStatus":0}],
+         *   "resultCode":"0000",
+         *   "resultMsg":"查询成功"}
+         *//*
                 cntCards.data.stream().forEach(item -> {
                     //删除历史银行卡
                     try {
@@ -221,9 +232,7 @@ public class CashService {
                 //提现失败：%s
                 throw new AwesomeException(Config.ERROR_REQUEST_FAIL.format(cntCards.resultMsg));
             }
-
-
-        }
+        }*/
     }
 
     /**
@@ -276,7 +285,7 @@ public class CashService {
      * @param cashLogId
      * @param success
      */
-    public void successJobs(Long cashLogId, Boolean success) {
+    /*public void successJobs(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
         if (cashLog == null) {
             return;
@@ -302,8 +311,7 @@ public class CashService {
 
             walletService.cashFail(wallet, cashLog.money);
         }
-    }
-
+    }*/
     public void sysCash(Long bankPayId, Long cashLogId) throws Exception {
         BankPayment payment = bankPaymentService.getBankPayment(bankPayId);
         if (payment == null) {

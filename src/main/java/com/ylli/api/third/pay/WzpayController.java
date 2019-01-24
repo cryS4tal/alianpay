@@ -47,8 +47,8 @@ public class WzpayController {
     }
 
 
-    @GetMapping("/test1")
+    /*@GetMapping("/test1")
     public String dotest1(@AwesomeParam String id) throws Exception {
         return wzClient.cashRes(id);
-    }
+    }*/
 }

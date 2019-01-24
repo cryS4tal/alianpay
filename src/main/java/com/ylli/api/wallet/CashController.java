@@ -22,12 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Auth
 public class CashController {
 
-    @Value("${cash.min}")
-    public Integer min;
-
-    @Value("${cash.max}")
-    public Integer max;
-
     @Autowired
     CashService cashService;
 
@@ -55,12 +49,9 @@ public class CashController {
      */
     @PostMapping
     public void cash(@RequestBody CashReq req) throws Exception {
-        ServiceUtil.checkNotEmptyIgnore(req, true, "identityCard", "reservedPhone");
+        ServiceUtil.checkNotEmptyIgnore(req, true, "identityCard", "reservedPhone","subBank");
         if (authSession.getAuthId() != req.mchId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-        }
-        if (req.money > max || req.money < min) {
-            throw new AwesomeException(Config.ERROR_CHARGE_MONEY);
         }
         cashService.cash(req);
     }

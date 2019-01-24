@@ -58,9 +58,9 @@ public class WalletService {
         if (sup != null) {
             Wallet wallet1 = walletMapper.selectByPrimaryKey(sup.mchId);
             if (PayService.ALI.equals(payType)) {
-                wallet1.bonus = orderMoney * sup.alipayRate / 10000;
+                wallet1.bonus = wallet1.bonus + orderMoney * sup.alipayRate / 10000;
             } else if (PayService.WX.equals(payType)) {
-                wallet1.bonus = orderMoney * sup.wxRate / 10000;
+                wallet1.bonus = wallet1.bonus + orderMoney * sup.wxRate / 10000;
             } else {
                 //预留其他情况.
                 wallet1.bonus = 0;

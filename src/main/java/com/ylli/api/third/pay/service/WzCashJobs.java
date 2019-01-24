@@ -1,25 +1,10 @@
 package com.ylli.api.third.pay.service;
 
 
-import com.google.gson.Gson;
-import com.ylli.api.wallet.mapper.WzCashLogMapper;
-import com.ylli.api.wallet.model.WzCashLog;
-import com.ylli.api.wallet.model.WzRes;
-import com.ylli.api.wallet.service.CashService;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-@Component
+//@Component
 public class WzCashJobs {
 
-    @Value("${pay.wz.fail.count}")
+    /*@Value("${pay.wz.fail.count}")
     public Integer failCount;
 
     private static Logger LOGGER = LoggerFactory.getLogger(WzCashJobs.class);
@@ -35,10 +20,10 @@ public class WzCashJobs {
 
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    /**
+    *//**
      * 自动轮询提现请求（网众支付）
-     */
-    @Scheduled(cron = "0 0/5 * * * ?")
+     *//*
+    //@Scheduled(cron = "0 0/5 * * * ?")
     @Transactional
     public void autoQuery() {
         if (!isRunning.compareAndSet(false, true)) {
@@ -80,5 +65,5 @@ public class WzCashJobs {
         } finally {
             isRunning.set(false);
         }
-    }
+    }*/
 }
