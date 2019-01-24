@@ -257,24 +257,15 @@ public class CashService {
         Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
         cashLog.type = CashLog.MANUAL;
         if (success == null || success) {
-            /*if (wallet.recharge < cashLog.money + 300) {
-                throw new AwesomeException(Config.ERROR_CHARGE_REQUEST);
-            }*/
             cashLog.state = CashLog.FINISH;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
             walletService.cashSuc(wallet, cashLog.money);
-            /*wallet.pending = wallet.pending - cashLog.money - 200;
-            wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
-            walletMapper.updateByPrimaryKeySelective(wallet);*/
         } else {
             cashLog.state = CashLog.FAILED;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
             walletService.cashFail(wallet, cashLog.money);
-            /*wallet.pending = wallet.pending - cashLog.money - 200;
-            wallet.recharge = wallet.recharge + cashLog.money + 200;
-            walletMapper.updateByPrimaryKeySelective(wallet);*/
         }
     }
 

@@ -144,8 +144,8 @@ public class WalletService {
         if (all < wallet.recharge) {
             wallet.recharge = wallet.recharge - all;
         } else {
-            wallet.recharge = 0;
             wallet.bonus = wallet.bonus - (all - wallet.recharge);
+            wallet.recharge = 0;
         }
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
