@@ -133,7 +133,7 @@ public class RateService {
                             throw new AwesomeException(Config.ERROR_FORMAT.format(new StringBuffer("当前子账户")
                                     .append(sub.subId).append("支付宝费率")
                                     .append(String.format("%.2f", (subRate / 100.0))).append("%")
-                                    .append("大于代理商").append(item.mchId).append("支付宝费率")
+                                    .append("小于代理商").append(item.mchId).append("支付宝费率")
                                     .append(String.format("%.2f", (item.rate / 100.0))).append("%").toString()
                             ));
                         }
