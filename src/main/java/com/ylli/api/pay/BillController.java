@@ -85,6 +85,16 @@ public class BillController {
                             @AwesomeParam(required = false) AwesomeDateTime startTime,
                             @AwesomeParam(required = false) AwesomeDateTime endTime,
                             HttpServletResponse response) {
+        Boolean admin = permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL);
+        do {
+            if (admin) {
+                break;
+            }
+            if (mchAgencyService.regPay(mchIds, authSession.getAuthId())) {
+                break;
+            }
+            permissionService.permissionDeny();
+        } while (false);
         billService.exportBills(mchIds, Bill.FINISH, mchOrderId, sysOrderId, payType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
