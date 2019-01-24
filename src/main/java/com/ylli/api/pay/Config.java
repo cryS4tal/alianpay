@@ -41,6 +41,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             7, "利率不能为空");
 
+    public static final ErrorCode ERROR_RATE
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            8, "%s");
+
     /**
      * 权限
      */

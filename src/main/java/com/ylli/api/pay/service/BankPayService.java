@@ -4,6 +4,9 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.mch.mapper.MchAgencyMapper;
+import com.ylli.api.mch.model.MchAgency;
+import static com.ylli.api.mch.service.MchAgencyService.bankPay;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.pay.Config;
@@ -61,6 +64,9 @@ public class BankPayService {
 
     @Autowired
     MchBankPayRateMapper mchBankPayRateMapper;
+
+    @Autowired
+    MchAgencyMapper mchAgencyMapper;
 
     @Autowired
     ModelMapper modelMapper;
@@ -294,6 +300,59 @@ public class BankPayService {
             // update.
             bankPayRate.rate = rate;
             mchBankPayRateMapper.updateByPrimaryKeySelective(bankPayRate);
+        }
+
+        /**
+         * 是否是代理商. yes 更新所有 mch_agency 费率差
+         *
+         * 是否是子账户. yes 更新所有 mch_agency 费率差
+         */
+        MchAgency agency = new MchAgency();
+        agency.mchId = mchId;
+        agency.type = bankPay;
+        List<MchAgency> isAgency = mchAgencyMapper.select(agency);
+        if (isAgency.size() > 0) {
+            isAgency.stream().forEach(item -> {
+
+                //获得子账户代付费率
+                MchBankPayRate subRate = mchBankPayRateMapper.selectByMchId(item.subId);
+                //费率差 = 子账户 -代理商
+                item.bankRate = subRate.rate - rate;
+                if (item.bankRate < 0) {
+                    throw new AwesomeException(Config.ERROR_RATE.format(new StringBuffer("当前代理商")
+                            .append(mchId).append("代付费率：")
+                            .append(String.format("%.2f", (rate / 100.0))).append("%")
+                            .append("小于子账户").append(item.subId)
+                            .append("代付费率")
+                            .append(String.format("%.2f", (subRate.rate / 100.0))).append("%")
+                            .toString()
+                    ));
+                }
+                mchAgencyMapper.updateByPrimaryKeySelective(item);
+            });
+        }
+
+        MchAgency isSub = new MchAgency();
+        isSub.subId = mchId;
+        isSub.type = bankPay;
+        isSub = mchAgencyMapper.selectOne(isSub);
+        if (isSub != null) {
+            //是子账户，获得代理商代付费率
+            MchBankPayRate supRate = mchBankPayRateMapper.selectByMchId(isSub.mchId);
+
+            //更新当前记录的费率差
+            isSub.bankRate = rate - supRate.rate;
+            if (isSub.bankRate < 0) {
+                throw new AwesomeException(Config.ERROR_RATE.format(new StringBuffer("当前子账户")
+                        .append(mchId).append("代付费率：")
+                        .append(String.format("%.2f", (rate / 100.0))).append("%")
+                        .append("大于代理商").append(isSub.mchId)
+                        .append("代付费率")
+                        .append(String.format("%.2f", (supRate.rate / 100.0))).append("%")
+                        .toString()
+                ));
+            }
+            mchAgencyMapper.updateByPrimaryKeySelective(isSub);
         }
     }
 

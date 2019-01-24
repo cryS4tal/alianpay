@@ -112,37 +112,38 @@ public class RateService {
              *
              * 是否子账户？ yes 更新所有 mch_agency 费率差。出现小于0 throw
              */
+            // 是否是代理商？
             MchAgency sup = new MchAgency();
             sup.mchId = item.mchId;
             sup.type = pay;
             List<MchAgency> subs = mchAgencyMapper.select(sup);
             if (subs.size() > 0) {
                 //item.appId =1 支付宝，= 2 微信
+                //遍历每一个 子账户
                 subs.stream().forEach(sub -> {
                     //更新支付宝，微信费率差
-                    MchRate subRate = new MchRate();
-                    subRate.mchId = sub.subId;
-                    subRate.appId = item.appId;
-                    subRate = mchRateMapper.selectOne(subRate);
+
+                    //获得zi账户费率信息
+                    Integer subRate = getRate(sub.subId, item.appId);
 
                     if (item.appId == 1) {
                         //支付宝
-                        sub.alipayRate = subRate.rate - item.rate;
+                        sub.alipayRate = subRate - item.rate;
                         if (sub.alipayRate < 0) {
                             throw new AwesomeException(Config.ERROR_FORMAT.format(new StringBuffer("当前子账户")
-                                    .append(subRate.mchId).append("支付宝费率")
-                                    .append(String.format("%.2f", (subRate.rate / 100.0))).append("%")
+                                    .append(sub.subId).append("支付宝费率")
+                                    .append(String.format("%.2f", (subRate / 100.0))).append("%")
                                     .append("大于代理商").append(item.mchId).append("支付宝费率")
                                     .append(String.format("%.2f", (item.rate / 100.0))).append("%").toString()
                             ));
                         }
                     } else if (item.appId == 2) {
                         //微信
-                        sub.wxRate = mchRateMapper.selectOne(subRate).rate - item.rate;
+                        sub.wxRate = subRate - item.rate;
                         if (sub.wxRate < 0) {
                             throw new AwesomeException(Config.ERROR_FORMAT.format(new StringBuffer("当前子账户")
-                                    .append(subRate.mchId).append("微信费率")
-                                    .append(String.format("%.2f", (subRate.rate / 100.0))).append("%")
+                                    .append(sub.subId).append("微信费率")
+                                    .append(String.format("%.2f", (subRate / 100.0))).append("%")
                                     .append("大于代理商").append(item.mchId).append("微信费率")
                                     .append(String.format("%.2f", (item.rate / 100.0))).append("%").toString()
                             ));
@@ -150,6 +151,41 @@ public class RateService {
                     }
                     mchAgencyMapper.updateByPrimaryKeySelective(sub);
                 });
+            }
+            //是否是子账户
+            MchAgency sub = new MchAgency();
+            sub.subId = item.mchId;
+            sub.type = pay;
+            sub = mchAgencyMapper.selectOne(sub);
+            if (sub != null) {
+
+                //获得代理商费率信息
+                Integer supRate = getRate(sub.mchId, item.appId);
+
+                if (item.appId == 1) {
+                    //支付宝
+                    sub.alipayRate = item.rate - supRate;
+                    if (sub.alipayRate < 0) {
+                        throw new AwesomeException(Config.ERROR_FORMAT.format(new StringBuffer("当前代理商")
+                                .append(sub.mchId).append("支付宝费率")
+                                .append(String.format("%.2f", (supRate / 100.0))).append("%")
+                                .append("小于子账户").append(item.mchId).append("支付宝费率")
+                                .append(String.format("%.2f", (item.rate / 100.0))).append("%").toString()
+                        ));
+                    }
+                } else if (item.appId == 2) {
+                    //微信
+                    sub.wxRate = item.rate - supRate;
+                    if (sub.wxRate < 0) {
+                        throw new AwesomeException(Config.ERROR_FORMAT.format(new StringBuffer("当前代理商")
+                                .append(sub.mchId).append("微信费率")
+                                .append(String.format("%.2f", (supRate / 100.0))).append("%")
+                                .append("小于子账户").append(item.mchId).append("微信费率")
+                                .append(String.format("%.2f", (item.rate / 100.0))).append("%").toString()
+                        ));
+                    }
+                }
+                mchAgencyMapper.updateByPrimaryKeySelective(sub);
             }
             list.add(convert(item));
         }
