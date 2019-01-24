@@ -118,8 +118,9 @@ public class CashService {
         if ("0000300000000236".equals(req.bankcardNumber)) {
             // 商户提现金额限制
             if (req.money > wallet.total - wallet.pending) {
-                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.recharge / 100.0))));
+                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.total - wallet.pending / 100.0))));
             }
+            walletService.pendingSuc(wallet, req.money, 0);
         } else {
             //系统提现金额限制
             if (req.money < min) {
@@ -132,15 +133,13 @@ public class CashService {
             if (req.money + cashCharge > wallet.total - wallet.pending) {
                 throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.total - wallet.pending - cashCharge) / 100.0))));
             }
+            walletService.pendingSuc(wallet, req.money, cashCharge);
         }
-
         //记录日志
         CashLog log = new CashLog();
         modelMapper.map(req, log);
         log.state = CashLog.NEW;
         cashLogMapper.insertSelective(log);
-
-        walletService.pendingSuc(wallet, req.money, cashCharge);
 
         /**
          * 注释cnt代码。若继续走cnt，需要开启以下代码

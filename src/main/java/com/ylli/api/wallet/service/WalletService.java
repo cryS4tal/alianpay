@@ -138,8 +138,15 @@ public class WalletService {
      */
     @Transactional
     public void pendingSuc(Wallet wallet, Integer money, Integer cashCharge) {
-        wallet.recharge = wallet.recharge - money - cashCharge;
-        wallet.pending = wallet.pending + money + cashCharge;
+        Integer all = money + cashCharge;
+
+        //优先减去交易金额.
+        if (all < wallet.recharge) {
+            wallet.recharge = wallet.recharge - all;
+        } else {
+            wallet.recharge = 0;
+            wallet.bonus = wallet.bonus - (all - wallet.recharge);
+        }
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
