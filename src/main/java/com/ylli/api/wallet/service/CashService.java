@@ -118,7 +118,7 @@ public class CashService {
         if ("0000300000000236".equals(req.bankcardNumber)) {
             // 商户提现金额限制
             if (req.money > wallet.total - wallet.pending) {
-                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", (wallet.total - wallet.pending / 100.0))));
+                throw new AwesomeException(Config.ERROR_CASH_OUT_BOUND.format(String.format("%.2f", ((wallet.total - wallet.pending) / 100.0))));
             }
             walletService.pendingSuc(wallet, req.money, 0);
         } else {
@@ -283,7 +283,6 @@ public class CashService {
      * 网众 - 提现任务轮询
      *
      * @param cashLogId
-     * @param success
      */
     /*public void successJobs(Long cashLogId, Boolean success) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);

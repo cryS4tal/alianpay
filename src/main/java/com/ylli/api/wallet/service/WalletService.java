@@ -74,6 +74,12 @@ public class WalletService {
     public void cashSuc(Wallet wallet, Integer money, Integer cashCharge) {
         wallet.pending = wallet.pending - money - cashCharge;
         wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
+
+        //手续费0标识为商户发起代付池转换请求，success，代付池余额增加
+        //@see recharge() method
+        if (0 == cashCharge.intValue()) {
+            wallet.reservoir = wallet.reservoir + money;
+        }
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
