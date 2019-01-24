@@ -73,3 +73,17 @@ ADD INDEX `n_mch_id` (`mch_id`) ,
 ADD INDEX `n_sub_id` (`sub_id`) ;
 
 RENAME TABLE t_user_app TO t_mch_rate;
+
+/* 重建 */
+DROP TABLE IF EXISTS `t_wallet_log`;
+CREATE TABLE t_wallet_log (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  auth_id BIGINT COMMENT '操作人id',
+  auth_name VARCHAR(128) COMMENT '操作人',
+  mch_id BIGINT COMMENT '商户id',
+  mch_name VARCHAR(128) COMMENT '商户',
+  type INTEGER COMMENT '操作类型',
+  money INTEGER COMMENT '交易金额',
+  create_time DATETIME NOT NULL DEFAULT now(),
+  modify_time DATETIME NOT NULL DEFAULT now()
+);

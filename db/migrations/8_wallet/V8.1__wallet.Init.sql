@@ -26,11 +26,12 @@ ADD UNIQUE INDEX `u_user_id` (`user_id`) ;
 
 CREATE TABLE t_wallet_log (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  user_id BIGINT COMMENT '用户id',
-  admin_id BIGINT COMMENT '管理员id',
-  type VARCHAR(64) COMMENT '操作类型',
-  money INTEGER  DEFAULT NULL COMMENT '交易金额',
-  current_money INTEGER DEFAULT NULL COMMENT '当前余额',
+  auth_id BIGINT COMMENT '操作人id',
+  auth_name VARCHAR(128) COMMENT '操作人',
+  mch_id BIGINT COMMENT '商户id',
+  mch_name VARCHAR(128) COMMENT '商户',
+  type INTEGER COMMENT '操作类型',
+  money INTEGER COMMENT '交易金额',
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );

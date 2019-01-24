@@ -11,18 +11,15 @@ import com.ylli.api.mch.model.MchBase;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.sys.model.BankPayment;
 import com.ylli.api.sys.service.BankPaymentService;
-import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.third.pay.service.CntClient;
 import com.ylli.api.third.pay.service.PingAnService;
-import com.ylli.api.third.pay.service.WzClient;
 import com.ylli.api.third.pay.service.XianFenService;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
-import com.ylli.api.wallet.mapper.WalletMapper;
-import com.ylli.api.wallet.mapper.WzCashLogMapper;
+import com.ylli.api.wallet.model.BankList;
 import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.model.CashReq;
 import com.ylli.api.wallet.model.Wallet;
+import com.ylli.api.wallet.model.WalletLog;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,22 +49,10 @@ public class CashService {
     WalletService walletService;
 
     @Autowired
-    WalletMapper walletMapper;
-
-    @Autowired
     ModelMapper modelMapper;
 
     @Autowired
-    WzClient wzClient;
-
-    @Autowired
-    MchBaseMapper userBaseMapper;
-
-    @Autowired
-    ChannelService channelService;
-
-    @Autowired
-    WzCashLogMapper wzCashLogMapper;
+    MchBaseMapper mchBaseMapper;
 
     @Autowired
     BankPaymentService bankPaymentService;
@@ -79,14 +64,14 @@ public class CashService {
     XianFenService xianFenService;
 
     @Autowired
-    CntClient cntClient;
+    WalletLogService walletLogService;
 
     public Object cashList(Long mchId, String phone, int offset, int limit) {
 
         PageHelper.offsetPage(offset, limit);
         Page<CashLog> page = (Page<CashLog>) cashLogMapper.cashList(mchId, phone);
         page.stream().forEach(item -> {
-            MchBase base = userBaseMapper.selectByMchId(item.mchId);
+            MchBase base = mchBaseMapper.selectByMchId(item.mchId);
             if (base != null) {
                 item.mchName = base.mchName;
             }
@@ -241,7 +226,7 @@ public class CashService {
      * @param success
      */
     @Transactional
-    public void manualCash(Long cashLogId, Boolean success) {
+    public void manualCash(Long cashLogId, Boolean success, Long authId) {
         CashLog cashLog = cashLogMapper.selectByPrimaryKey(cashLogId);
         if (cashLog == null) {
             throw new AwesomeException(Config.ERROR_REQUEST_NOT_FOUND);
@@ -254,7 +239,7 @@ public class CashService {
         if (cashLog.state == CashLog.PROCESS) {
             throw new AwesomeException(Config.ERROR_CASH_HANDING);
         }
-        Wallet wallet = walletMapper.selectByPrimaryKey(cashLog.mchId);
+        Wallet wallet = walletService.getOwnWallet(cashLog.mchId);
         cashLog.type = CashLog.MANUAL;
         if (success == null || success) {
             cashLog.state = CashLog.FINISH;
@@ -263,6 +248,9 @@ public class CashService {
             //先锋账户
             if ("0000300000000236".equals(cashLog.bankcardNumber)) {
                 walletService.cashSuc(wallet, cashLog.money, 0);
+
+                //记录日志请求.
+                walletLogService.log(authId, cashLog.mchId, cashLog.money, WalletLog.YEZH);
             } else {
                 walletService.cashSuc(wallet, cashLog.money, cashCharge);
             }
@@ -336,5 +324,11 @@ public class CashService {
             //其他
             throw new AwesomeException(Config.ERROR_PAYMENT_NOT_FOUND);
         }
+    }
+
+    public Object bankList(long authId) {
+        BankList list = new BankList();
+        list.list = cashLogMapper.selectBankList(authId);
+        return list;
     }
 }

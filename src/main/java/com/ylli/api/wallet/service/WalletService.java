@@ -7,6 +7,7 @@ import com.ylli.api.pay.service.PayService;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
+import com.ylli.api.wallet.model.WalletLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class WalletService {
 
     @Autowired
     MchAgencyService mchAgencyService;
+
+    @Autowired
+    WalletLogService walletLogService;
 
     public Wallet getOwnWallet(Long mchId) {
         return walletMapper.selectByPrimaryKey(mchId);
@@ -191,7 +195,7 @@ public class WalletService {
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
-    @Transactional
+    /*@Transactional
     public Object conversion(Long mchId, Integer money) {
         Wallet wallet = getOwnWallet(mchId);
         if (wallet.recharge < money) {
@@ -202,19 +206,20 @@ public class WalletService {
         wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
         walletMapper.updateByPrimaryKeySelective(wallet);
         return wallet;
-    }
+    }*/
 
     /**
      * 充值代付池
      */
     @Transactional
-    public Object recharge(Long mchId, Integer money, String password) {
+    public Object recharge(Long authId, Long mchId, Integer money, String password) {
         if (!password.equals(sysPwd)) {
             throw new AwesomeException(Config.ERROR_VERIFY);
         }
         Wallet wallet = getOwnWallet(mchId);
         wallet.reservoir = wallet.reservoir + money;
         walletMapper.updateByPrimaryKeySelective(wallet);
+        walletLogService.log(authId, mchId, money, WalletLog.XTCZ);
         return wallet;
     }
 

@@ -9,22 +9,27 @@ import javax.persistence.Table;
 @Table(name = "t_wallet_log")
 public class WalletLog {
 
-    public static final String CZ = "充值";
-    public static final String TX = "提现";
+    //线下充值
+    public static final Integer XTCZ = 1;
+    //余额转换
+    public static final Integer YEZH = 2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    public Long adminId;
+    //操作人员id
+    public Long authId;
 
-    public Long userId;
+    public String authName;
 
-    public String type;
+    public Long mchId;
+
+    public String mchName;
+
+    public Integer type;
 
     public Integer money;
-
-    public Integer currentMoney;
 
     public Timestamp createTime;
 
