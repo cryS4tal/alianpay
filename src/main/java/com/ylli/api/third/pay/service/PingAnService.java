@@ -97,6 +97,7 @@ public class PingAnService {
      * @param mobile
      * @param money
      */
+    @Deprecated
     public void createPingAnOrder(Long cashLogId, String inAcctNo, String inAcctName, String inAcctBankName, String mobile, Integer money) {
 
         /**组装请求报文-start*/
@@ -312,6 +313,7 @@ public class PingAnService {
      * @return
      */
     @Transactional
+    @Deprecated
     public void payQuery(SysPaymentLog log) {
 
         /**组装请求报文-start**/

@@ -260,12 +260,22 @@ public class CashService {
             cashLog.state = CashLog.FINISH;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-            walletService.cashSuc(wallet, cashLog.money);
+            //先锋账户
+            if ("0000300000000236".equals(cashLog.bankcardNumber)) {
+                walletService.cashSuc(wallet, cashLog.money, 0);
+            } else {
+                walletService.cashSuc(wallet, cashLog.money, cashCharge);
+            }
         } else {
             cashLog.state = CashLog.FAILED;
             cashLogMapper.updateByPrimaryKeySelective(cashLog);
 
-            walletService.cashFail(wallet, cashLog.money);
+            //先锋账户
+            if ("0000300000000236".equals(cashLog.bankcardNumber)) {
+                walletService.cashFail(wallet, cashLog.money, 0);
+            } else {
+                walletService.cashFail(wallet, cashLog.money, cashCharge);
+            }
         }
     }
 

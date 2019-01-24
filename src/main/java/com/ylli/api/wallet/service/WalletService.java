@@ -71,33 +71,41 @@ public class WalletService {
     }
 
     @Transactional
-    public void cashSuc(Wallet wallet, Integer money) {
+    public void cashSuc(Wallet wallet, Integer money, Integer cashCharge) {
         wallet.pending = wallet.pending - money - cashCharge;
         wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
+    /**
+     * 商户发起提现请求，走系统代付（弃用）success
+     * 保留 for 平安代付，
+     * cnt相关可删，暂存
+     */
     @Transactional
+    @Deprecated
     public void cashSuc(Long mchId, Integer money) {
         Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
-        wallet.pending = wallet.pending - money - cashCharge;
-        wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
-        walletMapper.updateByPrimaryKeySelective(wallet);
+        cashSuc(wallet, money, cashCharge);
     }
 
     @Transactional
-    public void cashFail(Wallet wallet, Integer money) {
+    public void cashFail(Wallet wallet, Integer money, Integer cashCharge) {
         wallet.pending = wallet.pending - money - cashCharge;
+
+        //分润金额提现失败暂时回滚至交易金额。
         wallet.recharge = wallet.recharge + money + cashCharge;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
+    /**
+     * 商户发起提现请求，走系统代付（弃用）fail
+     */
     @Transactional
+    @Deprecated
     public void cashFail(Long mchId, Integer money) {
         Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
-        wallet.pending = wallet.pending - money - cashCharge;
-        wallet.recharge = wallet.recharge + money + cashCharge;
-        walletMapper.updateByPrimaryKeySelective(wallet);
+        cashFail(wallet, money, cashCharge);
     }
 
     /**
@@ -147,6 +155,7 @@ public class WalletService {
             wallet.bonus = wallet.bonus - (all - wallet.recharge);
             wallet.recharge = 0;
         }
+        wallet.pending = wallet.pending + all;
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 

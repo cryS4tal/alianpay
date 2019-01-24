@@ -199,7 +199,6 @@ public class CntService {
                 return "success";
             } else if (CNTEnum.CASH.getValue().equals(isPur)) {
                 //提现回调
-                //TODO
                 CashLog log = cashLogMapper.selectByPrimaryKey(Long.parseLong(userOrder));
                 if (log == null) {
                     return "cash log 404 not found";

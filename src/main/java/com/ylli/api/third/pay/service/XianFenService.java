@@ -430,6 +430,7 @@ public class XianFenService {
      * @param accType        账户类型
      */
     @Transactional
+    @Deprecated
     public void createXianFenOrder(Long cashLogId, Integer money, String bankcardNumber, String name, String reservedPhone, Integer payType, Integer accType) throws Exception {
 
         //测试单时占用了很多，不能直接使用原生id
