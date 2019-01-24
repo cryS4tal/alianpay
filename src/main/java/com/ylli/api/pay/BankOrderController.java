@@ -60,9 +60,6 @@ public class BankOrderController {
             if (permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
                 break;
             }
-            if (mchIds.size() == 1 && authSession.getAuthId() == mchIds.get(0)) {
-                break;
-            }
             if (mchAgencyService.regBankPay(mchIds, authSession.getAuthId())) {
                 break;
             }

@@ -62,9 +62,6 @@ public class BillController {
             if (admin) {
                 break;
             }
-            if (mchIds.size() == 1 && authSession.getAuthId() == mchIds.get(0)) {
-                break;
-            }
             if (mchAgencyService.regPay(mchIds, authSession.getAuthId())) {
                 break;
             }

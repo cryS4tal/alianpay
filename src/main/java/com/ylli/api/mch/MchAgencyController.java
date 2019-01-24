@@ -53,7 +53,7 @@ public class MchAgencyController {
     }
 
     @GetMapping
-    @Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
+    //@Auth(@Permission(Config.SysPermission.MANAGE_AGENCY))
     public Object agencyList(@AwesomeParam Integer type,
                              @AwesomeParam(required = false) Long mchId,
                              @AwesomeParam(required = false) Long subId,

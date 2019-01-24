@@ -190,6 +190,9 @@ public class MchAgencyService {
     }
 
     public boolean regPay(List<Long> mchIds, long authId) {
+        if (mchIds == null) {
+            return false;
+        }
         MchAgency mchAgency = new MchAgency();
         mchAgency.mchId = authId;
         mchAgency.type = pay;
@@ -202,6 +205,9 @@ public class MchAgencyService {
     }
 
     public boolean regBankPay(List<Long> mchIds, long authId) {
+        if (mchIds == null) {
+            return false;
+        }
         MchAgency mchAgency = new MchAgency();
         mchAgency.mchId = authId;
         mchAgency.type = bankPay;
@@ -225,7 +231,7 @@ public class MchAgencyService {
             isAgency.isAgency = false;
         } else {
             isAgency.isAgency = true;
-            isAgency.subIds = list.stream().map(i ->i.subId).collect(Collectors.toList());
+            isAgency.subIds = list.stream().map(i -> i.subId).collect(Collectors.toList());
         }
         return isAgency;
     }
