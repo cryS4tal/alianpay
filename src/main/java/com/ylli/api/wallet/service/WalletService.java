@@ -63,7 +63,7 @@ public class WalletService {
                 wallet1.bonus = wallet1.bonus + orderMoney * sup.wxRate / 10000;
             } else {
                 //预留其他情况.
-                wallet1.bonus = 0;
+
             }
             wallet1.total = wallet1.recharge + wallet1.pending + wallet1.bonus;
             walletMapper.updateByPrimaryKeySelective(wallet1);
@@ -102,16 +102,30 @@ public class WalletService {
 
     /**
      * 补单金额回滚
-     *
-     * @param mchId
-     * @param money
      */
     @Transactional
-    public void rollback(Long mchId, int money) {
+    public void rollback(Long mchId, Integer orderMoney, Integer chargeMoney, String payType) {
         Wallet wallet = walletMapper.selectByPrimaryKey(mchId);
-        wallet.recharge = wallet.recharge - money;
+        wallet.recharge = wallet.recharge - orderMoney + chargeMoney;
         wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
         walletMapper.updateByPrimaryKeySelective(wallet);
+
+        //分润金额回滚.
+        MchAgency sup = mchAgencyService.getPaySupper(mchId);
+        if (sup != null) {
+            Wallet wallet1 = walletMapper.selectByPrimaryKey(sup.mchId);
+            if (PayService.ALI.equals(payType)) {
+                wallet1.bonus = wallet1.bonus - orderMoney * sup.alipayRate / 10000;
+            } else if (PayService.WX.equals(payType)) {
+                wallet1.bonus = wallet1.bonus - orderMoney * sup.wxRate / 10000;
+            } else {
+                //预留其他情况.
+
+            }
+            wallet1.total = wallet1.recharge + wallet1.pending + wallet1.bonus;
+            walletMapper.updateByPrimaryKeySelective(wallet1);
+        }
+
     }
 
 

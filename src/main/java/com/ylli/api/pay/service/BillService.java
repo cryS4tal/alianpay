@@ -317,7 +317,7 @@ public class BillService {
         }
         if (bill.status == Bill.FINISH) {
             //钱包金额变动。
-            walletService.rollback(bill.mchId, bill.money - bill.payCharge);
+            walletService.rollback(bill.mchId, bill.money, bill.payCharge, bill.payType);
 
             billMapper.rollback(sysOrderId);
         }

@@ -283,7 +283,7 @@ public class QrTransferService {
 
         if (bill.status == Bill.FINISH) {
             //钱包金额变动。
-            walletService.rollback(bill.mchId, Double.valueOf(Double.valueOf(bill.msg) * 100).intValue() - bill.payCharge);
+            walletService.rollback(bill.mchId, Double.valueOf(Double.valueOf(bill.msg) * 100).intValue(), bill.payCharge, bill.payType);
 
             billMapper.rollback(sysOrderId);
         }
