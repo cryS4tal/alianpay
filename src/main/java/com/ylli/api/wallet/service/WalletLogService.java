@@ -33,12 +33,8 @@ public class WalletLogService {
     }
 
     public Object getLogs(Long mchId, int offset, int limit) {
-
-        WalletLog mchLog = new WalletLog();
-        mchLog.mchId = mchId;
-
         PageHelper.offsetPage(offset, limit);
-        Page<WalletLog> page = (Page<WalletLog>) walletLogMapper.select(mchLog);
+        Page<WalletLog> page = (Page<WalletLog>) walletLogMapper.selectByMchId(mchId);
 
         DataList<WalletLog> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
