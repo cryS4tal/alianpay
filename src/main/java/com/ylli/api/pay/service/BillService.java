@@ -124,6 +124,7 @@ public class BillService {
             baseBill.channel = channelService.getChannelName(bill.channelId);
         }
         baseBill.msg = bill.msg;
+        baseBill.isSuccess = bill.isSuccess;
         return baseBill;
     }
 

@@ -40,6 +40,8 @@ public class BaseBill {
 
     public String channel;
 
+    public Boolean isSuccess;
+
     //创建时间
     public Timestamp createTime;
 
