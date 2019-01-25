@@ -153,16 +153,12 @@ public class QrTransferService {
                     .append("&reserve_word=").append(reserveWord);
             String uid = qrCode.uid;
             if (!Strings.isNullOrEmpty(uid)) {
-                sb.append("&native=").append(getNativeUrl(uid, String.format("%.2f", (money / 100.0)), bill.reserveWord));
+                sb.append("&uid=").append(uid);
             }
             return sb.toString();
         } else {
             return null;
         }
-    }
-
-    public String getNativeUrl(String uid, String money, String reserveWord) {
-        return "alipays://platformapi/startapp?appId=20000123&actionType=scan&biz_data={\"s\": \"money\", \"u\": \"" + uid + "\", \"a\": \"" + money + "\", \"m\": \"" + reserveWord + "\"}";
     }
 
     @Transactional

@@ -36,6 +36,6 @@ public class BaseOrder {
      * 新增加入版本号：原始第三方支付可以不传.
      * 新通道CNT version = 1.1
      */
-    public String version;
+    //public String version;
 
 }

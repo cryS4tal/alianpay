@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.ylli.api.mch.model.MchKey;
 import com.ylli.api.mch.service.MchKeyService;
-import com.ylli.api.pay.enums.Version;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.OrderQueryReq;
@@ -117,8 +116,6 @@ public class PayService {
     @Value("${pay.eazy.apihost}")
     public String EAZY_HOST;
 
-    //public static String successCode = "0000";
-
     /**
      * 中央调度server. 根据情况选择不同通道
      *
@@ -182,7 +179,7 @@ public class PayService {
                 //下单成功
                 return new Response("A000", "成功", successSign("A000", "成功", "url", ctOrderResponse.data, secretKey), "url", ctOrderResponse.data);
             }
-        } else if (channel.code.equals("CNT")) {
+        } /*else if (channel.code.equals("CNT")) {
             //cnt 支付.
             //cnt 加入版本 version = 1.1 。因为不会发起主动回调，需要商户主动确认。。
             if (!(Version.CNT.getVersion()).equals(baseOrder.version)) {
@@ -199,7 +196,7 @@ public class PayService {
             }
             return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
 
-        } else if (channel.code.equals("GP")) {
+        }*/ else if (channel.code.equals("GP")) {
             //Gpay
 
             //微信只支持扫码  支付宝走 H5
@@ -638,37 +635,6 @@ public class PayService {
             }
         }
     }
-
-    /*public Object payConfirm(OrderConfirm confirm, Boolean isMch) throws Exception {
-
-        if (isMch) {
-            String secretKey = mchKeyService.getKeyById(confirm.mchId);
-
-            if (isSignValid(confirm, secretKey)) {
-                return ResponseEnum.A001(null, confirm);
-            }
-        }
-
-        //根据商户定单号查询商户定单，获取上游定单号
-        Bill bill = billService.selectByMchOrderId(confirm.mchOrderId);
-        if (bill == null) {
-            return ResponseEnum.A006(null, null);
-        }
-        //根据上游定单号通知上游确认支付
-        try {
-            String str = cntService.confirm(bill.superOrderId, bill.reserve);
-            ConfirmResponse response = new Gson().fromJson(str, ConfirmResponse.class);
-            //TODO 无论支付都会返回付款成功
-            if (successCode.equals(response.resultCode)) {
-                return new Response("A000", "成功", bill.reserveWord);
-            } else {
-                //TODO 确认失败. 是否需要更改订单状态？
-                return new Response("A010", "失败:" + response.resultMsg);
-            }
-        } catch (Exception e) {
-            return new Response("A010", "失败,当前服务状态异常。");
-        }
-    }*/
 
     public Object manualNotify(String mchOrderId) throws Exception {
         Bill bill = billService.selectByMchOrderId(mchOrderId);

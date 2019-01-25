@@ -47,19 +47,6 @@ public class WalletController {
         return walletService.getOwnWallet(mchId);
     }
 
-    /*static class Conversion {
-        public Long mchId;
-        public Integer money;
-    }
-
-    @PostMapping("/conversion")
-    public Object conversion(@RequestBody Conversion conversion) {
-        if (authSession.getAuthId() != conversion.mchId) {
-            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-        }
-        return walletService.conversion(conversion.mchId, conversion.money);
-    }*/
-
     static class Recharge {
         public Long mchId;
         public Integer money;

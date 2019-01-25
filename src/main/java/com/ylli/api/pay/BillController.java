@@ -70,7 +70,6 @@ public class BillController {
                 Strings.isNullOrEmpty(mchOrderId) ? null : mchOrderId,
                 Strings.isNullOrEmpty(sysOrderId) ? null : sysOrderId,
                 Strings.isNullOrEmpty(payType) ? null : payType,
-                //Strings.isNullOrEmpty(tradeType) ? null : tradeType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(), admin, offset, limit);
@@ -100,22 +99,6 @@ public class BillController {
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(),
                 response);
-    }
-
-
-    @GetMapping("/today")
-    @Auth
-    public Object getTodayDetail(@AwesomeParam(required = false) Long mchId) {
-        do {
-            if (mchId != null && authSession.getAuthId() == mchId) {
-                break;
-            }
-            if (permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
-                break;
-            }
-            permissionService.permissionDeny();
-        } while (false);
-        return billService.getTodayDetail(mchId);
     }
 
     static class Reissue {

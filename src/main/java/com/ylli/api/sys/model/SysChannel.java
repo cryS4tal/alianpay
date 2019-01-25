@@ -45,6 +45,15 @@ public class SysChannel {
         if (channelId == 6) {
             return "畅通支付";
         }
+        if (channelId == 7) {
+            return "GPay支付";
+        }
+        if (channelId == 8) {
+            return "easy支付";
+        }
+        if (channelId == 9) {
+            return "BNT";
+        }
         return "未知";
     }
 }

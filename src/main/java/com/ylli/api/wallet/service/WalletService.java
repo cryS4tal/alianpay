@@ -195,19 +195,6 @@ public class WalletService {
         walletMapper.updateByPrimaryKeySelective(wallet);
     }
 
-    /*@Transactional
-    public Object conversion(Long mchId, Integer money) {
-        Wallet wallet = getOwnWallet(mchId);
-        if (wallet.recharge < money) {
-            throw new AwesomeException(Config.ERROR_WALLET_CONVERSION.format(String.format("%.2f", wallet.recharge / 100.0)));
-        }
-        wallet.recharge = wallet.recharge - money;
-        wallet.reservoir = wallet.reservoir + money;
-        wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
-        walletMapper.updateByPrimaryKeySelective(wallet);
-        return wallet;
-    }*/
-
     /**
      * 充值代付池
      */
