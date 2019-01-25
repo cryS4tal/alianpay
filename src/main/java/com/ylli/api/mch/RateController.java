@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping
-@Auth(@Permission(Config.SysPermission.MANAGE_RATE))
 public class RateController {
 
     @Autowired
@@ -38,12 +37,14 @@ public class RateController {
     BankPayService bankPayService;
 
     @PostMapping("/sys/app")
+    @Auth(@Permission(Config.SysPermission.MANAGE_RATE))
     public Object createApp(@RequestBody SysApp app) {
         ServiceUtil.checkNotEmptyIgnore(app, true, "status");
         return rateService.createApp(app.rate, app.appName);
     }
 
     @GetMapping("/sys/app")
+    @Auth(@Permission(Config.SysPermission.MANAGE_RATE))
     public Object getSysApp(@AwesomeParam(required = false) String appName,
                             @AwesomeParam(required = false) Boolean status,
                             @AwesomeParam(defaultValue = "0") int offset,
@@ -52,23 +53,27 @@ public class RateController {
     }
 
     @PutMapping("/sys/app")
+    @Auth(@Permission(Config.SysPermission.MANAGE_RATE))
     public Object updateApp(@RequestBody SysApp app) {
         return rateService.updateApp(app);
     }
 
 
     @PostMapping("/mch/app")
+    @Auth(@Permission(Config.SysPermission.MANAGE_RATE))
     public Object setMchRate(@RequestBody Apps apps) {
         return rateService.setMchRate(apps);
     }
 
     @DeleteMapping("/mch/app")
+    @Auth(@Permission(Config.SysPermission.MANAGE_RATE))
     public void removeRate(@AwesomeParam Long appId,
                           @AwesomeParam Long mchId) {
         rateService.removeRate(appId, mchId);
     }
 
     @GetMapping("/mch/app")
+    @Auth
     public Object getMchRate(@AwesomeParam Long mchId) {
         if (mchId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_RATE)) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
@@ -85,12 +90,17 @@ public class RateController {
      * 设置商户代付费率
      */
     @PostMapping("/bankpay/mch/rate")
+    @Auth(@Permission(Config.SysPermission.MANAGE_RATE))
     public void bankPayRate(@RequestBody BankPayRate rate) {
         bankPayService.bankPayRate(rate.mchId, rate.rate);
     }
 
     @GetMapping("/bankpay/mch/rate")
+    @Auth
     public Object getBankPayRate(@AwesomeParam Long mchId) {
+        if (mchId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_RATE)) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
         return bankPayService.getBankPayRate(mchId);
     }
 }
