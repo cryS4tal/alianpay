@@ -36,7 +36,7 @@ public class BaseBill {
 
     public Integer state;
 
-    public String tradeTime;
+    public Timestamp tradeTime;
 
     public String channel;
 

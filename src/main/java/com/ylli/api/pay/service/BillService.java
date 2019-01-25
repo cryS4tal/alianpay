@@ -120,7 +120,7 @@ public class BillService {
         baseBill.mchCharge = bill.payCharge;
         baseBill.payType = typeToString(bill.payType);
         baseBill.state = bill.status;
-        baseBill.tradeTime = bill.tradeType;
+        baseBill.tradeTime = bill.tradeTime;
         baseBill.createTime = bill.createTime;
         if (admin) {
             baseBill.channel = channelService.getChannelName(bill.channelId);
@@ -316,7 +316,7 @@ public class BillService {
     }
 
     public void exportBills(List<Long> mchIds, Integer status, String mchOrderId, String sysOrderId, String payType,
-                            Date tradeTime, Date startTime, Date endTime, HttpServletResponse response) {
+                            Date tradeTime, Date startTime, Date endTime, Boolean admin, HttpServletResponse response) {
         List<Bill> list = billMapper.getBills(mchIds, status, mchOrderId, sysOrderId, payType, tradeTime, startTime, endTime);
 
 
@@ -390,7 +390,9 @@ public class BillService {
                     cell.setCellValue(Optional.ofNullable(list.get(rownum - 1).superOrderId).map(i ->
                             i.startsWith("unknown") ? "是" : "否").orElse(""));
                 } else if (cellnum == 6) {
-                    cell.setCellValue(SysChannel.getName(list.get(rownum - 1).channelId));
+                    if (admin) {
+                        cell.setCellValue(SysChannel.getName(list.get(rownum - 1).channelId));
+                    }
                 } else if (cellnum == 7) {
                     cell.setCellValue(Bill.getStatus(list.get(rownum - 1).status));
                 } else if (cellnum == 8) {
