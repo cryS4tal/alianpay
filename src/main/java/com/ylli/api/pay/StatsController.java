@@ -5,10 +5,10 @@ import com.ylli.api.base.annotation.Auth;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
-import com.ylli.api.sys.Config;
 import com.ylli.api.pay.service.StatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,21 +57,18 @@ public class StatsController {
         return statsService.total(mchId);
     }
 
-
-    @GetMapping("/rate")
-    public Object successRate(@AwesomeParam(required = false) Long channelId,
-                              @AwesomeParam(required = false) Long mchId,
-                              @AwesomeParam(required = false) Long appId) {
-        //商户 mch_id 必传
-        //appId 选填
-        if (!permissionService.hasSysPermission(com.ylli.api.sys.Config.SysPermission.MANAGE_STATS)) {
-            if (mchId == null || mchId != authSession.getAuthId()) {
-                throw new AwesomeException(com.ylli.api.sys.Config.ERROR_PERMISSION_DENY);
+    //暂时只对管理员开放。
+    @GetMapping("/category/{date}")
+    public Object category(@AwesomeParam(required = false) Long channelId,
+                           @AwesomeParam(required = false) Long mchId,
+                           @AwesomeParam(required = false) String status,
+                           @PathVariable String date) {
+        do {
+            if (permissionService.hasSysPermission(com.ylli.api.sys.Config.SysPermission.MANAGE_STATS)) {
+                break;
             }
-            if (channelId != null) {
-                throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-            }
-        }
-        return statsService.successRate(channelId, mchId, appId);
+            throw new AwesomeException(com.ylli.api.sys.Config.ERROR_PERMISSION_DENY);
+        } while (false);
+        return statsService.category(channelId, mchId, status, date);
     }
 }

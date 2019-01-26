@@ -1,11 +1,16 @@
 package com.ylli.api.pay.service;
 
+import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.pay.Config;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
+import com.ylli.api.pay.model.CategoryData;
 import com.ylli.api.sys.model.Data;
 import com.ylli.api.sys.model.HourlyData;
 import com.ylli.api.sys.model.TotalData;
 import com.ylli.api.wallet.mapper.CashLogMapper;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -62,5 +67,59 @@ public class StatsService {
 
 
         return null;
+    }
+
+    /**
+     * date
+     * day week month year
+     */
+    public Object category(Long channelId, Long mchId, String status, String date) {
+        List<CategoryData> list = billMapper.category(channelId, mchId, status, createTime(date));
+        return list;
+    }
+
+    public Date createTime(String date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        //todo 是否-8h.
+
+        if ("0d".equals(date)) {
+            return calendar.getTime();
+        }
+        if ("1d".equals(date)) {
+            int day = calendar.get(Calendar.DAY_OF_YEAR);
+            calendar.set(Calendar.DAY_OF_YEAR, day - 1);
+            return calendar.getTime();
+        }
+        if ("3d".equals(date)) {
+            int day = calendar.get(Calendar.DAY_OF_YEAR);
+            calendar.set(Calendar.DAY_OF_YEAR, day - 3);
+            return calendar.getTime();
+        }
+        if ("7d".equals(date)) {
+            int day = calendar.get(Calendar.DAY_OF_YEAR);
+            calendar.set(Calendar.DAY_OF_YEAR, day - 7);
+            return calendar.getTime();
+        }
+        if ("1m".equals(date)) {
+            int month = calendar.get(Calendar.MONTH);
+            calendar.set(Calendar.MONTH, month - 1);
+            return calendar.getTime();
+        }
+        if ("3m".equals(date)) {
+            int month = calendar.get(Calendar.MONTH);
+            calendar.set(Calendar.MONTH, month - 3);
+            return calendar.getTime();
+        }
+        if ("1y".equals(date)) {
+            int year = calendar.get(Calendar.YEAR);
+            calendar.set(Calendar.YEAR, year - 1);
+            return calendar.getTime();
+        }
+        throw new AwesomeException(Config.ERROR_DATE);
     }
 }

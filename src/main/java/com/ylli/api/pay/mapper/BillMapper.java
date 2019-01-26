@@ -1,6 +1,7 @@
 package com.ylli.api.pay.mapper;
 
 import com.ylli.api.pay.model.Bill;
+import com.ylli.api.pay.model.CategoryData;
 import com.ylli.api.sys.model.Data;
 import java.util.Date;
 import java.util.List;
@@ -45,4 +46,9 @@ public interface BillMapper extends Mapper<Bill> {
                          @Param("mch_order_id") String mchOrderId,
                          @Param("start_time") Date startTime,
                          @Param("end_time") Date endTime);
+
+    List<CategoryData> category(@Param("channel_id") Long channelId,
+                                @Param("mch_id") Long mchId,
+                                @Param("status") String status,
+                                @Param("time") Date time);
 }

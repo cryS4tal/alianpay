@@ -45,6 +45,10 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             8, "%s");
 
+    public static final ErrorCode ERROR_DATE
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            9, "非法得请求参数date");
+
     /**
      * 权限
      */
