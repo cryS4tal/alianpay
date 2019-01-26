@@ -204,10 +204,39 @@
                 AND IF(status = 3, 3, 4) = ${status}
             </if>
         </where>
-        GROUP BY
-          channel_id,
-          mch_id,
-          IF (STATUS = 3, 1, 0)
+        <if test="groupby == 1">
+            GROUP BY
+            channel_id
+        </if>
+        <if test="groupby == 2">
+            GROUP BY
+            mch_id
+        </if>
+        <if test="groupby == 4">
+            GROUP BY
+            IF (STATUS = 3, 1, 0)
+        </if>
+        <if test="groupby == 3">
+            GROUP BY
+            channel_id,
+            mch_id
+        </if>
+        <if test="groupby == 5">
+            GROUP BY
+            channel_id,
+            IF (STATUS = 3, 1, 0)
+        </if>
+        <if test="groupby == 6">
+            GROUP BY
+            mch_id,
+            IF (STATUS = 3, 1, 0)
+        </if>
+        <if test="groupby == 7">
+            GROUP BY
+            channel_id,
+            mch_id,
+            IF (STATUS = 3, 1, 0)
+        </if>
     </select>
 
 </mapper>

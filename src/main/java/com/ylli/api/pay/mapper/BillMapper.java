@@ -49,6 +49,7 @@ public interface BillMapper extends Mapper<Bill> {
 
     List<CategoryData> category(@Param("channel_id") Long channelId,
                                 @Param("mch_id") Long mchId,
-                                @Param("status") String status,
-                                @Param("time") Date time);
+                                @Param("status") Integer status,
+                                @Param("time") Date time,
+                                @Param("groupby") Integer groupby);
 }

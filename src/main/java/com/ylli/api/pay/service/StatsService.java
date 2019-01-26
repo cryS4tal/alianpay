@@ -73,11 +73,10 @@ public class StatsService {
      * date
      * day week month year
      */
-    public Object category(Long channelId, Long mchId, String status, String date) {
-        List<CategoryData> list = billMapper.category(channelId, mchId, status, createTime(date));
+    public Object category(Long channelId, Long mchId, Integer status, String date, Integer groupby) {
+        List<CategoryData> list = billMapper.category(channelId, mchId, status, createTime(date), groupby);
         return list;
     }
-
     public Date createTime(String date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
