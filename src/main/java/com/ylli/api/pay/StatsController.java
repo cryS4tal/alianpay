@@ -62,7 +62,7 @@ public class StatsController {
     public Object category(@AwesomeParam(required = false) Long channelId,
                            @AwesomeParam(required = false) Long mchId,
                            @AwesomeParam(required = false) Integer status,
-                           @AwesomeParam(required = false) Integer groupby,
+                           @AwesomeParam(defaultValue = "7") Integer groupby,
                            @PathVariable String date) {
         do {
             if (permissionService.hasSysPermission(com.ylli.api.sys.Config.SysPermission.MANAGE_STATS)) {
