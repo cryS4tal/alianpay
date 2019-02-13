@@ -24,6 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping
 public class RateController {
 
+    /**
+     * TODO 费率这块有空重构.
+     * 支付和代付的费率重新定义。
+     *
+     * 关于系统配置，重新定义 sys_config 配置各种参数（可修改/不可修改）。
+     */
+
+
     @Autowired
     RateService rateService;
 
@@ -91,8 +99,8 @@ public class RateController {
      */
     @PostMapping("/bankpay/mch/rate")
     @Auth(@Permission(Config.SysPermission.MANAGE_RATE))
-    public void bankPayRate(@RequestBody BankPayRate rate) {
-        bankPayService.bankPayRate(rate.mchId, rate.rate);
+    public void setBankPayRate(@RequestBody BankPayRate rate) {
+        bankPayService.setBankPayRate(rate.mchId, rate.rate);
     }
 
     @GetMapping("/bankpay/mch/rate")
