@@ -136,4 +136,18 @@ public class BankPayOrder {
         }
         return "N";
     }
+
+    //代付订单导出-状态解析
+    public static String statusFormat(Integer status) {
+        if (status == ING) {
+            return "进行中";
+        }
+        if (status == FINISH) {
+            return "成功";
+        }
+        if (status == FAIL) {
+            return "失败";
+        }
+        return "异常";
+    }
 }
