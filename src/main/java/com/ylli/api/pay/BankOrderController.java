@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/bankpay")
-//@Auth
+@Auth
 public class BankOrderController {
 
     @Autowired
@@ -83,7 +83,7 @@ public class BankOrderController {
                              @AwesomeParam(required = false) AwesomeDateTime startTime,
                              @AwesomeParam(required = false) AwesomeDateTime endTime,
                              HttpServletResponse response) {
-        /*do {
+        do {
             if (permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
                 break;
             }
@@ -91,7 +91,7 @@ public class BankOrderController {
                 break;
             }
             permissionService.permissionDeny();
-        } while (false);*/
+        } while (false);
         bankPayService.exportOrders(mchIds, status, mchOrderId, sysOrderId, accName, payType,
                 tradeTime == null ? null : tradeTime.getDate(),
                 startTime == null ? null : startTime.getDate(),
