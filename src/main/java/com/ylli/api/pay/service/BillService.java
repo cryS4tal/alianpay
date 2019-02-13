@@ -11,6 +11,7 @@ import com.ylli.api.pay.Config;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.BaseBill;
 import com.ylli.api.pay.model.Bill;
+import com.ylli.api.pay.util.ExcelUtil;
 import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
@@ -23,23 +24,16 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -326,11 +320,11 @@ public class BillService {
         // 冻结最左边的两列、冻结最上面的一行
         // 即：滚动横向滚动条时，左边的第一、二列固定不动;滚动纵向滚动条时，上面的第一行固定不动。
         sheet.createFreezePane(2, 1);
-        setSheet(sheet);
+        ExcelUtil.setSheet(sheet);
         // 设置并获取到需要的样式
-        XSSFCellStyle xssfCellStyleHeader = getAndSetXSSFCellStyleHeader(sxssfWorkbook);
-        XSSFCellStyle xssfCellStyleOne = getAndSetXSSFCellStyleOne(sxssfWorkbook);
-        XSSFCellStyle xssfCellStyleTwo = getAndSetXSSFCellStyleTwo(sxssfWorkbook);
+        XSSFCellStyle xssfCellStyleHeader = ExcelUtil.getAndSetXSSFCellStyleHeader(sxssfWorkbook);
+        XSSFCellStyle xssfCellStyleOne = ExcelUtil.getAndSetXSSFCellStyleOne(sxssfWorkbook);
+        XSSFCellStyle xssfCellStyleTwo = ExcelUtil.getAndSetXSSFCellStyleTwo(sxssfWorkbook);
         // 创建第一行,作为header表头
         Row header = sheet.createRow(0);
         // 循环创建header单元格(根据实际情况灵活创建即可)
@@ -400,7 +394,7 @@ public class BillService {
                 } else if (cellnum == 9) {
                     cell.setCellValue(list.get(rownum - 1).msg);
                 } else if (cellnum == 10) {
-                    cell.setCellValue(convertZ8(list.get(rownum - 1).createTime));
+                    cell.setCellValue(ExcelUtil.convertZ8(list.get(rownum - 1).createTime));
                 }
             }
         }
@@ -424,108 +418,6 @@ public class BillService {
                 }
             }
         }
-    }
-
-    private void setSheet(Sheet sheet) {
-        // 设置各列宽度(单位为:字符宽度的1/256)
-        sheet.setColumnWidth(0, 3000);
-        sheet.setColumnWidth(1, 3000);
-        sheet.setColumnWidth(2, 8000);
-        sheet.setColumnWidth(3, 8000);
-        sheet.setColumnWidth(4, 8000);
-        sheet.setColumnWidth(5, 4000);
-        sheet.setColumnWidth(6, 3000);
-        sheet.setColumnWidth(7, 3000);
-        sheet.setColumnWidth(8, 3000);
-        sheet.setColumnWidth(9, 3000);
-        sheet.setColumnWidth(10, 8000);
-    }
-
-    /**
-     * 获取并设置header样式
-     */
-    private XSSFCellStyle getAndSetXSSFCellStyleHeader(SXSSFWorkbook sxssfWorkbook) {
-        XSSFCellStyle xssfCellStyle = (XSSFCellStyle) sxssfWorkbook.createCellStyle();
-        Font font = sxssfWorkbook.createFont();
-        // 字体大小
-        font.setFontHeightInPoints((short) 14);
-        // 字体粗细
-        font.setBoldweight((short) 20);
-        // 将字体应用到样式上面
-        xssfCellStyle.setFont(font);
-        // 是否自动换行
-        xssfCellStyle.setWrapText(false);
-        // 水平居中
-        xssfCellStyle.setAlignment(HorizontalAlignment.CENTER);
-        // 垂直居中
-        xssfCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        return xssfCellStyle;
-    }
-
-    /**
-     * 获取并设置样式一
-     */
-    private XSSFCellStyle getAndSetXSSFCellStyleOne(SXSSFWorkbook sxssfWorkbook) {
-        XSSFCellStyle xssfCellStyle = (XSSFCellStyle) sxssfWorkbook.createCellStyle();
-        XSSFDataFormat format = (XSSFDataFormat) sxssfWorkbook.createDataFormat();
-        // 是否自动换行
-        xssfCellStyle.setWrapText(false);
-        // 水平居中
-        xssfCellStyle.setAlignment(HorizontalAlignment.CENTER);
-        // 垂直居中
-        xssfCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        // 前景颜色
-        xssfCellStyle.setFillPattern(XSSFCellStyle.SOLID_FOREGROUND);
-        xssfCellStyle.setFillForegroundColor(IndexedColors.AQUA.getIndex());
-        // 边框
-        xssfCellStyle.setBorderBottom(BorderStyle.THIN);
-        xssfCellStyle.setBorderRight(BorderStyle.THIN);
-        xssfCellStyle.setBorderTop(BorderStyle.THIN);
-        xssfCellStyle.setBorderLeft(BorderStyle.THIN);
-        xssfCellStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-        xssfCellStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-        xssfCellStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-        xssfCellStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-        // 防止数字过长,excel导出后,显示为科学计数法,如:防止8615192053888被显示为8.61519E+12
-        xssfCellStyle.setDataFormat(format.getFormat("0"));
-        return xssfCellStyle;
-    }
-
-    /**
-     * 获取并设置样式二
-     */
-    private XSSFCellStyle getAndSetXSSFCellStyleTwo(SXSSFWorkbook sxssfWorkbook) {
-        XSSFCellStyle xssfCellStyle = (XSSFCellStyle) sxssfWorkbook.createCellStyle();
-        XSSFDataFormat format = (XSSFDataFormat) sxssfWorkbook.createDataFormat();
-        // 是否自动换行
-        xssfCellStyle.setWrapText(false);
-        // 水平居中
-        xssfCellStyle.setAlignment(HorizontalAlignment.CENTER);
-        // 边框
-        xssfCellStyle.setBorderBottom(BorderStyle.THIN);
-        xssfCellStyle.setBorderRight(BorderStyle.THIN);
-        xssfCellStyle.setBorderTop(BorderStyle.THIN);
-        xssfCellStyle.setBorderLeft(BorderStyle.THIN);
-        xssfCellStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-        xssfCellStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-        xssfCellStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-        xssfCellStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-        // 垂直居中
-        xssfCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        // 防止数字过长,excel导出后,显示为科学计数法,如:防止8615192053888被显示为8.61519E+12
-        xssfCellStyle.setDataFormat(format.getFormat("0"));
-        return xssfCellStyle;
-    }
-
-
-    /**
-     * Z0 to Z8
-     */
-    public String convertZ8(Timestamp ts) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(ts);
-        calendar.add(Calendar.HOUR, 8);
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
     }
 
     public Bill selectBySuperOrderId(String superOrderId) {

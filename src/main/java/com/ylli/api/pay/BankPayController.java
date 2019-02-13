@@ -65,7 +65,7 @@ public class BankPayController {
     }
 
     /**
-     * 目前系统走先锋支付.临时失败方法
+     * 目前系统走先锋支付.临时失败方法 todo delete
      *
      * @param sysOrderId
      * @return

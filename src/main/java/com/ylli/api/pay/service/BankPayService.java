@@ -19,6 +19,7 @@ import com.ylli.api.pay.model.OrderQueryRes;
 import com.ylli.api.pay.model.Response;
 import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.model.SignPayOrder;
+import com.ylli.api.pay.util.ExcelUtil;
 import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.mapper.BankPaymentMapper;
@@ -27,10 +28,18 @@ import com.ylli.api.third.pay.service.PingAnService;
 import com.ylli.api.third.pay.service.XianFenService;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -281,8 +290,14 @@ public class BankPayService {
         return dataList;
     }
 
+    /**
+     * 设置代付费率.
+     *
+     * @param mchId
+     * @param rate
+     */
     @Transactional
-    public void bankPayRate(Long mchId, Integer rate) {
+    public void setBankPayRate(Long mchId, Integer rate) {
         if (mchId == null) {
             throw new AwesomeException(Config.ERROR_MCH_NOT_FOUND);
         }
@@ -358,5 +373,121 @@ public class BankPayService {
 
     public MchBankPayRate getBankPayRate(Long mchId) {
         return mchBankPayRateMapper.selectByMchId(mchId);
+    }
+
+    public void exportOrders(List<Long> mchIds, Integer status, String mchOrderId, String sysOrderId, String accName,
+                             Integer payType, Date tradeTime, Date startTime, Date endTime, HttpServletResponse response) {
+        List<BankPayOrder> list = bankPayOrderMapper.getOrders(mchIds, status, mchOrderId, sysOrderId, accName, payType, tradeTime, startTime, endTime);
+
+        SXSSFWorkbook sxssfWorkbook = new SXSSFWorkbook();
+
+        Sheet sheet = sxssfWorkbook.createSheet("Sheet1");
+        // 冻结最左边的两列、冻结最上面的一行
+        // 即：滚动横向滚动条时，左边的第一、二列固定不动;滚动纵向滚动条时，上面的第一行固定不动。
+        sheet.createFreezePane(2, 1);
+        ExcelUtil.setSheet1(sheet);
+        // 设置并获取到需要的样式
+        XSSFCellStyle xssfCellStyleHeader = ExcelUtil.getAndSetXSSFCellStyleHeader(sxssfWorkbook);
+        XSSFCellStyle xssfCellStyleOne = ExcelUtil.getAndSetXSSFCellStyleOne(sxssfWorkbook);
+        XSSFCellStyle xssfCellStyleTwo = ExcelUtil.getAndSetXSSFCellStyleTwo(sxssfWorkbook);
+        // 创建第一行,作为header表头
+        Row header = sheet.createRow(0);
+        // 循环创建header单元格(根据实际情况灵活创建即可)
+        for (int cellnum = 0; cellnum < 13; cellnum++) {
+            Cell cell = header.createCell(cellnum);
+            cell.setCellStyle(xssfCellStyleHeader);
+            // 判断单元格
+            if (cellnum == 0) {
+                cell.setCellValue("id");
+            } else if (cellnum == 1) {
+                cell.setCellValue("商户号");
+            } else if (cellnum == 2) {
+                cell.setCellValue("系统订单号");
+            } else if (cellnum == 3) {
+                cell.setCellValue("商户订单号");
+            } else if (cellnum == 4) {
+                cell.setCellValue("上游订单号");
+            } else if (cellnum == 5) {
+                cell.setCellValue("通道");
+            } else if (cellnum == 6) {
+                cell.setCellValue("收款人");
+            } else if (cellnum == 7) {
+                cell.setCellValue("收款账户");
+            } else if (cellnum == 8) {
+                cell.setCellValue("金额/元");
+            } else if (cellnum == 9) {
+                cell.setCellValue("结算类型");
+            } else if (cellnum == 10) {
+                cell.setCellValue("手续费/元");
+            } else if (cellnum == 11) {
+                cell.setCellValue("状态");
+            } else if (cellnum == 12) {
+                cell.setCellValue("创建时间(北京时间)");
+            }
+        }
+        // 遍历创建行,导出数据
+        for (int rownum = 1; rownum <= list.size(); rownum++) {
+            Row row = sheet.createRow(rownum);
+            // 循环创建单元格
+            for (int cellnum = 0; cellnum < 13; cellnum++) {
+                Cell cell = row.createCell(cellnum);
+                // 根据行数,设置该行内的单元格样式
+                if (rownum % 2 == 1) { // 奇数
+                    cell.setCellStyle(xssfCellStyleOne);
+                } else { // 偶数
+                    cell.setCellStyle(xssfCellStyleTwo);
+                }
+                // 根据单元格所属,录入相应内容
+                if (cellnum == 0) {
+                    cell.setCellValue((list.get(rownum - 1).id));
+                } else if (cellnum == 1) {
+                    cell.setCellValue(list.get(rownum - 1).mchId);
+                } else if (cellnum == 2) {
+                    //cell.setCellType(CellType.NUMERIC);
+                    cell.setCellValue(list.get(rownum - 1).sysOrderId);
+                } else if (cellnum == 3) {
+                    cell.setCellValue(list.get(rownum - 1).mchOrderId);
+                } else if (cellnum == 4) {
+                    cell.setCellValue(list.get(rownum - 1).superOrderId);
+                } else if (cellnum == 5) {
+                    cell.setCellValue(list.get(rownum - 1).bankPaymentId == 1 ? "平安" : "先锋");
+                } else if (cellnum == 6) {
+                    cell.setCellValue(list.get(rownum - 1).accName);
+                } else if (cellnum == 7) {
+                    cell.setCellValue(list.get(rownum - 1).accNo);
+                } else if (cellnum == 8) {
+                    cell.setCellValue(String.format("%.2f", (list.get(rownum - 1).money / 100.0)));
+                } else if (cellnum == 9) {
+                    cell.setCellValue(list.get(rownum - 1).chargeType == BankPayOrder.PAY_TYPE_PERSON ? "对私" : "对公");
+                } else if (cellnum == 10) {
+                    cell.setCellValue(String.format("%.2f", (list.get(rownum - 1).chargeMoney / 100.0)));
+                } else if (cellnum == 11) {
+                    cell.setCellValue(BankPayOrder.statusFormat(list.get(rownum - 1).status));
+                } else if (cellnum == 12) {
+                    cell.setCellValue(ExcelUtil.convertZ8(list.get(rownum - 1).createTime));
+                }
+            }
+        }
+
+        OutputStream output = null;
+        try {
+            output = response.getOutputStream();
+            response.reset();
+            response.setHeader("Content-disposition", "attachment; filename=orders.xlsx");
+            response.setContentType("application/msexcel");
+            sxssfWorkbook.write(output);
+            output.flush();
+        } catch (IOException ex) {
+            throw new AwesomeException(Config.ERROR_FAILURE_BILL_EXCEL_EXPORT);
+        } finally {
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException ex) {
+                    //logger.info("stream closed failure");
+                }
+            }
+        }
+
     }
 }

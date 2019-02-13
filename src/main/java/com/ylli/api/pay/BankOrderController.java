@@ -8,6 +8,7 @@ import com.ylli.api.base.util.AwesomeDateTime;
 import com.ylli.api.mch.service.MchAgencyService;
 import com.ylli.api.pay.service.BankPayService;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/bankpay")
-@Auth
+//@Auth
 public class BankOrderController {
 
     @Autowired
@@ -70,4 +71,31 @@ public class BankOrderController {
                 startTime == null ? null : startTime.getDate(),
                 endTime == null ? null : endTime.getDate(), offset, limit);
     }
+
+    @GetMapping("/export")
+    public void exportOrders(@AwesomeParam(required = false) List<Long> mchIds,
+                             @AwesomeParam(required = false) Integer status,
+                             @AwesomeParam(required = false) String mchOrderId,
+                             @AwesomeParam(required = false) String sysOrderId,
+                             @AwesomeParam(required = false) String accName,
+                             @AwesomeParam(required = false) Integer payType,
+                             @AwesomeParam(required = false) AwesomeDateTime tradeTime,
+                             @AwesomeParam(required = false) AwesomeDateTime startTime,
+                             @AwesomeParam(required = false) AwesomeDateTime endTime,
+                             HttpServletResponse response) {
+        /*do {
+            if (permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_BILL)) {
+                break;
+            }
+            if (mchAgencyService.regBankPay(mchIds, authSession.getAuthId())) {
+                break;
+            }
+            permissionService.permissionDeny();
+        } while (false);*/
+        bankPayService.exportOrders(mchIds, status, mchOrderId, sysOrderId, accName, payType,
+                tradeTime == null ? null : tradeTime.getDate(),
+                startTime == null ? null : startTime.getDate(),
+                endTime == null ? null : endTime.getDate(), response);
+    }
+
 }
