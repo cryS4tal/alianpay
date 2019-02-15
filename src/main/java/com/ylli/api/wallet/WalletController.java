@@ -6,6 +6,8 @@ import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.base.annotation.Permission;
 import com.ylli.api.base.auth.AuthSession;
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.base.util.ServiceUtil;
+import com.ylli.api.wallet.model.MchRecharge;
 import com.ylli.api.wallet.service.WalletLogService;
 import com.ylli.api.wallet.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +56,7 @@ public class WalletController {
     }
 
     /**
-     * 代付充值
+     * 代付充值 - 管理员.
      *
      * @param recharge
      * @return
@@ -63,6 +65,29 @@ public class WalletController {
     @Auth(@Permission(Config.SysPermission.MANAGE_USER_WALLET))
     public Object recharge(@RequestBody Recharge recharge) {
         return walletService.recharge(authSession.getAuthId(), recharge.mchId, recharge.money, recharge.password);
+    }
+
+    /**
+     * 代付充值 - 商户.
+     */
+    @PostMapping("/recharge/mch")
+    @Auth
+    public Object rechargeMch(@RequestBody MchRecharge mchRecharge) throws Exception {
+        ServiceUtil.checkNotEmpty(mchRecharge);
+        if (authSession.getAuthId() != mchRecharge.mchId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        return walletService.rechargeMch(mchRecharge.mchId, mchRecharge.money, mchRecharge.accountName, mchRecharge.accountNo, mchRecharge.recevieBank);
+    }
+
+    /**
+     * 代付充值 - 商户.
+     * 单笔订单查询
+     */
+    @Auth
+    @GetMapping("/recharge/mch")
+    public Object rechargeQuery(@AwesomeParam String id) throws Exception {
+        return walletService.rechargeQuery(authSession.getAuthId(), id);
     }
 
     @GetMapping("/recharge/log")

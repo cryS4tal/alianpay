@@ -24,8 +24,8 @@ import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.mapper.BankPaymentMapper;
 import com.ylli.api.sys.model.BankPayment;
-import com.ylli.api.third.pay.service.PingAnService;
-import com.ylli.api.third.pay.service.XianFenService;
+import com.ylli.api.third.pay.service.pingan.PingAnService;
+import com.ylli.api.third.pay.service.xianfen.XianFenService;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.service.WalletService;
 import java.io.IOException;
@@ -54,12 +54,6 @@ public class BankPayService {
 
     @Value("${bank.pay.max}")
     public Integer bankPayMax;
-
-    @Value("${bank.pay.limit}")
-    public Integer bankPayLimit;
-
-    @Value("${bank.pay.add}")
-    public Integer bankPayAdd;
 
     //手续费暂时设置定值
     @Value("${bank.pay.charge}")
@@ -241,23 +235,6 @@ public class BankPayService {
             BankPayOrder order = bankPayOrderMapper.selectByMchOrderId(orderQuery.mchOrderId);
             if (order == null) {
                 return ResponseEnum.A006(null, null);
-            }
-            if (order.status == BankPayOrder.FINISH || order.status == BankPayOrder.FAIL) {
-
-            } else {
-                //TODO 主动查询
-                /**
-                 * 平安代付：
-                 * 创建订单 success,扣除代付池金额。加入主动轮询日志，系统自动轮询。
-                 * 当轮询返回ok.fail(金额回滚).删除日志，以日志得存在形态来保证不重复入账
-                 * 固这里不适合去主动调取平安服务更新状态.
-                 */
-
-
-                //xianfeng query
-
-                //更新订单信息
-                //order = bankPayOrderMapper.selectByMchOrderId(orderQuery.mchOrderId);
             }
             //直接返回订单信息
             OrderQueryRes res = new OrderQueryRes();

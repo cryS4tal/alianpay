@@ -13,18 +13,19 @@ import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.third.pay.model.CTOrderResponse;
-import com.ylli.api.third.pay.model.EazyResponse;
-import com.ylli.api.third.pay.model.NotifyRes;
-import com.ylli.api.third.pay.service.CTService;
-import com.ylli.api.third.pay.service.CntService;
-import com.ylli.api.third.pay.service.EazyPayService;
-import com.ylli.api.third.pay.service.GPayService;
-import com.ylli.api.third.pay.service.HRJFService;
-import com.ylli.api.third.pay.service.QrTransferService;
-import com.ylli.api.third.pay.service.UnknownPayService;
-import com.ylli.api.third.pay.service.WzService;
-import com.ylli.api.third.pay.service.YfbService;
+import com.ylli.api.third.pay.modelVo.NotifyRes;
+import com.ylli.api.third.pay.modelVo.chantong.CTOrderResponse;
+import com.ylli.api.third.pay.modelVo.easy.EazyResponse;
+import com.ylli.api.third.pay.service.chantong.CTService;
+import com.ylli.api.third.pay.service.cntbnt.CntService;
+import com.ylli.api.third.pay.service.cntbnt.QrTransferService;
+import com.ylli.api.third.pay.service.deprecate.UnknownPayService;
+import com.ylli.api.third.pay.service.deprecate.WzService;
+import com.ylli.api.third.pay.service.deprecate.YfbService;
+import com.ylli.api.third.pay.service.eazy.EazyPayService;
+import com.ylli.api.third.pay.service.gpay.GPayService;
+import com.ylli.api.third.pay.service.guagua.GuaGuaService;
+import com.ylli.api.third.pay.service.hrjf.HRJFService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,6 +85,9 @@ public class PayService {
 
     @Autowired
     EazyPayService eazyPayService;
+
+    @Autowired
+    GuaGuaService guaGuaService;
 
     @Autowired
     QrTransferService qrTransferService;
@@ -253,6 +257,19 @@ public class PayService {
             } else {
                 return new Response("A000", "成功", successSign("A000", "成功", "url", str, secretKey), "url", str);
             }
+        } else if (channel.code.equals("GuaGua")) {
+            //呱呱 支付
+            if (!ALI.equals(baseOrder.payType)) {
+                return ResponseEnum.A007("pay_type = alipay", baseOrder);
+            }
+            //TODO 新通道开始 tradeType 调整。 wap 支付链接, native 返回原生支付链接（用来生成二维码）
+
+            String str = guaGuaService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
+                    baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            //TODO 返回数据处理
+            return str;
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);

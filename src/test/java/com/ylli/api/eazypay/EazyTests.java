@@ -1,6 +1,6 @@
 package com.ylli.api.eazypay;
 
-import com.ylli.api.third.pay.service.EazyClient;
+import com.ylli.api.third.pay.service.eazy.EazyClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

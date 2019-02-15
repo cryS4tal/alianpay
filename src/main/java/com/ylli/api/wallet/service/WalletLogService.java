@@ -20,8 +20,11 @@ public class WalletLogService {
     @Autowired
     MchBaseMapper mchBaseMapper;
 
+    /**
+     * 代付充值 - 日志。
+     */
     @Transactional
-    public void log(Long authId, Long mchId, Integer money, Integer type) {
+    public WalletLog log(Long authId, Long mchId, Integer money, Integer type,Integer status) {
         WalletLog log = new WalletLog();
         log.authId = authId;
         log.authName = Optional.ofNullable(mchBaseMapper.selectByMchId(authId)).map(i -> i.mchName).orElse("");
@@ -29,7 +32,9 @@ public class WalletLogService {
         log.mchName = Optional.ofNullable(mchBaseMapper.selectByMchId(mchId)).map(i -> i.mchName).orElse("");
         log.money = money;
         log.type = type;
+        log.status = status;
         walletLogMapper.insertSelective(log);
+        return log;
     }
 
     public Object getLogs(Long mchId, int offset, int limit) {

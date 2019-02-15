@@ -1,9 +1,9 @@
 package com.ylli.api.alipay;
 
 import com.google.gson.Gson;
-import com.ylli.api.third.pay.model.OrderQueryResponse;
-import com.ylli.api.third.pay.model.OrderResponse;
-import com.ylli.api.third.pay.service.KyPayClient;
+import com.ylli.api.third.pay.modelVo.deprecate.OrderQueryResponse;
+import com.ylli.api.third.pay.modelVo.deprecate.OrderResponse;
+import com.ylli.api.third.pay.service.deprecate.KyPayClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

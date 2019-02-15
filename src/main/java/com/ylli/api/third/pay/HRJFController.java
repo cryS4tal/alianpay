@@ -1,7 +1,7 @@
 package com.ylli.api.third.pay;
 
 import com.ylli.api.base.annotation.AwesomeParam;
-import com.ylli.api.third.pay.service.HRJFService;
+import com.ylli.api.third.pay.service.hrjf.HRJFService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

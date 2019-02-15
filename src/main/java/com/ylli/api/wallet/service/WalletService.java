@@ -1,10 +1,16 @@
 package com.ylli.api.wallet.service;
 
+import com.google.gson.Gson;
+import com.ucf.sdk.UcfForOnline;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.mch.service.MchAgencyService;
 import com.ylli.api.pay.service.PayService;
+import com.ylli.api.third.pay.modelVo.xianfen.Data;
+import com.ylli.api.third.pay.modelVo.xianfen.XianFenResponse;
+import com.ylli.api.third.pay.service.xianfen.XfClient;
 import com.ylli.api.wallet.Config;
+import com.ylli.api.wallet.mapper.WalletLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.model.WalletLog;
@@ -22,6 +28,9 @@ public class WalletService {
     @Value("${bank.pay.pwd}")
     public String sysPwd;
 
+    @Value("${xf.pay.mer_pri_key}")
+    public String mer_pri_key;
+
     @Autowired
     WalletMapper walletMapper;
 
@@ -30,6 +39,12 @@ public class WalletService {
 
     @Autowired
     WalletLogService walletLogService;
+
+    @Autowired
+    WalletLogMapper walletLogMapper;
+
+    @Autowired
+    XfClient xfClient;
 
     public Wallet getOwnWallet(Long mchId) {
         return walletMapper.selectByPrimaryKey(mchId);
@@ -196,7 +211,7 @@ public class WalletService {
     }
 
     /**
-     * 充值代付池
+     * 充值代付池 - 管理员
      */
     @Transactional
     public Object recharge(Long authId, Long mchId, Integer money, String password) {
@@ -206,8 +221,59 @@ public class WalletService {
         Wallet wallet = getOwnWallet(mchId);
         wallet.reservoir = wallet.reservoir + money;
         walletMapper.updateByPrimaryKeySelective(wallet);
-        walletLogService.log(authId, mchId, money, WalletLog.XTCZ);
+        walletLogService.log(authId, mchId, money, WalletLog.XXCZ, WalletLog.FINISH);
         return wallet;
+    }
+
+    /**
+     * 充值代付池 - 商户
+     */
+    @Transactional
+    public Object rechargeMch(Long mchId, Integer money, String accountName, String accountNo, String recevieBank) throws Exception {
+        //参数合法性校验。
+        //money - 范围
+        //accountName & accountNo 姓名和卡号暂时不进行校验
+        //recevieBank UPOPJS（银联）NUCC（网联）
+        if (!"UPOPJS".equals(recevieBank) && !"NUCC".equals(recevieBank)) {
+            throw new AwesomeException(Config.ERROR_RECRIVE_BANK_ERROR);
+        }
+        WalletLog walletLog = walletLogService.log(mchId, mchId, money, WalletLog.XXCZ, WalletLog.ING);
+        String str = xfClient.offlineRecharge(walletLog.id.toString(), money, accountNo, accountName, recevieBank, mchId.toString());
+        //
+        XianFenResponse response = new Gson().fromJson(str, XianFenResponse.class);
+        if (("99000").equals(response.code)) {
+            //加密后的业务数据
+            String bizData = UcfForOnline.decryptData(str, mer_pri_key);
+
+            //
+            Data data = new Gson().fromJson(bizData, Data.class);
+            if (data.resCode.equals("00000")) {
+                if (data.status.equals("S")) {
+                    //异步回调success逻辑
+
+                    Wallet wallet = getOwnWallet(mchId);
+                    wallet.reservoir = wallet.reservoir + money;
+                    walletMapper.updateByPrimaryKeySelective(wallet);
+
+                    walletLog.status = WalletLog.FINISH;
+                    walletLogMapper.updateByPrimaryKeySelective(walletLog);
+                }
+                if (data.status.equals("F")) {
+                    //异步回调fail逻辑
+
+                    walletLog.status = WalletLog.FAIL;
+                    walletLogMapper.updateByPrimaryKeySelective(walletLog);
+                }
+                if (data.status.equals("I")) {
+                    //不处理
+                }
+            } else {
+                throw new AwesomeException(Config.ERROR.format(new StringBuffer(data.resCode).append("|").append(data.resMessage)));
+            }
+            return bizData;
+        } else {
+            throw new AwesomeException(Config.ERROR.format(new StringBuffer(response.code).append("|").append(response.message)));
+        }
     }
 
     /**
@@ -224,6 +290,56 @@ public class WalletService {
             wallet.bonus = wallet.bonus + money * sup.bankRate / 10000;
             wallet.total = wallet.recharge + wallet.pending + wallet.bonus;
             walletMapper.updateByPrimaryKeySelective(wallet);
+        }
+    }
+
+    @Transactional
+    public Object rechargeQuery(long authId, String id) throws Exception {
+        WalletLog walletLog = walletLogMapper.selectByPrimaryKey(Long.parseLong(id));
+        if (walletLog == null) {
+            throw new AwesomeException(Config.ERROR_REQUEST_NOT_FOUND);
+        }
+        if (walletLog.mchId != authId) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
+        if (walletLog.status != WalletLog.ING) {
+            return walletLog;
+        }
+
+        String str = xfClient.rechargeQuery(id);
+        XianFenResponse response = new Gson().fromJson(str, XianFenResponse.class);
+        if (("99000").equals(response.code)) {
+            //加密后的业务数据
+            String bizData = UcfForOnline.decryptData(str, mer_pri_key);
+
+            //
+            Data data = new Gson().fromJson(bizData, Data.class);
+            if (data.resCode.equals("00000")) {
+                if (data.status.equals("S")) {
+                    //异步回调success逻辑
+
+                    Wallet wallet = getOwnWallet(authId);
+                    wallet.reservoir = wallet.reservoir + walletLog.money;
+                    walletMapper.updateByPrimaryKeySelective(wallet);
+
+                    walletLog.status = WalletLog.FINISH;
+                    walletLogMapper.updateByPrimaryKeySelective(walletLog);
+                }
+                if (data.status.equals("F")) {
+                    //异步回调fail逻辑
+
+                    walletLog.status = WalletLog.FAIL;
+                    walletLogMapper.updateByPrimaryKeySelective(walletLog);
+                }
+                if (data.status.equals("I")) {
+                    //不处理
+                }
+                return walletLog;
+            } else {
+                throw new AwesomeException(Config.ERROR.format(new StringBuffer(data.resCode).append("|").append(data.resMessage)));
+            }
+        } else {
+            throw new AwesomeException(Config.ERROR.format(new StringBuffer(response.code).append("|").append(response.message)));
         }
     }
 }

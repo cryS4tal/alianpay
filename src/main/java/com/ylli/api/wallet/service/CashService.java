@@ -11,8 +11,8 @@ import com.ylli.api.mch.model.MchBase;
 import com.ylli.api.model.base.DataList;
 import com.ylli.api.sys.model.BankPayment;
 import com.ylli.api.sys.service.BankPaymentService;
-import com.ylli.api.third.pay.service.PingAnService;
-import com.ylli.api.third.pay.service.XianFenService;
+import com.ylli.api.third.pay.service.pingan.PingAnService;
+import com.ylli.api.third.pay.service.xianfen.XianFenService;
 import com.ylli.api.wallet.Config;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.model.BankList;
@@ -250,7 +250,7 @@ public class CashService {
                 walletService.cashSuc(wallet, cashLog.money, 0);
 
                 //记录日志请求.
-                walletLogService.log(authId, cashLog.mchId, cashLog.money, WalletLog.YEZH);
+                walletLogService.log(authId, cashLog.mchId, cashLog.money, WalletLog.YEZH, WalletLog.FINISH);
             } else {
                 walletService.cashSuc(wallet, cashLog.money, cashCharge);
             }

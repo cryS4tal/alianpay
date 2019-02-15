@@ -1,6 +1,6 @@
 package com.ylli.api.third.pay;
 
-import com.ylli.api.third.pay.service.CTService;
+import com.ylli.api.third.pay.service.chantong.CTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

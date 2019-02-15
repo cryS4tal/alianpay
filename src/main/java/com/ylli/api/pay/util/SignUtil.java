@@ -1,7 +1,7 @@
 package com.ylli.api.pay.util;
 
 import com.google.common.base.CaseFormat;
-import com.ylli.api.third.pay.service.KyPayService;
+import com.ylli.api.third.pay.service.deprecate.KyPayService;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;

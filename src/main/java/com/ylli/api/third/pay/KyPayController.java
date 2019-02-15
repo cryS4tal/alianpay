@@ -1,6 +1,6 @@
 package com.ylli.api.third.pay;
 
-import com.ylli.api.third.pay.service.KyPayService;
+import com.ylli.api.third.pay.service.deprecate.KyPayService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

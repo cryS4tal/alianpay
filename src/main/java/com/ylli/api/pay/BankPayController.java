@@ -9,7 +9,7 @@ import com.ylli.api.pay.model.BankPayOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
 import com.ylli.api.pay.model.ResponseEnum;
 import com.ylli.api.pay.service.BankPayService;
-import com.ylli.api.third.pay.service.XianFenService;
+import com.ylli.api.third.pay.service.xianfen.XianFenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;

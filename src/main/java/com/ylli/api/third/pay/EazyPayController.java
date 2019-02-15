@@ -1,7 +1,7 @@
 package com.ylli.api.third.pay;
 
-import com.ylli.api.third.pay.model.EazyNotify;
-import com.ylli.api.third.pay.service.EazyPayService;
+import com.ylli.api.third.pay.modelVo.easy.EazyNotify;
+import com.ylli.api.third.pay.service.eazy.EazyPayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

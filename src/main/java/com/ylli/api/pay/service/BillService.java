@@ -15,7 +15,7 @@ import com.ylli.api.pay.util.ExcelUtil;
 import com.ylli.api.pay.util.RedisUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
-import com.ylli.api.third.pay.service.YfbClient;
+import com.ylli.api.third.pay.service.deprecate.YfbClient;
 import com.ylli.api.wallet.service.WalletService;
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,8 +1,8 @@
 package com.ylli.api.third.pay;
 
 import com.google.gson.Gson;
-import com.ylli.api.third.pay.model.GPNotify;
-import com.ylli.api.third.pay.service.GPayService;
+import com.ylli.api.third.pay.modelVo.gpay.GPNotify;
+import com.ylli.api.third.pay.service.gpay.GPayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

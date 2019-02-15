@@ -10,6 +10,15 @@ import javax.persistence.Transient;
 @Table(name = "t_mch_agency")
 public class MchAgency {
 
+    /**
+     * TODO 结构重新定义.
+     * {id，mchId，subId, ....待定吧}
+     *
+     *
+     *
+     *
+     */
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;

@@ -36,6 +36,9 @@ CREATE TABLE t_wallet_log (
   modify_time DATETIME NOT NULL DEFAULT now()
 );
 
+ALTER TABLE `t_wallet_log`
+ADD COLUMN `status`  integer NULL AFTER `type`;
+
 CREATE TABLE t_cash_log (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   mch_id BIGINT COMMENT '用户id',

@@ -125,3 +125,4 @@ SELECT _init(10);
 -- 管理商户提现费率
 SET @pm_sys.manage_qr_code = @pm_sys_base + 1;
 SET @pm_sys.qr_code = @pm_sys_base + 2;
+SET @pm_sys.manage_xf = @pm_sys_base + 3;

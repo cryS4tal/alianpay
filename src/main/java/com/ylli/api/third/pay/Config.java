@@ -38,9 +38,9 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
             6, "订单不存在");
 
-    public static final ErrorCode ERROR_BILL_STATUS
+    public static final ErrorCode ERROR
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            7, "订单不可操作");
+            7, "%s");
 
     public static final ErrorCode ERROR_INFO_NOT_FOUND
             = new ErrorCode(HttpServletResponse.SC_NOT_FOUND, MODEL_CODE,
@@ -57,5 +57,7 @@ public class Config {
         public static final long MANAGE_QR_CODE = BASE + 1;
 
         public static final long QR_CODE = BASE + 2;
+
+        public static final long MANAGE_XF = BASE + 3;
     }
 }

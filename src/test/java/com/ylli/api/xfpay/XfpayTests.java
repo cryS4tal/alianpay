@@ -2,9 +2,9 @@ package com.ylli.api.xfpay;
 
 import com.google.gson.Gson;
 import com.ucf.sdk.UcfForOnline;
-import com.ylli.api.third.pay.model.Data;
-import com.ylli.api.third.pay.model.XfPaymentResponse;
-import com.ylli.api.third.pay.service.XfClient;
+import com.ylli.api.third.pay.modelVo.xianfen.Data;
+import com.ylli.api.third.pay.modelVo.xianfen.XianFenResponse;
+import com.ylli.api.third.pay.service.xianfen.XfClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +32,7 @@ public class XfpayTests {
         String str = client.agencyPayment("XianFen_test003", 100, "6217920274920375",
                 "李玉龙", "", "12", 1, 1, "");
 
-        XfPaymentResponse response = new Gson().fromJson(str, XfPaymentResponse.class);
+        XianFenResponse response = new Gson().fromJson(str, XianFenResponse.class);
         //加密后的业务数据
         String bizData = UcfForOnline.decryptData(str, mer_pri_key);
 

@@ -53,9 +53,13 @@ public class Config {
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
             10, "提现请求处理中");
 
-    public static final ErrorCode ERROR_WALLET_CONVERSION
+    public static final ErrorCode ERROR_RECRIVE_BANK_ERROR
             = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
-            11, "当前最多转换：%s 元");
+            11, "备付金账户错误");
+
+    public static final ErrorCode ERROR
+            = new ErrorCode(HttpServletResponse.SC_BAD_REQUEST, MODEL_CODE,
+            12, "%s");
 
     /**
      * 权限

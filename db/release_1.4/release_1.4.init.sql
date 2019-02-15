@@ -87,3 +87,6 @@ CREATE TABLE t_wallet_log (
   create_time DATETIME NOT NULL DEFAULT now(),
   modify_time DATETIME NOT NULL DEFAULT now()
 );
+
+ALTER TABLE `t_wallet_log`
+ADD COLUMN `status`  integer NULL AFTER `type`;

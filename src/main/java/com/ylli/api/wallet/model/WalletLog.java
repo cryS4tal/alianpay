@@ -10,9 +10,14 @@ import javax.persistence.Table;
 public class WalletLog {
 
     //线下充值
-    public static final Integer XTCZ = 1;
+    public static final Integer XXCZ = 1;
     //余额转换
     public static final Integer YEZH = 2;
+
+    //状态。
+    public static final Integer ING = 1;
+    public static final Integer FAIL = 2;
+    public static final Integer FINISH = 3;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +35,9 @@ public class WalletLog {
     public Integer type;
 
     public Integer money;
+
+    //状态。
+    public Integer status;
 
     public Timestamp createTime;
 
