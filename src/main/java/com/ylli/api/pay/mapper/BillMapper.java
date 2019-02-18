@@ -2,6 +2,7 @@ package com.ylli.api.pay.mapper;
 
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.CategoryData;
+import com.ylli.api.sys.model.Bonus;
 import com.ylli.api.sys.model.Data;
 import java.util.Date;
 import java.util.List;
@@ -52,4 +53,7 @@ public interface BillMapper extends Mapper<Bill> {
                                 @Param("status") Integer status,
                                 @Param("time") Date time,
                                 @Param("groupby") Integer groupby);
+
+    List<Bonus> bonus(@Param("mch_id") Long mchId,
+                      @Param("time") Date time);
 }

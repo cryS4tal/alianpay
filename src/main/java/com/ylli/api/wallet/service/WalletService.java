@@ -14,6 +14,8 @@ import com.ylli.api.wallet.mapper.WalletLogMapper;
 import com.ylli.api.wallet.mapper.WalletMapper;
 import com.ylli.api.wallet.model.Wallet;
 import com.ylli.api.wallet.model.WalletLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WalletService {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(WalletService.class);
 
     @Value("${cash.charge}")
     public Integer cashCharge;
@@ -232,6 +236,9 @@ public class WalletService {
     public Object rechargeMch(Long mchId, Integer money, String accountName, String accountNo, String recevieBank) throws Exception {
         //参数合法性校验。
         //money - 范围
+        if (money <= 10 * 100) {
+            throw new AwesomeException(Config.ERROR.format("充值金额最低10元，5W以下单笔额外扣除手续费10元"));
+        }
         //accountName & accountNo 姓名和卡号暂时不进行校验
         //recevieBank UPOPJS（银联）NUCC（网联）
         if (!"UPOPJS".equals(recevieBank) && !"NUCC".equals(recevieBank)) {
@@ -239,6 +246,8 @@ public class WalletService {
         }
         WalletLog walletLog = walletLogService.log(mchId, mchId, money, WalletLog.XXCZ, WalletLog.ING, accountName, accountNo, recevieBank);
         String str = xfClient.offlineRecharge(walletLog.id.toString(), money, accountNo, accountName, recevieBank, mchId.toString());
+
+        LOGGER.info("\n xianFen mch recharge offline response. \n " + str);
         //
         XianFenResponse response = new Gson().fromJson(str, XianFenResponse.class);
         if (("99000").equals(response.code)) {
@@ -247,6 +256,8 @@ public class WalletService {
 
             //
             Data data = new Gson().fromJson(bizData, Data.class);
+
+            LOGGER.info("\n xianFen mch recharge offline response bizData. \n " + bizData);
             if (data.resCode.equals("00000")) {
                 if (data.status.equals("S")) {
                     //异步回调success逻辑
@@ -307,11 +318,15 @@ public class WalletService {
         }
 
         String str = xfClient.rechargeQuery(id);
+
+        LOGGER.info("\n xianFen mch recharge offline query response. \n " + str);
+
         XianFenResponse response = new Gson().fromJson(str, XianFenResponse.class);
         if (("99000").equals(response.code)) {
             //加密后的业务数据
             String bizData = UcfForOnline.decryptData(str, mer_pri_key);
 
+            LOGGER.info("\n xianFen mch recharge offline query response bizData. \n " + bizData);
             //
             Data data = new Gson().fromJson(bizData, Data.class);
             if (data.resCode.equals("00000")) {

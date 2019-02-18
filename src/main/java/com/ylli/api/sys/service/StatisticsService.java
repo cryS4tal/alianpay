@@ -1,14 +1,18 @@
-package com.ylli.api.pay.service;
+package com.ylli.api.sys.service;
 
 import com.ylli.api.base.exception.AwesomeException;
+import com.ylli.api.mch.mapper.MchAgencyMapper;
+import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.pay.Config;
 import com.ylli.api.pay.mapper.BillMapper;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.CategoryData;
+import com.ylli.api.sys.model.Bonus;
 import com.ylli.api.sys.model.Data;
 import com.ylli.api.sys.model.HourlyData;
 import com.ylli.api.sys.model.TotalData;
 import com.ylli.api.wallet.mapper.CashLogMapper;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -18,13 +22,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StatsService {
+public class StatisticsService {
 
     @Autowired
     BillMapper billMapper;
 
     @Autowired
     CashLogMapper cashLogMapper;
+
+    @Autowired
+    MchAgencyMapper mchAgencyMapper;
 
     public Object hourlyData(Long mchId) {
 
@@ -62,13 +69,6 @@ public class StatsService {
         return totalData;
     }
 
-    public Object successRate(Long channelId, Long mchId, Long appId) {
-        List<Data> list = billMapper.rate(channelId, mchId, appId);
-
-
-        return null;
-    }
-
     /**
      * date
      * day week month year
@@ -77,6 +77,7 @@ public class StatsService {
         List<CategoryData> list = billMapper.category(channelId, mchId, status, createTime(date), groupby);
         return list;
     }
+
     public Date createTime(String date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -120,5 +121,42 @@ public class StatsService {
             return calendar.getTime();
         }
         throw new AwesomeException(Config.ERROR_DATE);
+    }
+
+    /**
+     * 系统分润统计.
+     *
+     * @param mchId
+     * @return
+     */
+    public Object bonus(Long mchId, String date) {
+        //今日分润. 历史分润.
+        List<Bonus> list = new ArrayList<>();
+        //获得所有的代理商.
+        List<MchAgency> agencies = mchAgencyMapper.selectAll();
+        if (mchId != null) {
+            agencies = agencies.stream().filter(item -> item.mchId == mchId).collect(Collectors.toList());
+        }
+
+        //去重
+        List<Long> longs = agencies.stream().map(i -> i.mchId).distinct().collect(Collectors.toList());
+
+        for (int i = 0; i < longs.size(); i++) {
+            Long mch = longs.get(i);
+
+            Bonus bonus = new Bonus();
+
+            /*bonus.money = agencies.stream().filter(item -> item.mchId == mch).mapToLong(item -> {
+                if (item.type == 1) {
+                    //支付
+                    //return billMapper.bonus();
+                } else {
+                    //代付
+                    //return item.bankRate;
+                }
+            }).sum();*/
+            list.add(bonus);
+        }
+        return list;
     }
 }

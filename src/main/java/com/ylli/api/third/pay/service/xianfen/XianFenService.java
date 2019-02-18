@@ -633,7 +633,11 @@ public class XianFenService {
                         walletLogMapper.updateByPrimaryKeySelective(walletLog);
 
                         Wallet wallet = walletService.getOwnWallet(walletLog.mchId);
-                        wallet.reservoir = wallet.reservoir + walletLog.money;
+                        if (walletLog.money >= 50000 * 100) {
+                            wallet.reservoir = wallet.reservoir + walletLog.money;
+                        } else {
+                            wallet.reservoir = wallet.reservoir + walletLog.money - 10 * 100;
+                        }
                         walletMapper.updateByPrimaryKeySelective(wallet);
 
                         writer.write(getResStr("SUCCESS"));
