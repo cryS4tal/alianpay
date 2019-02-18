@@ -39,6 +39,11 @@ public class WalletLog {
     //状态。
     public Integer status;
 
+    //商户线下录入时，记录相关信息
+    public String accountName;
+    public String accountNo;
+    public String recevieBank;
+
     public Timestamp createTime;
 
     public Timestamp modifyTime;

@@ -24,7 +24,7 @@ public class WalletLogService {
      * 代付充值 - 日志。
      */
     @Transactional
-    public WalletLog log(Long authId, Long mchId, Integer money, Integer type,Integer status) {
+    public WalletLog log(Long authId, Long mchId, Integer money, Integer type, Integer status) {
         WalletLog log = new WalletLog();
         log.authId = authId;
         log.authName = Optional.ofNullable(mchBaseMapper.selectByMchId(authId)).map(i -> i.mchName).orElse("");
@@ -33,6 +33,23 @@ public class WalletLogService {
         log.money = money;
         log.type = type;
         log.status = status;
+        walletLogMapper.insertSelective(log);
+        return log;
+    }
+
+    @Transactional
+    public WalletLog log(Long authId, Long mchId, Integer money, Integer type, Integer status, String accountName, String accountNo, String recevieBank) {
+        WalletLog log = new WalletLog();
+        log.authId = authId;
+        log.authName = Optional.ofNullable(mchBaseMapper.selectByMchId(authId)).map(i -> i.mchName).orElse("");
+        log.mchId = mchId;
+        log.mchName = Optional.ofNullable(mchBaseMapper.selectByMchId(mchId)).map(i -> i.mchName).orElse("");
+        log.money = money;
+        log.type = type;
+        log.status = status;
+        log.accountName = accountName;
+        log.accountNo = accountNo;
+        log.recevieBank = recevieBank;
         walletLogMapper.insertSelective(log);
         return log;
     }

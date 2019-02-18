@@ -237,7 +237,7 @@ public class WalletService {
         if (!"UPOPJS".equals(recevieBank) && !"NUCC".equals(recevieBank)) {
             throw new AwesomeException(Config.ERROR_RECRIVE_BANK_ERROR);
         }
-        WalletLog walletLog = walletLogService.log(mchId, mchId, money, WalletLog.XXCZ, WalletLog.ING);
+        WalletLog walletLog = walletLogService.log(mchId, mchId, money, WalletLog.XXCZ, WalletLog.ING, accountName, accountNo, recevieBank);
         String str = xfClient.offlineRecharge(walletLog.id.toString(), money, accountNo, accountName, recevieBank, mchId.toString());
         //
         XianFenResponse response = new Gson().fromJson(str, XianFenResponse.class);

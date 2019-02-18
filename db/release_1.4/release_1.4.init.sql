@@ -90,3 +90,12 @@ CREATE TABLE t_wallet_log (
 
 ALTER TABLE `t_wallet_log`
 ADD COLUMN `status`  integer NULL AFTER `type`;
+
+ALTER TABLE `t_wallet_log`
+ADD COLUMN `account_name`  VARCHAR(128) NULL AFTER `status`;
+
+ALTER TABLE `t_wallet_log`
+ADD COLUMN `account_no`  VARCHAR(128) NULL AFTER `account_name`;
+
+ALTER TABLE `t_wallet_log`
+ADD COLUMN `recevie_bank`  VARCHAR(128) NULL AFTER `account_no`;

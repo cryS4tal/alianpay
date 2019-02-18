@@ -91,10 +91,13 @@ public class WalletController {
     }
 
     @GetMapping("/recharge/log")
-    @Auth(@Permission(Config.SysPermission.MANAGE_USER_WALLET))
+    @Auth
     public Object getLogs(@AwesomeParam Long mchId,
                           @AwesomeParam(defaultValue = "0") int offset,
                           @AwesomeParam(defaultValue = "20") int limit) {
+        if (mchId != authSession.getAuthId() && !permissionService.hasSysPermission(Config.SysPermission.MANAGE_USER_WALLET)) {
+            throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
+        }
         return walletLogService.getLogs(mchId, offset, limit);
     }
 }
