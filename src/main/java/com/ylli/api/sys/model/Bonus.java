@@ -1,13 +1,12 @@
 package com.ylli.api.sys.model;
 
+import java.util.List;
+
 public class Bonus {
 
     public Long mchId;
 
-    //代理商类型：1-支付，2-代付
-    public Integer type;
+    public List<BonusDetail> zhifu;
 
-    public String mchName;
-
-    public Long money;
+    public List<BonusDetail> daifu;
 }

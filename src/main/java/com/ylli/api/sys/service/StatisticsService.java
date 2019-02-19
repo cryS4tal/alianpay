@@ -4,10 +4,13 @@ import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.mapper.MchAgencyMapper;
 import com.ylli.api.mch.model.MchAgency;
 import com.ylli.api.pay.Config;
+import com.ylli.api.pay.mapper.BankPayOrderMapper;
 import com.ylli.api.pay.mapper.BillMapper;
+import com.ylli.api.pay.model.BankPayOrder;
 import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.model.CategoryData;
 import com.ylli.api.sys.model.Bonus;
+import com.ylli.api.sys.model.BonusDetail;
 import com.ylli.api.sys.model.Data;
 import com.ylli.api.sys.model.HourlyData;
 import com.ylli.api.sys.model.TotalData;
@@ -26,6 +29,9 @@ public class StatisticsService {
 
     @Autowired
     BillMapper billMapper;
+
+    @Autowired
+    BankPayOrderMapper bankPayOrderMapper;
 
     @Autowired
     CashLogMapper cashLogMapper;
@@ -129,33 +135,48 @@ public class StatisticsService {
      * @param mchId
      * @return
      */
-    public Object bonus(Long mchId, String date) {
+    public Object bonus(Boolean admin, Long mchId, String date) {
         //今日分润. 历史分润.
         List<Bonus> list = new ArrayList<>();
         //获得所有的代理商.
-        List<MchAgency> agencies = mchAgencyMapper.selectAll();
-        if (mchId != null) {
-            agencies = agencies.stream().filter(item -> item.mchId == mchId).collect(Collectors.toList());
+        List<MchAgency> agencies = new ArrayList<>();
+        if (admin) {
+            agencies = mchAgencyMapper.selectAll();
+        } else {
+            agencies = mchAgencyMapper.agencyList(null, mchId, null);
+        }
+        //初始化返回数组.
+        List<Long> supers = agencies.stream().map(item -> item.mchId).collect(Collectors.toList());
+        for (int i = 0; i < supers.size(); i++) {
+            Bonus bonus = new Bonus();
+            bonus.mchId = supers.get(i);
+            bonus.zhifu = new ArrayList<>();
+            bonus.daifu = new ArrayList<>();
+            list.add(bonus);
         }
 
-        //去重
-        List<Long> longs = agencies.stream().map(i -> i.mchId).distinct().collect(Collectors.toList());
+        for (int i = 0; i < agencies.size(); i++) {
+            MchAgency index = agencies.get(i);
 
-        for (int i = 0; i < longs.size(); i++) {
-            Long mch = longs.get(i);
+            Bonus bonus = list.stream().filter(item -> item.mchId == index.mchId).findFirst().get();
 
-            Bonus bonus = new Bonus();
+            if (index.type == 1) {
+                //支付
+                // TODO 潜在BUG  目前系统只走支付宝，所有统一使用支付宝费率差
+                // TODO 潜在BUG  订单时间和代理商创建时间取舍. （若之后存在某个时间节点之前的订单不算需进行时间判断修正）
+                List<Bill> bills = billMapper.getBills(new ArrayList<Long>() {{
+                    add(index.subId);
+                }}, Bill.FINISH, null, null, null, null, createTime(date), null);
 
-            /*bonus.money = agencies.stream().filter(item -> item.mchId == mch).mapToLong(item -> {
-                if (item.type == 1) {
-                    //支付
-                    //return billMapper.bonus();
-                } else {
-                    //代付
-                    //return item.bankRate;
-                }
-            }).sum();*/
-            list.add(bonus);
+                bonus.zhifu.add(new BonusDetail(index.subId, bills.stream().mapToLong(item -> item.money).sum() * index.alipayRate / 10000));
+            } else {
+                //代付
+                List<BankPayOrder> orders = bankPayOrderMapper.getOrders(new ArrayList<Long>() {{
+                    add(index.subId);
+                }}, BankPayOrder.FINISH, null, null, null, null, null, createTime(date), null);
+
+                bonus.daifu.add(new BonusDetail(index.subId, orders.stream().mapToLong(item -> item.money).sum() * index.bankRate / 10000));
+            }
         }
         return list;
     }

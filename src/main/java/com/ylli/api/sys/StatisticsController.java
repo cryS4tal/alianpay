@@ -58,18 +58,12 @@ public class StatisticsController {
     }
 
     @GetMapping("/bonus/{date}")
-    public Object bonus(@AwesomeParam(required = false) Long mchId,
+    public Object bonus(@AwesomeParam Long mchId,
                         @PathVariable String date) {
-        do {
-            if (mchId != null && authSession.getAuthId() == mchId) {
-                break;
-            }
-            if (permissionService.hasSysPermission(com.ylli.api.sys.Config.SysPermission.MANAGE_STATS)) {
-                break;
-            }
+        if (authSession.getAuthId() != mchId) {
             throw new AwesomeException(Config.ERROR_PERMISSION_DENY);
-        } while (false);
-        return statsService.bonus(mchId, date);
+        }
+        return statsService.bonus(permissionService.hasSysPermission(com.ylli.api.sys.Config.SysPermission.MANAGE_STATS), mchId, date);
     }
 
     //暂时只对管理员开放。

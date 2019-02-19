@@ -237,7 +237,7 @@ public class WalletService {
         //参数合法性校验。
         //money - 范围
         if (money <= 10 * 100) {
-            throw new AwesomeException(Config.ERROR.format("充值金额最低10元，5W以下单笔额外扣除手续费10元"));
+            throw new AwesomeException(Config.ERROR.format("单笔充值金额不得低于10元"));
         }
         //accountName & accountNo 姓名和卡号暂时不进行校验
         //recevieBank UPOPJS（银联）NUCC（网联）
