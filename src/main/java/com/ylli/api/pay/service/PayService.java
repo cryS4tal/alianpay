@@ -15,10 +15,11 @@ import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.modelVo.NotifyRes;
 import com.ylli.api.third.pay.modelVo.chantong.CTOrderResponse;
+import com.ylli.api.third.pay.modelVo.cxt.CXTResponse;
 import com.ylli.api.third.pay.modelVo.easy.EazyResponse;
 import com.ylli.api.third.pay.service.chantong.CTService;
-import com.ylli.api.third.pay.service.cntbnt.CntService;
 import com.ylli.api.third.pay.service.cntbnt.QrTransferService;
+import com.ylli.api.third.pay.service.cxt.CXTService;
 import com.ylli.api.third.pay.service.deprecate.UnknownPayService;
 import com.ylli.api.third.pay.service.deprecate.WzService;
 import com.ylli.api.third.pay.service.deprecate.YfbService;
@@ -71,8 +72,8 @@ public class PayService {
     @Autowired
     HRJFService hrjfService;
 
-    @Autowired
-    CntService cntService;
+    /*@Autowired
+    CntService cntService;*/
 
     @Autowired
     CTService ctService;
@@ -91,6 +92,9 @@ public class PayService {
 
     @Autowired
     QrTransferService qrTransferService;
+
+    @Autowired
+    CXTService cxtService;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -120,13 +124,16 @@ public class PayService {
     @Value("${pay.eazy.apihost}")
     public String EAZY_HOST;
 
+    @Value("${cxt.apihost}")
+    public String CXT_HOST;
+
     /**
      * 中央调度server. 根据情况选择不同通道
      *
      * @param baseOrder
      * @return
      */
-    public Object createOrder(BaseOrder baseOrder) throws Exception {
+    public Response createOrder(BaseOrder baseOrder) throws Exception {
 
         Response response = baseCheck(baseOrder);
         if (response != null) {
@@ -269,7 +276,29 @@ public class PayService {
                     baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
 
             //TODO 返回数据处理
-            return str;
+            return new Response();
+        } else if (channel.code.equals("CXT")) {
+            //诚信通 支付
+            if (!ALI.equals(baseOrder.payType)) {
+                return ResponseEnum.A007("pay_type = alipay", baseOrder);
+            }
+            CXTResponse cxtResponse = cxtService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
+                    baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            if ("200".equals(cxtResponse.code)) {
+                //
+                String payUrl = cxtResponse.qrcode;
+                if (WAP.equals(baseOrder.tradeType)) {
+                    payUrl = new StringBuffer(CXT_HOST).append(cxtResponse.qrcode)
+                            .append("&mch_order_id=").append(baseOrder.mchOrderId)
+                            .append("&money=").append(baseOrder.money)
+                            .toString();
+                }
+                return new Response("A000", "成功", successSign("A000", "成功", "url", payUrl, secretKey), "url", payUrl);
+            } else {
+                return ResponseEnum.A099(cxtResponse.msg, null);
+            }
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);
