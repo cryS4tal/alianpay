@@ -93,7 +93,7 @@ public class ChannelService {
 
     public Object sysChannels(int offset, int limit) {
         PageHelper.offsetPage(offset, limit);
-        Page<SysChannel> page = (Page<SysChannel>) sysChannelMapper.selectAll();
+        Page<SysChannel> page = (Page<SysChannel>) sysChannelMapper.selectAllOrderByState();
 
         DataList<SysChannel> dataList = new DataList<>();
         dataList.offset = page.getStartRow();
