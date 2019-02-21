@@ -1,6 +1,6 @@
 package com.ylli.api.gpay;
 
-import com.ylli.api.third.pay.service.gpay.GPayClient;
+import com.ylli.api.third.pay.service.deprecate.GPayClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

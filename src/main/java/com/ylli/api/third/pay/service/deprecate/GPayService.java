@@ -1,4 +1,4 @@
-package com.ylli.api.third.pay.service.gpay;
+package com.ylli.api.third.pay.service.deprecate;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -11,7 +11,7 @@ import com.ylli.api.pay.model.Bill;
 import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
-import com.ylli.api.third.pay.modelVo.gpay.GPNotify;
+import com.ylli.api.third.pay.modelVo.deprecate.GPNotify;
 import com.ylli.api.wallet.service.WalletService;
 import java.security.KeyFactory;
 import java.security.PublicKey;

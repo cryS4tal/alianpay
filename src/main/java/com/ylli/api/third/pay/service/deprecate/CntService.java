@@ -1,4 +1,4 @@
-package com.ylli.api.third.pay.service.cntbnt;
+package com.ylli.api.third.pay.service.deprecate;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -11,8 +11,8 @@ import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.third.pay.enums.CNTEnum;
-import com.ylli.api.third.pay.modelVo.cntbnt.CNTCard;
-import com.ylli.api.third.pay.modelVo.cntbnt.CntRes;
+import com.ylli.api.third.pay.modelVo.deprecate.CNTCard;
+import com.ylli.api.third.pay.modelVo.deprecate.CntRes;
 import com.ylli.api.wallet.mapper.CashLogMapper;
 import com.ylli.api.wallet.model.CashLog;
 import com.ylli.api.wallet.service.WalletService;

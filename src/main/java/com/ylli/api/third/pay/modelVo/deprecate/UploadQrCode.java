@@ -1,4 +1,4 @@
-package com.ylli.api.third.pay.modelVo.cntbnt;
+package com.ylli.api.third.pay.modelVo.deprecate;
 
 public class UploadQrCode {
 

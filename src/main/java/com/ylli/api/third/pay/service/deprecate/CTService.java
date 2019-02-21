@@ -1,4 +1,4 @@
-package com.ylli.api.third.pay.service.chantong;
+package com.ylli.api.third.pay.service.deprecate;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -9,7 +9,7 @@ import com.ylli.api.pay.service.BillService;
 import com.ylli.api.pay.service.PayClient;
 import com.ylli.api.pay.service.PayService;
 import com.ylli.api.pay.util.SignUtil;
-import com.ylli.api.third.pay.modelVo.chantong.CTOrderResponse;
+import com.ylli.api.third.pay.modelVo.deprecate.CTOrderResponse;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;

@@ -3,6 +3,7 @@ package com.ylli.api.pay.service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Strings;
+import com.ylli.api.auth.service.AccountService;
 import com.ylli.api.base.exception.AwesomeException;
 import com.ylli.api.mch.mapper.MchAgencyMapper;
 import com.ylli.api.mch.model.MchAgency;
@@ -89,11 +90,17 @@ public class BankPayService {
     @Autowired
     WalletService walletService;
 
+    @Autowired
+    AccountService accountService;
+
     @Transactional
     public Object createOrder(BankPayOrder bankPayOrder) throws Exception {
         //参数校验
         if (bankPayOrder.mchId == null) {
             return ResponseEnum.A003("商户号为空", bankPayOrder);
+        }
+        if (!accountService.isActive(bankPayOrder.mchId)) {
+            return ResponseEnum.A100(null, null);
         }
         if (Strings.isNullOrEmpty(bankPayOrder.mchOrderId)) {
             return ResponseEnum.A003("商户订单号为空", bankPayOrder);
@@ -227,6 +234,9 @@ public class BankPayService {
     }
 
     public Object orderQuery(OrderQueryReq orderQuery) throws Exception {
+        if (!accountService.isActive(orderQuery.mchId)) {
+            return ResponseEnum.A100(null, null);
+        }
         String key = mchKeyService.getKeyById(orderQuery.mchId);
         Map<String, String> map = SignUtil.objectToMap(orderQuery);
         String sign = SignUtil.generateSignature(map, key);

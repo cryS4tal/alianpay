@@ -1,4 +1,4 @@
-package com.ylli.api.third.pay.modelVo.chantong;
+package com.ylli.api.third.pay.modelVo.deprecate;
 
 public class CTOrderResponse {
     public Boolean result;

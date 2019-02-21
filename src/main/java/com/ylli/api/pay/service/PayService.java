@@ -2,6 +2,7 @@ package com.ylli.api.pay.service;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.ylli.api.auth.service.AccountService;
 import com.ylli.api.mch.model.MchKey;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.pay.model.BaseOrder;
@@ -14,17 +15,19 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.modelVo.NotifyRes;
-import com.ylli.api.third.pay.modelVo.chantong.CTOrderResponse;
+import com.ylli.api.third.pay.modelVo.alipayhb.AlipayHBResponse;
 import com.ylli.api.third.pay.modelVo.cxt.CXTResponse;
+import com.ylli.api.third.pay.modelVo.deprecate.CTOrderResponse;
 import com.ylli.api.third.pay.modelVo.easy.EazyResponse;
-import com.ylli.api.third.pay.service.chantong.CTService;
-import com.ylli.api.third.pay.service.cntbnt.QrTransferService;
+import com.ylli.api.third.pay.service.alipayhb.AliPayHBService;
 import com.ylli.api.third.pay.service.cxt.CXTService;
+import com.ylli.api.third.pay.service.deprecate.CTService;
+import com.ylli.api.third.pay.service.deprecate.GPayService;
+import com.ylli.api.third.pay.service.deprecate.QrTransferService;
 import com.ylli.api.third.pay.service.deprecate.UnknownPayService;
 import com.ylli.api.third.pay.service.deprecate.WzService;
 import com.ylli.api.third.pay.service.deprecate.YfbService;
 import com.ylli.api.third.pay.service.eazy.EazyPayService;
-import com.ylli.api.third.pay.service.gpay.GPayService;
 import com.ylli.api.third.pay.service.guagua.GuaGuaService;
 import com.ylli.api.third.pay.service.hrjf.HRJFService;
 import java.io.BufferedReader;
@@ -52,6 +55,9 @@ public class PayService {
     private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(PayService.class);
 
     @Autowired
+    AccountService accountService;
+
+    @Autowired
     YfbService yfbService;
 
     @Autowired
@@ -71,6 +77,9 @@ public class PayService {
 
     @Autowired
     HRJFService hrjfService;
+
+    @Autowired
+    AliPayHBService aliPayHBService;
 
     /*@Autowired
     CntService cntService;*/
@@ -299,6 +308,21 @@ public class PayService {
             } else {
                 return ResponseEnum.A099(cxtResponse.msg, null);
             }
+        } else if (channel.code.equals("AliPayHB")) {
+            //支付宝红包
+            if (!ALI.equals(baseOrder.payType)) {
+                return ResponseEnum.A007("pay_type = alipay", baseOrder);
+            }
+            String str = aliPayHBService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
+                    baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            AlipayHBResponse hbResponse = new Gson().fromJson(str, AlipayHBResponse.class);
+            if (hbResponse.success) {
+                return new Response("A000", "成功", successSign("A000", "成功", "url", hbResponse.data.payUrl, secretKey), "url", hbResponse.data.payUrl);
+            } else {
+                return ResponseEnum.A099(hbResponse.msg, null);
+            }
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);
@@ -321,6 +345,9 @@ public class PayService {
         }
         if (baseOrder.tradeType != null && !tradeTypes.contains(baseOrder.tradeType)) {
             return ResponseEnum.A003("不支持的支付方式", baseOrder);
+        }
+        if (!accountService.isActive(baseOrder.mchId)) {
+            return ResponseEnum.A100(null, null);
         }
         return null;
     }
@@ -577,6 +604,9 @@ public class PayService {
 
     @Transactional
     public Object orderQuery(OrderQueryReq orderQuery) throws Exception {
+        if (!accountService.isActive(orderQuery.mchId)) {
+            return ResponseEnum.A100(null, null);
+        }
         String key = mchKeyService.getKeyById(orderQuery.mchId);
         Map<String, String> map = SignUtil.objectToMap(orderQuery);
         String sign = SignUtil.generateSignature(map, key);

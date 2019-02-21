@@ -3,17 +3,18 @@ package com.ylli.api.third.pay;
 import com.google.gson.Gson;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.mch.service.MchKeyService;
+import com.ylli.api.third.pay.modelVo.deprecate.GPNotify;
 import com.ylli.api.third.pay.modelVo.easy.EazyNotify;
-import com.ylli.api.third.pay.modelVo.gpay.GPNotify;
-import com.ylli.api.third.pay.service.chantong.CTService;
-import com.ylli.api.third.pay.service.cntbnt.CntService;
+import com.ylli.api.third.pay.service.alipayhb.AliPayHBService;
 import com.ylli.api.third.pay.service.cxt.CXTNotify;
 import com.ylli.api.third.pay.service.cxt.CXTService;
+import com.ylli.api.third.pay.service.deprecate.CTService;
+import com.ylli.api.third.pay.service.deprecate.CntService;
+import com.ylli.api.third.pay.service.deprecate.GPayService;
 import com.ylli.api.third.pay.service.deprecate.UnknownPayService;
 import com.ylli.api.third.pay.service.deprecate.WzService;
 import com.ylli.api.third.pay.service.deprecate.YfbService;
 import com.ylli.api.third.pay.service.eazy.EazyPayService;
-import com.ylli.api.third.pay.service.gpay.GPayService;
 import com.ylli.api.third.pay.service.hrjf.HRJFService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,9 @@ public class NotifyController {
 
     @Autowired
     CXTService cxtService;
+
+    @Autowired
+    AliPayHBService aliPayHBService;
 
     @PostMapping("/cnt/notify")
     public String cntnotify(@RequestParam(required = false) String userId,
@@ -175,4 +179,17 @@ public class NotifyController {
         return cxtService.payNotify(notify);
     }
 
+    @GetMapping("/zfbhb/notify")
+    public String zfbhbnotify(@AwesomeParam String merchantId,
+                              @AwesomeParam String outTradeNo,
+                              @AwesomeParam String tradeNo,
+                              @AwesomeParam String payTime,
+                              @AwesomeParam String tranAmt,
+                              @AwesomeParam String settleStatus,
+                              @AwesomeParam String payStatus,
+                              @AwesomeParam String msg,
+                              @AwesomeParam String timeStamp,
+                              @AwesomeParam String sign) throws Exception {
+        return aliPayHBService.zfbhbnotify(merchantId, outTradeNo, tradeNo, payTime, tranAmt, settleStatus, payStatus, msg, timeStamp, sign);
+    }
 }

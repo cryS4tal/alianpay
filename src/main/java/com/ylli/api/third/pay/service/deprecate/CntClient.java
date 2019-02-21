@@ -1,4 +1,4 @@
-package com.ylli.api.third.pay.service.cntbnt;
+package com.ylli.api.third.pay.service.deprecate;
 
 import com.ylli.api.pay.util.SignUtil;
 import org.springframework.beans.factory.annotation.Autowired;

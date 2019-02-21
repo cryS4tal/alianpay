@@ -1,6 +1,5 @@
 package com.ylli.api.pay;
 
-import com.ylli.api.auth.service.AccountService;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.pay.model.BaseOrder;
 import com.ylli.api.pay.model.OrderQueryReq;
@@ -10,9 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,31 +27,23 @@ public class PayController {
     @Autowired
     PayService payService;
 
-    @Autowired
-    AccountService accountService;
-
     @PostMapping("/order")
-    public Object createOrder(@RequestBody BaseOrder baseOrder) throws Exception {
-
+    public Object createOrder(@RequestBody BaseOrder baseOrder,
+                              @RequestHeader("Content-Type") String contentType) throws Exception {
+        if (!MediaType.APPLICATION_JSON_VALUE.equals(contentType) && !MediaType.APPLICATION_JSON_UTF8_VALUE.equals(contentType)) {
+            return ResponseEnum.A003("Content-Type should be application/json", null);
+        }
         if (!enable) {
             return ResponseEnum.A999(null, null);
-        }
-        if (baseOrder.mchId == null) {
-            return ResponseEnum.A003("mch_id not empty, or please check Content-Type is application/json ?", null);
-        }
-        if (!accountService.isActive(baseOrder.mchId)) {
-            return ResponseEnum.A100(null, null);
         }
         return payService.createOrder(baseOrder);
     }
 
     @PostMapping("/order/query")
-    public Object orderQuery(@RequestBody OrderQueryReq orderQuery) throws Exception {
-        if (orderQuery.mchId == null) {
-            return ResponseEnum.A003("mch_id not empty, or please check Content-Type is application/json ?", null);
-        }
-        if (!accountService.isActive(orderQuery.mchId)) {
-            return ResponseEnum.A100(null, null);
+    public Object orderQuery(@RequestBody OrderQueryReq orderQuery,
+                             @RequestHeader("Content-Type") String contentType) throws Exception {
+        if (!"application/json".equals(contentType)) {
+            return ResponseEnum.A003("Content-Type should be application/json", null);
         }
         return payService.orderQuery(orderQuery);
     }

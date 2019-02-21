@@ -1,7 +1,7 @@
-package com.ylli.api.third.pay.service.gpay;
+package com.ylli.api.third.pay.service.deprecate;
 
 import com.google.gson.Gson;
-import com.ylli.api.third.pay.modelVo.gpay.GPayOrder;
+import com.ylli.api.third.pay.modelVo.deprecate.GPayOrder;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
