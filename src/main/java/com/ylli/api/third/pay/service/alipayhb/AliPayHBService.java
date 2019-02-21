@@ -11,8 +11,10 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.wallet.service.WalletService;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -73,7 +75,7 @@ public class AliPayHBService {
         map.put("payStatus", payStatus);
         map.put("msg", msg);
         map.put("timeStamp", timeStamp);
-        Boolean flag = SignUtil.generateSignature(map, secret).equals(sign.toUpperCase());
+        Boolean flag = generateSignature(map, secret).equals(sign);
 
         if (flag) {
             Bill bill = billService.selectBySysOrderId(outTradeNo);
@@ -119,5 +121,22 @@ public class AliPayHBService {
         } else {
             return "sign error";
         }
+    }
+
+    public String generateSignature(final Map<String, String> data, String key) throws Exception {
+        Set<String> keySet = data.keySet();
+        String[] keyArray = keySet.toArray(new String[keySet.size()]);
+        Arrays.sort(keyArray);
+        StringBuilder sb = new StringBuilder();
+        for (String k : keyArray) {
+            if (k.equals("sign")) {
+                continue;
+            }
+            sb.append(k).append("=").append(data.get(k)).append("&");
+        }
+        sb.append("key=").append(key);
+
+        String sign = SignUtil.MD5(sb.toString()).toLowerCase();
+        return sign;
     }
 }

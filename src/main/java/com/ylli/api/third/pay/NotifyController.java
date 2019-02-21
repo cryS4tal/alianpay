@@ -180,16 +180,16 @@ public class NotifyController {
     }
 
     @GetMapping("/zfbhb/notify")
-    public String zfbhbnotify(@AwesomeParam String merchantId,
-                              @AwesomeParam String outTradeNo,
-                              @AwesomeParam String tradeNo,
-                              @AwesomeParam String payTime,
-                              @AwesomeParam String tranAmt,
-                              @AwesomeParam String settleStatus,
-                              @AwesomeParam String payStatus,
-                              @AwesomeParam String msg,
-                              @AwesomeParam String timeStamp,
-                              @AwesomeParam String sign) throws Exception {
+    public String zfbhbnotify(@RequestParam String merchantId,
+                              @RequestParam String outTradeNo,
+                              @RequestParam String tradeNo,
+                              @RequestParam String payTime,
+                              @RequestParam String tranAmt,
+                              @RequestParam String settleStatus,
+                              @RequestParam String payStatus,
+                              @RequestParam String msg,
+                              @RequestParam String timeStamp,
+                              @RequestParam String sign) throws Exception {
         return aliPayHBService.zfbhbnotify(merchantId, outTradeNo, tradeNo, payTime, tranAmt, settleStatus, payStatus, msg, timeStamp, sign);
     }
 }
