@@ -42,7 +42,7 @@ public class PayController {
     @PostMapping("/order/query")
     public Object orderQuery(@RequestBody OrderQueryReq orderQuery,
                              @RequestHeader("Content-Type") String contentType) throws Exception {
-        if (!"application/json".equals(contentType)) {
+        if (!MediaType.APPLICATION_JSON_VALUE.equals(contentType) && !MediaType.APPLICATION_JSON_UTF8_VALUE.equals(contentType)) {
             return ResponseEnum.A003("Content-Type should be application/json", null);
         }
         return payService.orderQuery(orderQuery);
