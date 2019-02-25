@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.ylli.api.base.annotation.AwesomeParam;
 import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.third.pay.modelVo.deprecate.GPNotify;
+import com.ylli.api.third.pay.modelVo.dh.DHNotify;
 import com.ylli.api.third.pay.modelVo.easy.EazyNotify;
 import com.ylli.api.third.pay.service.alipayhb.AliPayHBService;
 import com.ylli.api.third.pay.service.cxt.CXTNotify;
@@ -14,6 +15,7 @@ import com.ylli.api.third.pay.service.deprecate.GPayService;
 import com.ylli.api.third.pay.service.deprecate.UnknownPayService;
 import com.ylli.api.third.pay.service.deprecate.WzService;
 import com.ylli.api.third.pay.service.deprecate.YfbService;
+import com.ylli.api.third.pay.service.dh.DHService;
 import com.ylli.api.third.pay.service.eazy.EazyPayService;
 import com.ylli.api.third.pay.service.hrjf.HRJFService;
 import org.slf4j.Logger;
@@ -64,6 +66,9 @@ public class NotifyController {
 
     @Autowired
     AliPayHBService aliPayHBService;
+
+    @Autowired
+    DHService dhService;
 
     @PostMapping("/cnt/notify")
     public String cntnotify(@RequestParam(required = false) String userId,
@@ -191,5 +196,10 @@ public class NotifyController {
                               @RequestParam String timeStamp,
                               @RequestParam String sign) throws Exception {
         return aliPayHBService.zfbhbnotify(merchantId, outTradeNo, tradeNo, payTime, tranAmt, settleStatus, payStatus, msg, timeStamp, sign);
+    }
+
+    @PostMapping("/dh/notify")
+    public String dhnotify(@RequestBody DHNotify notify) throws Exception {
+        return dhService.dhnotify(notify);
     }
 }

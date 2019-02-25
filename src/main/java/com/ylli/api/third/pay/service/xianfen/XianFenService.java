@@ -534,7 +534,7 @@ public class XianFenService {
 
     }
 
-    @Deprecated
+    /*@Deprecated
     @Transactional
     public Object fail(String sysOrderId) throws Exception {
         BankPayOrder payOrder = bankPayOrderMapper.selectBySysOrderId(sysOrderId);
@@ -559,7 +559,7 @@ public class XianFenService {
             bankPayClient.sendNotify(payOrder.sysOrderId, payOrder.notifyUrl, params1, true);
         }
         return "ok";
-    }
+    }*/
 
     /**
      * 余额查询.

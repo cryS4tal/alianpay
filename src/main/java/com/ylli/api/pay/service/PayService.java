@@ -18,6 +18,7 @@ import com.ylli.api.third.pay.modelVo.NotifyRes;
 import com.ylli.api.third.pay.modelVo.alipayhb.AlipayHBResponse;
 import com.ylli.api.third.pay.modelVo.cxt.CXTResponse;
 import com.ylli.api.third.pay.modelVo.deprecate.CTOrderResponse;
+import com.ylli.api.third.pay.modelVo.dh.DHResponse;
 import com.ylli.api.third.pay.modelVo.easy.EazyResponse;
 import com.ylli.api.third.pay.service.alipayhb.AliPayHBService;
 import com.ylli.api.third.pay.service.cxt.CXTService;
@@ -27,6 +28,7 @@ import com.ylli.api.third.pay.service.deprecate.QrTransferService;
 import com.ylli.api.third.pay.service.deprecate.UnknownPayService;
 import com.ylli.api.third.pay.service.deprecate.WzService;
 import com.ylli.api.third.pay.service.deprecate.YfbService;
+import com.ylli.api.third.pay.service.dh.DHService;
 import com.ylli.api.third.pay.service.eazy.EazyPayService;
 import com.ylli.api.third.pay.service.guagua.GuaGuaService;
 import com.ylli.api.third.pay.service.hrjf.HRJFService;
@@ -104,6 +106,9 @@ public class PayService {
 
     @Autowired
     CXTService cxtService;
+
+    @Autowired
+    DHService dhService;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -323,6 +328,23 @@ public class PayService {
             } else {
                 return ResponseEnum.A099(hbResponse.msg, null);
             }
+        } else if (channel.code.equals("DH")) {
+            //只走支付宝
+            if (!ALI.equals(baseOrder.payType)) {
+                return ResponseEnum.A007("pay_type = alipay", baseOrder);
+            }
+            String str = dhService.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
+                    baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            DHResponse dhResponse = new Gson().fromJson(str, DHResponse.class);
+
+            if ("success".equals(dhResponse.status)) {
+                return new Response("A000", "成功", successSign("A000", "成功", "url", dhResponse.data.url, secretKey), "url", dhResponse.data.url);
+            } else {
+                return ResponseEnum.A099(dhResponse.msg, str);
+            }
+
         } else {
             //
             return ResponseEnum.A099("暂无可用通道", null);
