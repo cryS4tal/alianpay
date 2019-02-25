@@ -6,6 +6,7 @@ import com.ylli.api.mch.service.MchKeyService;
 import com.ylli.api.third.pay.modelVo.deprecate.GPNotify;
 import com.ylli.api.third.pay.modelVo.dh.DHNotify;
 import com.ylli.api.third.pay.modelVo.easy.EazyNotify;
+import com.ylli.api.third.pay.service.alipayh5.AlipayH5Service;
 import com.ylli.api.third.pay.service.alipayhb.AliPayHBService;
 import com.ylli.api.third.pay.service.cxt.CXTNotify;
 import com.ylli.api.third.pay.service.cxt.CXTService;
@@ -18,6 +19,8 @@ import com.ylli.api.third.pay.service.deprecate.YfbService;
 import com.ylli.api.third.pay.service.dh.DHService;
 import com.ylli.api.third.pay.service.eazy.EazyPayService;
 import com.ylli.api.third.pay.service.hrjf.HRJFService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +72,9 @@ public class NotifyController {
 
     @Autowired
     DHService dhService;
+
+    @Autowired
+    AlipayH5Service alipayH5Service;
 
     @PostMapping("/cnt/notify")
     public String cntnotify(@RequestParam(required = false) String userId,
@@ -201,5 +207,10 @@ public class NotifyController {
     @PostMapping("/dh/notify")
     public String dhnotify(@RequestBody DHNotify notify) throws Exception {
         return dhService.dhnotify(notify);
+    }
+
+    @PostMapping("/alipayh5/notify")
+    public void zfbh5notify(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        alipayH5Service.zfbh5notify(request, response);
     }
 }

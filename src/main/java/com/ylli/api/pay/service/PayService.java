@@ -15,11 +15,13 @@ import com.ylli.api.pay.util.SignUtil;
 import com.ylli.api.sys.model.SysChannel;
 import com.ylli.api.sys.service.ChannelService;
 import com.ylli.api.third.pay.modelVo.NotifyRes;
+import com.ylli.api.third.pay.modelVo.alipayh5.AlipayH5Response;
 import com.ylli.api.third.pay.modelVo.alipayhb.AlipayHBResponse;
 import com.ylli.api.third.pay.modelVo.cxt.CXTResponse;
 import com.ylli.api.third.pay.modelVo.deprecate.CTOrderResponse;
 import com.ylli.api.third.pay.modelVo.dh.DHResponse;
 import com.ylli.api.third.pay.modelVo.easy.EazyResponse;
+import com.ylli.api.third.pay.service.alipayh5.AlipayH5Service;
 import com.ylli.api.third.pay.service.alipayhb.AliPayHBService;
 import com.ylli.api.third.pay.service.cxt.CXTService;
 import com.ylli.api.third.pay.service.deprecate.CTService;
@@ -109,6 +111,9 @@ public class PayService {
 
     @Autowired
     DHService dhService;
+
+    @Autowired
+    AlipayH5Service alipayH5Service;
 
     public static final String ALI = "alipay";
     public static final String WX = "wx";
@@ -342,7 +347,24 @@ public class PayService {
             if ("success".equals(dhResponse.status)) {
                 return new Response("A000", "成功", successSign("A000", "成功", "url", dhResponse.data.url, secretKey), "url", dhResponse.data.url);
             } else {
-                return ResponseEnum.A099(dhResponse.msg, str);
+                return ResponseEnum.A099(dhResponse.msg, null);
+            }
+
+        } else if (channel.code.equals("alipayh5")) {
+            // 只走支付宝
+            if (!ALI.equals(baseOrder.payType)) {
+                return ResponseEnum.A007("pay_type = alipay", baseOrder);
+            }
+            String str = alipayH5Service.createOrder(baseOrder.mchId, channel.id, baseOrder.money,
+                    baseOrder.mchOrderId, baseOrder.notifyUrl, baseOrder.redirectUrl, baseOrder.reserve,
+                    baseOrder.payType, baseOrder.tradeType, baseOrder.extra);
+
+            AlipayH5Response response1 = new Gson().fromJson(str, AlipayH5Response.class);
+
+            if (Strings.isNullOrEmpty(response1.msg)) {
+                return new Response("A000", "成功", successSign("A000", "成功", "url", response1.payUrl, secretKey), "url", response1.payUrl);
+            } else {
+                return ResponseEnum.A099(response1.msg, null);
             }
 
         } else {
