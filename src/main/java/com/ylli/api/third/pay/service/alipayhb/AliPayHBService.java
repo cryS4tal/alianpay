@@ -89,6 +89,7 @@ public class AliPayHBService {
             if ("0000".equals(payStatus)) {
                 if (bill.status != Bill.FINISH) {
                     bill.tradeTime = new Timestamp(System.currentTimeMillis());
+                    bill.superOrderId = tradeNo;
                     bill.payCharge = (bill.money * appService.getRate(bill.mchId, bill.appId)) / 10000;
                     bill.status = Bill.FINISH;
                     bill.msg = tranAmt;
@@ -100,6 +101,7 @@ public class AliPayHBService {
             } else {
                 bill.tradeTime = new Timestamp(System.currentTimeMillis());
                 bill.status = Bill.FAIL;
+                bill.superOrderId = tradeNo;
                 bill.msg = msg;
                 billMapper.updateByPrimaryKeySelective(bill);
             }
