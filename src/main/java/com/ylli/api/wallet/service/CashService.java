@@ -126,6 +126,13 @@ public class CashService {
         log.state = CashLog.NEW;
         cashLogMapper.insertSelective(log);
 
+        // todo temp code。start
+        //1086 2019-02-26 晚上跑交易临时提现不审核，直接成功
+        if (req.mchId.longValue() == 1086) {
+            manualCash(log.id,true,1019L);
+        }
+        // todo temp code。end
+
         /**
          * 注释cnt代码。若继续走cnt，需要开启以下代码
          */
